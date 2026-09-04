@@ -5,6 +5,7 @@ import FormSessaoGeral from "@/components/Forms/Sessao/FormSessaoGeral";
 import { SessaoTipoEnum } from "@/enums/session";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useSession } from "@/hooks/useSession";
+import { useSessoesQuery } from "@/features/sessoes/hooks/useSessoesQuery";
 import { useEffect, useMemo, useState } from "react";
 import ModalComponent from "@/components/UI/ModalComponent/ModalComponent";
 
@@ -22,19 +23,20 @@ const titulo = {
 };
 
 export default function ModalSessao() {
-  const { sessao, listRooms, sessoesList } = useSession();
+  const { sessao } = useSession();
   const { Edicao } = useEdicao();
+  const { sessoes } = useSessoesQuery(Edicao?.id);
 
   const disabledIntervals = useMemo(() => {
-    if (!sessoesList) return [];
-    const otherSessions = sessoesList.filter((s) => s.id !== sessao?.id);
+    if (!sessoes) return [];
+    const otherSessions = sessoes.filter((s) => s.id !== sessao?.id);
 
     return otherSessions.map((s) => {
       const start = new Date(s.startTime);
       const end = new Date(start.getTime() + (s.duration ?? 0) * 60000);
       return { start, end };
     });
-  }, [sessoesList, sessao?.id]);
+  }, [sessoes, sessao?.id]);
 
   const [tipoSessao, setTipoSessao] = useState<SessaoTipoEnum>(
     sessao?.type === SessaoTipoEnum["Sessão de apresentações"]
@@ -50,12 +52,6 @@ export default function ModalSessao() {
       );
     }
   }, [sessao?.type]);
-
-  useEffect(() => {
-    if (Edicao?.id) {
-      listRooms(Edicao.id);
-    }
-  }, [Edicao?.id]);
 
   return (
     <ModalComponent

@@ -12,7 +12,7 @@ export default function CadastroEdicao() {
       <div className="flex flex-col items-center justify-center gap-20 max-[480px]:gap-20">
         <div className="mb-2.5 flex flex-col items-center">
           <h1 className="ms-2 mt-5 flex justify-center text-5xl font-normal text-[#0066ba]">
-            {Edicao?.name || "Carregando..."}
+            {Edicao?.name || "WEPGCOMP"}
           </h1>
           <hr className="w-[600px] border border-brand-orange max-md:w-full" />
         </div>

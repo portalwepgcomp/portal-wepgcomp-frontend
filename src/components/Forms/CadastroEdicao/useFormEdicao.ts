@@ -14,6 +14,8 @@ import {
   formEdicaoSchema,
   type FormEdicaoSchema,
 } from "./formEdicaoSchema";
+import { Edicao, EdicaoParams } from "@/models/edicao";
+import { OptionType } from "@/models/forms";
 
 interface UseFormEdicaoOptions {
   edicaoData?: Edicao | null;
@@ -113,8 +115,8 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     } as EdicaoParams;
 
     if (edicaoData?.id) {
-      updateEdicao(edicaoData.id, body);
-      setTimeout(() => window.location.reload(), 3000);
+      await updateEdicao(edicaoData.id, body);
+      router.push("/edicoes");
       return;
     }
 

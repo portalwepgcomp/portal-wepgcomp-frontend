@@ -1,5 +1,6 @@
 import { cn } from "@/utils/cn";
 import { badgeBase } from "./constants";
+import { User } from "@/models/user";
 
 export default function GerenciarUsuarioBadges({ user }: { user: User }) {
   const badges: React.ReactNode[] = [];

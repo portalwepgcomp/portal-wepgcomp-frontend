@@ -2,7 +2,6 @@
 import { ComposeProviders } from "@/components/ComposeProviders";
 import { ReactQueryProvider } from "@/lib/react-query";
 import { EmailProvider } from "@/hooks/useEmail";
-import { ModalProvider } from "../context/ModalProvider";
 import { ActiveEditionProvider } from "../hooks/useActiveEdition";
 import { CommitterProvider } from "../hooks/useCommittee";
 import { EdicaoProvider } from "../hooks/useEdicao";
@@ -23,7 +22,6 @@ const Providers = ({ children }: ProvidersProps) => {
   return (
     <ComposeProviders
       with={[
-        ModalProvider,
         ActiveEditionProvider,
         UserProvider,
         SessionProvider,

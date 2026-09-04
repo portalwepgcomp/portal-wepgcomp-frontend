@@ -20,8 +20,8 @@ export default function ListaBancas() {
 
         <div className="mt-4 flex flex-col gap-3">
           {sessoes.map((sessao) =>
-            sessao.presentations
-              ?.toSorted((a, b) => a.positionWithinBlock - b.positionWithinBlock)
+            [...(sessao.presentations ?? [])]
+              .sort((a, b) => a.positionWithinBlock - b.positionWithinBlock)
               .map((pres) => (
                 <PresentationCard
                   key={pres.id}

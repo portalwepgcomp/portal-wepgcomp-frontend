@@ -6,8 +6,7 @@
       "esnext"
     ],
     "typeRoots": [
-      "node_modules/@types",
-      "cypress/support"
+      "node_modules/@types"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -25,6 +24,10 @@
         "name": "next"
       }
     ],
+    "types": [
+      "jest",
+      "node"
+    ],
     "paths": {
       "@/*": [
         "./src/*"
@@ -36,11 +39,10 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "cypress/**/*.ts",
-    "cypress/support/**/*.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "cypress"
   ]
 }

@@ -29,7 +29,7 @@ export default function OrientacoesAudiencia() {
   }, [orientacoes?.audienceGuidance]);
 
   return (
-    <div className="w-full px-[6.25rem] pb-4 text-black max-md:px-4">
+    <div className="w-full pb-4 text-black">
       <HtmlEditorComponent
         content={content}
         onChange={(newValue) => setContent(newValue)}

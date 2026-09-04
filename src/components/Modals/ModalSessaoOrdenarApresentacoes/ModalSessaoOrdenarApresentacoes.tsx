@@ -7,25 +7,28 @@ import ModalComponent from "@/components/UI/ModalComponent/ModalComponent";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useSession } from "@/hooks/useSession";
 import { useEffect, useState } from "react";
+import { SwapPresentationsOnSession } from "@/models/session";
+import { Submission } from "@/models/submission";
 
 export default function ModalSessaoOrdenarApresentacoes() {
   const { swapPresentationsOnSession, sessao } = useSession();
   const { Edicao } = useEdicao();
-  const [listaOrdenada, setListaOrdenada] = useState<any[]>([]);
+  const [listaOrdenada, setListaOrdenada] = useState<Submission[]>([]);
 
   useEffect(() => {
     const listaOrdenadaSessao =
-      sessao?.presentations
-        ?.toSorted((a, b) => a.positionWithinBlock - b.positionWithinBlock)
-        .map((p) => p.submission) || [];
+      [...(sessao?.presentations ?? [])]
+        .sort((a, b) => a.positionWithinBlock - b.positionWithinBlock)
+        .map((p) => p.submission)
+        .filter((sub): sub is Submission => sub !== null && sub !== undefined) || [];
     setListaOrdenada(listaOrdenadaSessao);
   }, [sessao]);
 
   const getPresentationId = (id: string): string =>
-    sessao?.presentations?.find((p) => p.submissionId == id)?.id || "";
+    sessao?.presentations?.find((p) => p.submissionId === id)?.id || "";
 
   const handleOnChangeOrder = async (
-    data: any[],
+    data: Submission[],
     draggedMovement: DraggedMovement[],
   ) => {
     if (!sessao?.id || !Edicao?.id) return;
@@ -66,7 +69,7 @@ export default function ModalSessaoOrdenarApresentacoes() {
           <p className="mb-2 text-sm font-bold">
             Arraste os itens para alterar a ordenação
           </p>
-          <DraggableList
+          <DraggableList<Submission>
             list={listaOrdenada}
             labelTitle="title"
             labelSubtitle="abstract"

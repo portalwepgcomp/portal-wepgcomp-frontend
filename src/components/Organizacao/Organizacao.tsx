@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useCommittee } from "@/hooks/useCommittee";
 import { useEdicao } from "@/hooks/useEdicao";
 
 export default function Organizacao() {
   const { getCommitterAll, committerList } = useCommittee();
   const { Edicao } = useEdicao();
+  const lastFetchedIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (Edicao?.id) {
+    if (Edicao?.id && lastFetchedIdRef.current !== Edicao.id) {
+      lastFetchedIdRef.current = Edicao.id;
       getCommitterAll(Edicao.id);
     }
-  }, [Edicao?.id]);
+  }, [Edicao?.id, getCommitterAll]);
 
   const coordenador = useMemo(() => {
     const coord = committerList.find(
@@ -56,27 +58,27 @@ export default function Organizacao() {
   }
 
   return (
-    <section className="flex w-full items-center justify-center bg-gradient-to-br from-brand-gold to-[rgb(247,168,90)] py-16">
-      <div className="w-[80%] rounded-3xl bg-white p-12 text-[#222] shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl max-md:w-[90%] max-md:p-8">
-        <h1 className="mb-8 text-center text-[2.8rem] font-bold tracking-wide text-brand-navy max-md:text-[2rem]">
+    <section className="flex w-full items-center justify-center bg-gradient-to-br from-brand-gold to-[rgb(247,168,90)] py-10 sm:py-12 px-4">
+      <div className="w-full max-w-4xl rounded-2xl bg-white p-6 sm:p-8 text-[#222] shadow-md transition duration-300 hover:shadow-lg">
+        <h2 className="mb-6 text-center text-2xl sm:text-3xl font-bold tracking-tight text-brand-navy">
           Organização
-        </h1>
+        </h2>
 
-        <div className="flex flex-col gap-8">
-          <div className="rounded-2xl border-l-[5px] border-brand-accent bg-[#f9f9f9] px-6 py-5 transition hover:bg-[#fff5e6]">
-            <h3 className="mb-2 text-xl font-semibold text-brand-accent max-md:text-lg">
+        <div className="flex flex-col gap-5">
+          <div className="rounded-xl border-l-4 border-brand-accent bg-[#f9f9f9] px-5 py-4 transition hover:bg-[#fff5e6]">
+            <h3 className="mb-1 text-base sm:text-lg font-bold text-brand-accent">
               Coordenação geral
             </h3>
-            <p className="text-[1.05rem] leading-relaxed text-[#333] max-md:text-[0.95rem]">
+            <p className="m-0 text-sm sm:text-base leading-relaxed text-[#333]">
               {coordenador}
             </p>
           </div>
 
-          <div className="rounded-2xl border-l-[5px] border-brand-accent bg-[#f9f9f9] px-6 py-5 transition hover:bg-[#fff5e6]">
-            <h3 className="mb-2 text-xl font-semibold text-brand-accent max-md:text-lg">
+          <div className="rounded-xl border-l-4 border-brand-accent bg-[#f9f9f9] px-5 py-4 transition hover:bg-[#fff5e6]">
+            <h3 className="mb-1 text-base sm:text-lg font-bold text-brand-accent">
               Comissão organizadora
             </h3>
-            <p className="text-[1.05rem] leading-relaxed text-[#333] max-md:text-[0.95rem]">
+            <p className="m-0 text-sm sm:text-base leading-relaxed text-[#333]">
               {formatTeam(groupedMembers.comissao)}
             </p>
           </div>

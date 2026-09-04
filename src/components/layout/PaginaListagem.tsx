@@ -19,9 +19,9 @@ export default function PaginaListagem({
   children,
 }: Readonly<PaginaListagemProps>) {
   return (
-    <div className="flex flex-col">
+    <div className="w-full">
       <Banner title={titulo} />
-      <div className="flex flex-col p-16 max-[980px]:p-4">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col gap-6">
         {toolbar}
         {children}
       </div>

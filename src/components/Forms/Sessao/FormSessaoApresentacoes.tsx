@@ -8,7 +8,6 @@ import Select from "react-select";
 
 import Button from "@/components/UI/Button";
 import { Campo, Input } from "@/components/UI/Input";
-import { cn } from "@/utils/cn";
 import ApresentacoesOrdenaveis from "./ApresentacoesOrdenaveis";
 import {
   bloquearTeclasInvalidas,

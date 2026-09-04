@@ -7,11 +7,13 @@ export default function LocalEvento() {
   return (
     <section
       id="Contato"
-      className="flex w-full items-center justify-center bg-brand-slate p-8"
+      className="w-full bg-slate-50 py-10 sm:py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-100 scroll-mt-24"
     >
-      <div className="flex w-[80%] flex-row justify-evenly gap-8 max-xl:w-full max-xl:flex-col">
-        <Contato />
-        <Endereco />
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-14">
+          <Contato />
+          <Endereco />
+        </div>
       </div>
     </section>
   );

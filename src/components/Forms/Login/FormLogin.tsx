@@ -1,14 +1,20 @@
-import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { useModal } from "@/context/ModalProvider";
-import Button from "@/components/UI/Button";
-import { Campo, Input } from "@/components/UI/Input";
-import PasswordEye from "@/components/UI/PasswordEye";
-import { zodResolver } from "@hookform/resolvers/zod";
+"use client";
+
+import { useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+import { AuthContext } from "@/context/AuthProvider/authProvider";
+import Button from "@/components/UI/Button";
+import { Campo, Input, PasswordInput } from "@/components/UI/Input";
+import { UserLogin } from "@/models/user";
+
+/**
+ * Esquema de validação para os campos de autenticação do usuário.
+ */
 const formLoginSchema = z.object({
   email: z
     .string({
@@ -29,6 +35,9 @@ const formLoginSchema = z.object({
 
 type FormLoginSchema = z.infer<typeof formLoginSchema>;
 
+/**
+ * Formulário principal de Login de usuários do portal.
+ */
 export function FormLogin() {
   const {
     register,
@@ -38,11 +47,9 @@ export function FormLogin() {
     resolver: zodResolver(formLoginSchema),
   });
   const { singIn, signed } = useContext(AuthContext);
-  const { open } = useModal("alterarSenhaModal");
   const router = useRouter();
 
-  const [eye, setEye] = useState(false);
-
+  // Redireciona para a página principal caso o usuário já esteja autenticado
   useEffect(() => {
     if (signed) {
       router.push("/home");
@@ -56,7 +63,7 @@ export function FormLogin() {
     try {
       await singIn(usuario);
     } catch {
-      /* erro tratado no contexto */
+      /* Erro de autenticação já é tratado no AuthProvider */
     }
   }
 
@@ -95,39 +102,27 @@ export function FormLogin() {
         erro={errors.password?.message}
         className="mb-3"
       >
-        <div className="flex flex-row items-center gap-1 rounded-md border border-[#e4e4e4] px-1">
-          <input
-            type={eye ? "text" : "password"}
-            id="password"
-            placeholder="digite sua senha"
-            className="flex-1 border-0 bg-transparent px-2 py-2.5 text-sm outline-none placeholder:text-[#ADB5BD]"
-            {...register("password")}
-          />
-          <button
-            type="button"
-            className="cursor-pointer border-0 bg-transparent p-1"
-            onClick={() => setEye(!eye)}
-            aria-label={eye ? "Ocultar senha" : "Mostrar senha"}
-          >
-            <PasswordEye color={eye ? "blue" : "black"} />
-          </button>
-        </div>
+        <PasswordInput
+          id="password"
+          placeholder="digite sua senha"
+          {...register("password")}
+        />
       </Campo>
 
       <div className="mb-4 text-end">
-        <button
-          type="button"
-          onClick={() => open()}
-          className="mt-1 border-0 bg-transparent p-0 text-sm text-[#090DF0] underline-offset-2 hover:underline"
+        <Link
+          href="/recuperar-senha"
+          className="mt-1 text-sm text-[#090DF0] no-underline underline-offset-2 hover:underline"
         >
           Esqueceu sua senha?
-        </button>
+        </Link>
       </div>
 
       <div className="mx-auto mb-4 flex justify-center gap-2">
         <Button
           type="submit"
-          className="h-[2.375rem] w-[7.938rem] bg-brand-blue text-sm font-semibold hover:bg-brand-blue"
+          variante="brand"
+          className="h-[2.375rem] w-[7.938rem] text-sm font-semibold"
         >
           Entrar
         </Button>

@@ -1,4 +1,6 @@
-interface Presentation {
+import { Submission } from "@/models/submission";
+
+export interface Presentation {
   id: string;
   presentationBlockId: string;
   positionWithinBlock: number;
@@ -11,10 +13,10 @@ interface Presentation {
   updatedAt: string;
 }
 
-interface PresentationBookmark {
+export interface PresentationBookmark {
   bookmarked: boolean;
 }
 
-interface PresentationBookmarkRegister {
+export interface PresentationBookmarkRegister {
   presentationId: string;
 }

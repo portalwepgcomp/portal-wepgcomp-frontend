@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { cn } from "@/utils/cn";
+import { User } from "@/models/user";
 
 interface FilterOption {
   value: string;

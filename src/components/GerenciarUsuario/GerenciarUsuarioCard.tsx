@@ -11,6 +11,7 @@ import {
   type StatusUsuario,
 } from "./constants";
 import { obterPermissaoUsuario, obterStatusUsuario } from "./usuarioUtils";
+import { User, UserProfile } from "@/models/user";
 
 interface GerenciarUsuarioCardProps {
   usuario: User;

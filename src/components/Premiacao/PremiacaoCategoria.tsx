@@ -1,4 +1,5 @@
 import Premiacao from "@/templates/Premiacao/Premiacao";
+import { PremiacaoCategoriaProps } from "@/models/premiacao";
 
 export default function PremiacaoCategoria({
   categoria,

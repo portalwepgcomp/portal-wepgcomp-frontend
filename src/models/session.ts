@@ -1,7 +1,10 @@
-type SessaoTipo = "General" | "Presentation";
+import { Presentation } from "@/models/presentation";
+import { User } from "@/models/user";
 
-interface SessaoParams {
-  type: SessaoTipo;
+export type PresentationBlockType = "General" | "Presentation";
+
+export interface PresentationBlockParams {
+  type: PresentationBlockType;
   eventEditionId: string;
   roomId: string;
   startTime: string;
@@ -13,12 +16,12 @@ interface SessaoParams {
   avaliadores?: string[];
 }
 
-interface AvailablePositionsWithInBlock {
+export interface AvailablePositionsWithInBlock {
   positionWithinBlock: number;
   startTime: string;
 }
 
-interface Panelist {
+export interface Panelist {
   createdAt: string;
   id: string;
   presentationBlockId: string;
@@ -28,7 +31,7 @@ interface Panelist {
   userId: string;
 }
 
-interface Sessao extends SessaoParams {
+export interface PresentationBlock extends PresentationBlockParams {
   id: string;
   availablePositionsWithInBlock: AvailablePositionsWithInBlock[];
   panelists: Panelist[];
@@ -38,16 +41,16 @@ interface Sessao extends SessaoParams {
   updatedAt: string;
 }
 
-interface SwapPresentationsOnSession {
+export interface SwapPresentationsOnSession {
   presentation1Id: string;
   presentation2Id: string;
 }
 
-interface SwapMultiplePresentationsOnSession {
+export interface SwapMultiplePresentationsOnSession {
   presentations: SwapPresentationsOnSession[];
 }
 
-interface Room {
+export interface Room {
   id: string;
   eventEditionId: string;
   name: string;

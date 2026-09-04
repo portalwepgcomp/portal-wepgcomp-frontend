@@ -8,12 +8,12 @@ import { Campo, Input } from "@/components/UI/Input";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useUsers } from "@/hooks/useUsers";
 import { UpdateUserRequest } from "@/models/update-user";
+import { User } from "@/models/user";
 import { maskCPF, unmask } from "@/utils/masks";
 import { cn } from "@/utils/cn";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import InputMask from "react-input-mask";
 
 const updateUserSchema = z
   .object({
@@ -170,16 +170,19 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
     }
   };
 
+  // Atualiza o documento aplicando máscara de CPF para ouvintes ou limitando dígitos de matrícula
   const handleDocumentNumberChange = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    let { value } = e.target;
+    const { value } = e.target;
 
     if (selectedProfile === "Listener") {
-      setCpf(value);
+      // Aplica formatação automática de CPF (000.000.000-00)
+      setCpf(maskCPF(value));
     } else {
-      value = value.replace(/\D/g, "");
-      setMatricula(value);
+      // Matrícula acadêmica aceita apenas números (limite de 13 dígitos)
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 13);
+      setMatricula(digitsOnly);
     }
   };
 
@@ -282,6 +285,7 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                 </div>
               </Campo>
 
+              {/* Campo de Documento: Máscara dinâmica conforme o perfil selecionado */}
               <Campo
                 label={labelObrigatorio(
                   selectedProfile === "Listener"
@@ -291,18 +295,8 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                 htmlFor="documentoNumero"
                 className="mb-3"
               >
-                <InputMask
-                  mask={
-                    selectedProfile === "Listener"
-                      ? "999.999.999-99"
-                      : undefined
-                  }
-                  maskChar={null}
+                <Input
                   type="text"
-                  className={cn(
-                    "w-full rounded-md border border-line px-3 py-2.5 text-sm outline-none",
-                    "focus:border-brand-blue focus:ring-1 focus:ring-brand-blue",
-                  )}
                   id="documentoNumero"
                   name="registrationNumber"
                   value={selectedProfile === "Listener" ? cpf : matricula}
@@ -312,7 +306,11 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                       ? "000.000.000-00"
                       : "Digite a Matrícula (13 dígitos)"
                   }
-                  maxLength={selectedProfile === "Listener" ? undefined : 13}
+                  maxLength={selectedProfile === "Listener" ? 14 : 13}
+                  className={cn(
+                    "w-full rounded-md border border-line px-3 py-2.5 text-sm outline-none",
+                    "focus:border-brand-blue focus:ring-1 focus:ring-brand-blue",
+                  )}
                 />
               </Campo>
 

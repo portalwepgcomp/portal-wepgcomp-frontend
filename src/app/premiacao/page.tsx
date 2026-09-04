@@ -16,7 +16,7 @@ import { presentationApi } from "@/services/presentation";
 import { cn } from "@/utils/cn";
 
 const tabClass =
-  "flex h-[2.813rem] w-[15.625rem] items-center justify-center rounded-[0.625rem] font-semibold transition hover:-translate-y-0.5 max-[1000px]:w-[40%]";
+  "flex h-10 px-5 items-center justify-center rounded-xl text-sm font-semibold transition cursor-pointer max-sm:w-full";
 
 export default function Premiacao() {
   const [activeCategory, setActiveCategory] = useState<
@@ -39,18 +39,31 @@ export default function Premiacao() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleChangeCategory = (
-    categoria: "banca" | "avaliadores" | "publico",
-  ) => {
-    setActiveCategory(categoria);
+  const handleChangeCategory = (cat: "banca" | "avaliadores" | "publico") => {
+    setActiveCategory(cat);
   };
 
   const handleRecalculateScores = async () => {
     const eventEditionId = getEventEditionIdStorage();
     if (!eventEditionId) {
-      showAlert({ icon: "error", title: "Erro", text: "Evento não encontrado" });
+      showAlert({
+        icon: "warning",
+        title: "Edição não selecionada",
+        text: "Selecione uma edição do evento para recalcular as notas.",
+      });
       return;
     }
+
+    const res = await showAlert({
+      icon: "warning",
+      title: "Recalcular Notas?",
+      text: "Isso irá recalcular todas as notas ponderadas (Banca, Avaliadores e Público) para a edição atual. Deseja continuar?",
+      showCancelButton: true,
+      confirmButtonText: "Sim, recalcular",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!res.isConfirmed) return;
 
     setIsCalculating(true);
     try {
@@ -58,16 +71,16 @@ export default function Premiacao() {
       showAlert({
         icon: "success",
         title: "Sucesso!",
-        text: "Scores recalculados com sucesso",
-        timer: 2000,
+        text: "Notas recalculadas com sucesso.",
       });
-      window.location.reload();
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Erro ao recalcular as notas.";
       showAlert({
         icon: "error",
-        title: "Erro ao recalcular scores",
-        text: err.response?.data?.message || "Ocorreu um erro inesperado",
+        title: "Erro",
+        text: errorMsg,
       });
     } finally {
       setIsCalculating(false);
@@ -75,57 +88,59 @@ export default function Premiacao() {
   };
 
   const handleResetScores = async (
-    type: "evaluators" | "public" | "committee",
+    target: "evaluators" | "committee" | "public",
   ) => {
     const eventEditionId = getEventEditionIdStorage();
     if (!eventEditionId) {
-      showAlert({ icon: "error", title: "Erro", text: "Evento não encontrado" });
+      showAlert({
+        icon: "warning",
+        title: "Edição não selecionada",
+        text: "Selecione uma edição do evento.",
+      });
       return;
     }
 
-    const typeLabel =
-      type === "evaluators"
-        ? "da Banca"
-        : type === "committee"
-          ? "dos Avaliadores"
-          : "do Público";
+    const labels: Record<string, string> = {
+      evaluators: "todas as notas da Banca Examinadora",
+      committee:
+        "todas as atribuições e notas da Comissão Organizadora (Avaliadores)",
+      public: "todos os votos do Público",
+    };
 
-    const result = await showAlert({
+    const res = await showAlert({
       icon: "warning",
-      title: "Tem certeza que deseja resetar?",
-      text: `Isso irá apagar todos os scores ${typeLabel}. Esta ação não pode ser desfeita.`,
+      title: "Atenção: Ação Destrutiva",
+      text: `Tem certeza que deseja resetar ${labels[target]}? Esta ação não pode ser desfeita!`,
       showCancelButton: true,
-      confirmButtonText: "Resetar",
+      confirmButtonText: "Sim, resetar",
       cancelButtonText: "Cancelar",
-      confirmButtonColor: "#d33",
     });
 
-    if (!result.isConfirmed) return;
+    if (!res.isConfirmed) return;
 
     setIsResetting(true);
     setResetOpen(false);
     try {
-      if (type === "evaluators") {
+      if (target === "evaluators") {
         await presentationApi.resetEvaluatorsScores(eventEditionId);
-      } else if (type === "committee") {
+      } else if (target === "committee") {
         await presentationApi.resetCommitteeScores(eventEditionId);
       } else {
         await presentationApi.resetPublicScores(eventEditionId);
       }
-
       showAlert({
         icon: "success",
         title: "Sucesso!",
-        text: `Scores ${typeLabel} resetados com sucesso`,
-        timer: 2000,
+        text: "Reset efetuado com sucesso.",
       });
-      window.location.reload();
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Erro ao efetuar o reset.";
       showAlert({
         icon: "error",
-        title: "Erro ao resetar scores",
-        text: err.response?.data?.message || "Ocorreu um erro inesperado",
+        title: "Erro",
+        text: errorMsg,
       });
     } finally {
       setIsResetting(false);
@@ -135,11 +150,11 @@ export default function Premiacao() {
   return (
     <ProtectedLayout>
       <PremiacaoProvider>
-        <div className="flex flex-col gap-[3.125rem]">
-          <div className="flex flex-col">
-            <Banner title="Premiação" />
-            <div className="flex flex-wrap items-center justify-center gap-4 px-16 max-[1000px]:flex-col max-[1000px]:px-8">
-              <div className="flex w-[30rem] max-[1000px]:w-full max-[1000px]:max-w-[30rem]">
+        <div className="w-full">
+          <Banner title="Premiação" />
+          <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 flex flex-col gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <div className="flex w-full max-w-md">
                 <Input
                   type="text"
                   placeholder="Pesquise pelo nome da apresentação"
@@ -149,20 +164,20 @@ export default function Premiacao() {
                 />
                 <button
                   type="button"
-                  className="flex min-w-12 items-center justify-center rounded-r-[0.625rem] bg-brand-orange hover:bg-[#E68A00]"
+                  className="flex min-w-10 items-center justify-center rounded-r-lg bg-brand-orange hover:bg-[#E68A00]"
                 >
                   <Image
                     src="/assets/images/search.svg"
                     alt="Search icon"
-                    width={24}
-                    height={24}
+                    width={20}
+                    height={20}
                   />
                 </button>
               </div>
 
               <Button
                 type="button"
-                className="whitespace-nowrap rounded-lg bg-brand-orange px-4 py-1.5 hover:bg-brand-orange disabled:opacity-50"
+                className="whitespace-nowrap rounded-lg bg-brand-orange px-4 py-2 hover:bg-brand-orange disabled:opacity-50 text-sm font-semibold"
                 onClick={handleRecalculateScores}
                 disabled={isCalculating || isResetting}
               >
@@ -173,7 +188,7 @@ export default function Premiacao() {
                 <Button
                   type="button"
                   variante="danger"
-                  className="whitespace-nowrap rounded-lg px-4 py-1.5"
+                  className="whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold"
                   onClick={() => setResetOpen((v) => !v)}
                   disabled={isCalculating || isResetting}
                 >
@@ -217,8 +232,8 @@ export default function Premiacao() {
                   className={cn(
                     tabClass,
                     activeCategory === cat
-                      ? "border-0 bg-brand-orange text-white shadow-md hover:bg-[#E68A00]"
-                      : "border-2 border-brand-orange bg-white text-brand-orange hover:bg-[#FAFAFA]",
+                      ? "border-0 bg-brand-orange text-white shadow-sm"
+                      : "border-2 border-brand-orange bg-white text-brand-orange hover:bg-orange-50",
                   )}
                   onClick={() => handleChangeCategory(cat)}
                 >

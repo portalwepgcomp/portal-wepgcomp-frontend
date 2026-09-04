@@ -3,6 +3,7 @@
 import Banner from "@/components/UI/Banner";
 import Button from "@/components/UI/Button";
 import Spinner from "@/components/UI/Spinner";
+import { useAuth } from "@/hooks/useAuth";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { usePresentation } from "@/hooks/usePresentation";
 import { cn } from "@/utils/cn";
@@ -10,9 +11,11 @@ import { registrarErro } from "@/utils/logError";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
 import { CalendarPlus, Download, StarIcon } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { formatDate, formatOnlyTime, getInitials } from "./utils";
+import { Presentation, PresentationBookmark } from "@/models/presentation";
 
 const botaoAcaoBase =
   "flex items-center gap-2 rounded-lg px-6 py-3 text-base font-semibold transition duration-base";
@@ -21,6 +24,8 @@ export default function ApresentacaoDetalhes() {
     const params = useParams();
     const router = useRouter();
     const presentationId = params.id as string;
+
+    const { signed } = useAuth();
     const {
         getPresentationById,
         postPresentationBookmark,
@@ -52,10 +57,6 @@ export default function ApresentacaoDetalhes() {
             isFetching.current = true;
 
             try {
-                const bookmark = await getPresentationBookmark({ presentationId });
-                if (!controller.signal.aborted) {
-                    setPresentationBookmark(bookmark);
-                }
                 const data = await getPresentationById(presentationId);
                 if (!controller.signal.aborted) {
                     setPresentation(data);
@@ -64,11 +65,22 @@ export default function ApresentacaoDetalhes() {
                     hasFetched.current = true;
                 }
 
-            } catch (err) {
+                if (signed) {
+                    try {
+                        const bookmark = await getPresentationBookmark({ presentationId });
+                        if (!controller.signal.aborted) {
+                            setPresentationBookmark(bookmark);
+                        }
+                    } catch (_errBookmark) {
+                        // Ignora erro de bookmark se falhar
+                    }
+                }
+
+            } catch (_err) {
                 if (!controller.signal.aborted) {
                     showAlert({
                         icon: "error",
-                        title: `Erro ao carregar apresentação: ${err}`,
+                        title: "Erro ao carregar apresentação",
                         text: "Ocorreu um erro ao carregar os detalhes da apresentação. Tente novamente mais tarde!",
                         confirmButtonText: "Retornar",
                     });
@@ -88,13 +100,29 @@ export default function ApresentacaoDetalhes() {
             controller.abort();
             isFetching.current = false;
         };
-    }, [presentationId]);
+    }, [presentationId, signed, getPresentationBookmark, getPresentationById, showAlert]);
 
     const handleBack = () => {
         router.back();
     };
 
     const handleFavorite = async () => {
+        if (!signed) {
+            const res = await showAlert({
+                icon: "info",
+                title: "Acesso restrito",
+                text: "Você precisa estar conectado à sua conta para favoritar esta apresentação.",
+                showCancelButton: true,
+                confirmButtonText: "Fazer Login",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (res.isConfirmed) {
+                router.push(`/login?redirect=/apresentacoes/${presentationId}`);
+            }
+            return;
+        }
+
         const wasBookmarked = presentationBookmark?.bookmarked ?? false;
 
         setPresentationBookmark({
@@ -107,7 +135,7 @@ export default function ApresentacaoDetalhes() {
             } else {
                 await postPresentationBookmark({ presentationId });
             }
-        } catch (err) {
+        } catch (_err) {
             setPresentationBookmark({
                 bookmarked: wasBookmarked
             });
@@ -118,6 +146,26 @@ export default function ApresentacaoDetalhes() {
                 text: "Não foi possível atualizar o favorito. Tente novamente.",
             });
         }
+    };
+
+    const handleAvaliar = async () => {
+        if (!signed) {
+            const res = await showAlert({
+                icon: "info",
+                title: "Acesso restrito",
+                text: "Você precisa estar conectado à sua conta para avaliar esta apresentação.",
+                showCancelButton: true,
+                confirmButtonText: "Fazer Login",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (res.isConfirmed) {
+                router.push(`/login?redirect=/avaliacao/${presentationId}`);
+            }
+            return;
+        }
+
+        router.push('/avaliacao/' + presentation?.id);
     };
 
     const handleAddToCalendar = () => {
@@ -253,7 +301,7 @@ export default function ApresentacaoDetalhes() {
                                 botaoAcaoBase,
                                 "border-2 border-brand-blue bg-card text-brand-blue hover:bg-brand-blue hover:text-white max-md:w-full max-md:justify-center",
                             )}
-                            onClick={() => router.push('/avaliacao/' + presentation.id)}
+                            onClick={handleAvaliar}
                         >
                             <StarIcon className="h-5 w-5" />
                             Avaliar
@@ -322,10 +370,13 @@ export default function ApresentacaoDetalhes() {
                     <div className="flex items-center gap-5 rounded-xl border border-line bg-card p-6 max-md:flex-col max-md:text-center">
                         <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-blue">
                             {presentation.submission?.mainAuthor?.photoFilePath ? (
-                                <img
+                                <Image
                                     src={presentation.submission.mainAuthor.photoFilePath}
-                                    alt={presentation.submission.mainAuthor.name}
+                                    alt={presentation.submission.mainAuthor.name || "Foto do autor"}
+                                    width={80}
+                                    height={80}
                                     className="h-full w-full object-cover"
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="text-[28px] font-bold text-white">

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Plus } from "lucide-react";
 import BarraBusca from "./BarraBusca";
 
 interface BotaoCriar {
@@ -20,7 +20,6 @@ interface ToolbarListagemProps {
 
 /**
  * Barra de ações compartilhada das listagens: botão criar (opcional) + busca.
- * Só layout; a feature decide se/como criar e o que a busca filtra.
  */
 export default function ToolbarListagem({
   busca,
@@ -30,25 +29,27 @@ export default function ToolbarListagem({
   criar,
 }: Readonly<ToolbarListagemProps>) {
   return (
-    <div className="mb-4 grid grid-cols-[1.5fr_3fr_4fr] gap-4 max-[980px]:grid-cols-[1.5fr_4fr] max-md:grid-cols-1 max-md:justify-items-stretch">
-      {criar ? (
-        <button
-          type="button"
-          className="flex max-w-[15.625rem] items-center justify-between rounded-[10px] border-0 bg-brand-orange px-4 py-2 font-semibold text-white disabled:opacity-50 max-md:h-12"
-          onClick={criar.onClick}
-          disabled={criar.desabilitado}
-        >
-          {criar.rotulo}
-          <Image src="/assets/images/add.svg" alt="" width={24} height={24} />
-        </button>
-      ) : null}
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center gap-4">
+        {criar ? (
+          <button
+            type="button"
+            className="inline-flex h-11 items-center gap-2 rounded-lg border-0 bg-brand-orange px-5 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={criar.onClick}
+            disabled={criar.desabilitado}
+          >
+            <span>{criar.rotulo}</span>
+            <Plus className="h-5 w-5" />
+          </button>
+        ) : null}
 
-      <BarraBusca
-        valor={busca}
-        onChange={onBuscaChange}
-        placeholder={placeholderBusca}
-        ocultar={ocultarBusca}
-      />
+        <BarraBusca
+          valor={busca}
+          onChange={onBuscaChange}
+          placeholder={placeholderBusca}
+          ocultar={ocultarBusca}
+        />
+      </div>
     </div>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 
+import { ReactNode, useEffect } from "react";
+import { X } from "lucide-react";
 import LoadingPage from "@/components/LoadingPage";
 import Button from "@/components/UI/Button";
 import { useModal } from "@/context/ModalProvider";
 import { cn } from "@/utils/cn";
-import Image from "next/image";
-import { ReactNode, useEffect } from "react";
 
 interface ModalComponentProps {
   id: string;
@@ -22,6 +22,10 @@ interface ModalComponentProps {
   onClose?: () => void;
 }
 
+/**
+ * Componente de Modal padronizado do Portal WEPGCOMP.
+ * Integração direta com ModalProvider, controle de acessibilidade e animações em Tailwind CSS.
+ */
 export default function ModalComponent({
   id,
   formId,
@@ -68,13 +72,13 @@ export default function ModalComponent({
       aria-labelledby={id}
     >
       <div
-        className="absolute inset-0 bg-[#808080ba]"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={handleClose}
         aria-hidden
       />
       <div
         className={cn(
-          "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[10px] border-[3px] border-brand-accent bg-white shadow-lg",
+          "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl",
           isShortModal ? "max-w-md" : "max-w-4xl",
         )}
       >
@@ -87,15 +91,10 @@ export default function ModalComponent({
                 id={idCloseModal ?? "close-modal"}
                 type="button"
                 onClick={handleClose}
-                className="flex h-8 w-8 cursor-pointer items-center justify-center border-0 bg-transparent"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted transition hover:bg-muted-light hover:text-foreground focus:outline-none"
                 aria-label="Fechar"
               >
-                <Image
-                  src="/assets/images/close.svg"
-                  alt=""
-                  width={24}
-                  height={24}
-                />
+                <X className="h-6 w-6" aria-hidden="true" />
               </button>
             </div>
 

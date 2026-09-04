@@ -7,17 +7,20 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useSession } from "@/hooks/useSession";
+import { useRoomsQuery } from "@/features/sessoes/hooks/useRoomsQuery";
 
 import { getDurationInMinutes } from "@/utils/formatDate";
 import { formatOptions } from "@/utils/formatOptions";
 import { useEffect } from "react";
 import { useEdicao } from "@/hooks/useEdicao";
 import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
 import Button from "@/components/UI/Button";
 import { Campo, Input } from "@/components/UI/Input";
 
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { PresentationBlockParams } from "@/models/session";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -119,9 +122,12 @@ interface FormSessaoAuxiliarProps {
 export default function FormSessaoAuxiliar({
   disabledIntervals,
 }: Readonly<FormSessaoAuxiliarProps>) {
-  const { createSession, updateSession, sessao, setSessao, roomsList } =
+  const { createSession, updateSession, sessao, setSessao } =
     useSession();
   const { Edicao } = useEdicao();
+  const router = useRouter();
+  const eventEditionId = sessao?.eventEditionId || Edicao?.id;
+  const { data: rooms } = useRoomsQuery(eventEditionId);
 
   type FormSessaoAuxiliarSchema = z.infer<typeof formSessaoAuxiliarSchema>;
 
@@ -150,7 +156,7 @@ export default function FormSessaoAuxiliar({
     defaultValues,
   });
 
-  const roomsOptions = formatOptions(roomsList, "name");
+  const roomsOptions = formatOptions(rooms ?? [], "name");
 
   const combinedTimeFilter = (time: Date) => {
     const hour = time.getHours();
@@ -188,13 +194,14 @@ export default function FormSessaoAuxiliar({
       roomId: sala,
       startTime: inicio,
       duration,
-    } as SessaoParams;
+    } as PresentationBlockParams;
 
     if (sessao?.id) {
       updateSession(sessao.id, Edicao.id, body).then((status) => {
         if (status) {
           reset();
           setSessao(null);
+          router.push("/sessoes");
         }
       });
       return;
@@ -204,6 +211,7 @@ export default function FormSessaoAuxiliar({
       if (status) {
         reset();
         setSessao(null);
+        router.push("/sessoes");
       }
     });
   };
@@ -227,7 +235,7 @@ export default function FormSessaoAuxiliar({
       setValue("inicio", "");
       setValue("final", "");
     }
-  }, [sessao?.id]);
+  }, [sessao, setValue]);
 
   return (
     <form

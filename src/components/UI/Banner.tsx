@@ -6,8 +6,8 @@ interface BannerProps {
 
 export default function Banner({ title }: Readonly<BannerProps>) {
   return (
-    <div className="mb-10 flex h-[120px] w-full items-center justify-center rounded-[8px] bg-[url('/assets/images/slide1.png')] bg-cover bg-center">
-      <h1 className="m-0 text-center text-4xl font-bold text-white">
+    <div className="mb-6 flex h-[85px] sm:h-[95px] w-full items-center justify-center rounded-lg bg-[url('/assets/images/slide1.png')] bg-cover bg-center shadow-sm">
+      <h1 className="m-0 text-center text-2xl sm:text-3xl font-bold text-white tracking-tight">
         {title}
       </h1>
     </div>

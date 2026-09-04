@@ -1,3 +1,5 @@
+"use client";
+
 import { sendContactRequest } from "@/services/contact";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -7,6 +9,7 @@ import { useEdicao } from "@/hooks/useEdicao";
 import Button from "@/components/UI/Button";
 import { Campo, Input, Textarea } from "@/components/UI/Input";
 import { cn } from "@/utils/cn";
+import { getErrorMessage } from "@/utils/error";
 
 const formContatoSchema = z.object({
   name: z
@@ -23,8 +26,8 @@ const formContatoSchema = z.object({
 
 type FormContatoSchema = z.infer<typeof formContatoSchema>;
 
-const campoClaro =
-  "border-2 border-white bg-transparent text-lg text-white placeholder:text-white/70 shadow-sm";
+const inputClass =
+  "w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition focus:border-brand-orange focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange";
 
 export function FormContato() {
   const { Edicao } = useEdicao();
@@ -33,7 +36,7 @@ export function FormContato() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormContatoSchema>({
     resolver: zodResolver(formContatoSchema),
   });
@@ -41,63 +44,51 @@ export function FormContato() {
   const { showAlert } = useSweetAlert();
 
   const handleFormContato = async (data: FormContatoSchema) => {
-    sendContactRequest(data)
-      .then((resp) => {
-        if (resp.status < 200 || resp.status >= 300) {
-          showAlert({
-            icon: "error",
-            title: "Erro ao enviar mensagem",
-            text:
-              resp?.response?.data?.message?.message ||
-              resp?.response?.data?.message ||
-              "Ocorreu um erro ao enviar o formulário. Tente novamente.",
-            confirmButtonText: "Retornar",
-          });
-        } else {
-          showAlert({
-            icon: "success",
-            title: "Mensagem enviada com sucesso!",
-            timer: 3000,
-            showConfirmButton: false,
-          });
-          reset();
-        }
-      })
-      .catch((err) => {
-        showAlert({
-          icon: "error",
-          title: "Erro ao enviar mensagem",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro ao enviar o formulário. Tente novamente.",
-          confirmButtonText: "Retornar",
-        });
+    try {
+      await sendContactRequest(data);
+      showAlert({
+        icon: "success",
+        title: "Mensagem enviada com sucesso!",
+        text: "Obrigado pelo contato! Responderemos em breve.",
+        timer: 3000,
+        showConfirmButton: false,
       });
+      reset();
+    } catch (err: unknown) {
+      showAlert({
+        icon: "error",
+        title: "Erro ao enviar mensagem",
+        text: getErrorMessage(
+          err,
+          "Ocorreu um erro ao enviar o formulário. Tente novamente mais tarde.",
+        ),
+        confirmButtonText: "Fechar",
+      });
+    }
   };
 
   return (
     <form
-      className="mx-auto rounded-2xl border border-white p-8 shadow-lg"
+      className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
       onSubmit={handleSubmit(handleFormContato)}
     >
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Campo
-          label={<span className="text-xl font-semibold text-white">Nome:</span>}
+          label={<span className="text-sm font-medium text-slate-700">Seu Nome:</span>}
           htmlFor="name"
           erro={errors.name?.message}
           className="mb-0"
         >
           <Input
             id="name"
-            placeholder="Insira seu nome"
-            className={campoClaro}
+            placeholder="Ex: Maria Silva"
+            className={inputClass}
             {...register("name")}
           />
         </Campo>
 
         <Campo
-          label={<span className="text-xl font-semibold text-white">E-mail:</span>}
+          label={<span className="text-sm font-medium text-slate-700">Seu E-mail:</span>}
           htmlFor="email"
           erro={errors.email?.message}
           className="mb-0"
@@ -105,40 +96,40 @@ export function FormContato() {
           <Input
             id="email"
             type="email"
-            placeholder="Insira seu e-mail"
-            className={campoClaro}
+            placeholder="exemplo@ufba.br"
+            className={inputClass}
             {...register("email")}
           />
         </Campo>
       </div>
 
       <Campo
-        label={<span className="text-xl font-semibold text-white">Mensagem:</span>}
+        label={<span className="text-sm font-medium text-slate-700">Mensagem:</span>}
         htmlFor="text"
         erro={errors.text?.message}
-        className="mb-4"
+        className="mb-1"
       >
         <Textarea
           id="text"
-          placeholder="Digite sua mensagem"
-          rows={5}
-          className={cn(campoClaro, "min-h-0 resize-none")}
+          placeholder="Escreva sua dúvida, sugestão ou informação..."
+          rows={4}
+          className={cn(inputClass, "min-h-[110px] resize-none")}
           {...register("text")}
         />
       </Campo>
 
-      <div className="mt-4 flex justify-center">
+      <div className="flex justify-end pt-1">
         <Button
           type="submit"
-          disabled={!Edicao?.isActive}
+          disabled={!Edicao?.isActive || isSubmitting}
           className={cn(
-            "rounded-full border-2 border-white px-10 py-2 text-lg font-bold transition",
+            "rounded-lg px-7 py-2.5 text-sm font-semibold transition-all duration-200 shadow-sm",
             Edicao?.isActive
-              ? "bg-white text-[#1e1e1e] shadow-[0_2px_8px_rgba(255,255,255,0.2)] hover:opacity-90"
-              : "cursor-not-allowed bg-[#bbb] text-[#1e1e1e]",
+              ? "bg-brand-orange text-white hover:bg-brand-orange/90 hover:shadow active:scale-[0.98]"
+              : "cursor-not-allowed bg-slate-300 text-slate-500",
           )}
         >
-          Enviar
+          {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
         </Button>
       </div>
     </form>

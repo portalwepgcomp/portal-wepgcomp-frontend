@@ -1,11 +1,12 @@
-import { useContext } from "react";
-
 import {
+  useContext,
   createContext,
   Dispatch,
   ReactNode,
   SetStateAction,
   useState,
+  useCallback,
+  useMemo,
 } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
@@ -13,25 +14,24 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { submissionApi } from "@/services/submission";
 import { registrarErro } from "@/utils/logError";
+import { Submission, SubmissionParams } from "@/models/submission";
+import { getErrorMessage } from "@/utils/error";
 
 interface SubmissionProps {
   children: ReactNode;
 }
 
 interface SubmissionProviderData {
-  loadingSubmissionList: boolean;
   loadingSubmission: boolean;
-  submissionList: Submission[];
   submission: Submission | null;
   setSubmission: Dispatch<SetStateAction<Submission | null>>;
-  getSubmissions: (params: GetSubmissionParams) => void;
-  getSubmissionById: (idSubmission: string) => void;
+  getSubmissionById: (idSubmission: string) => Promise<void>;
   createSubmission: (body: SubmissionParams) => Promise<boolean>;
   updateSubmissionById: (
     idSubmission: string,
     body: SubmissionParams
   ) => Promise<boolean>;
-  deleteSubmissionById: (idSubmission: string) => void;
+  deleteSubmissionById: (idSubmission: string) => Promise<void>;
 }
 
 export const SubmissionContext = createContext<SubmissionProviderData>(
@@ -41,86 +41,49 @@ export const SubmissionContext = createContext<SubmissionProviderData>(
 export const useSubmission = () => useContext(SubmissionContext);
 
 export const SubmissionProvider = ({ children }: SubmissionProps) => {
-  const [loadingSubmissionList, setLoadingSubmissionList] =
-    useState<boolean>(false);
   const [loadingSubmission, setLoadingSubmission] = useState<boolean>(false);
-  const [submissionList, setSubmissionList] = useState<Submission[]>([]);
   const [submission, setSubmission] = useState<Submission | null>(null);
 
   const { showAlert } = useSweetAlert();
   const queryClient = useQueryClient();
 
-  // Invalida as listagens em React Query (features/apresentacoes) após mutações,
-  // mantendo o fluxo atual do provider + modal intacto.
-  const invalidarListas = () =>
-    queryClient.invalidateQueries({ queryKey: ["submissions"] });
+  const invalidarListas = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ["submissions"] }),
+    [queryClient]
+  );
 
-  const getSubmissions = async (params: GetSubmissionParams) => {
-    setLoadingSubmissionList(true);
+  const getSubmissionById = useCallback(
+    async (idSubmission: string) => {
+      setLoadingSubmission(true);
 
-    try {
-      const response = await submissionApi.getSubmissions(params);
-      setSubmissionList(response);
-    } catch (err: any) {
-      registrarErro("Erro na requisição de submissão", err);
-      setSubmissionList([]);
-
-      showAlert({
-        icon: "error",
-        title: "Erro ao listar apresentações",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante a busca.",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingSubmissionList(false);
-    }
-  };
-
-  const getSubmissionById = async (idSubmission: string) => {
-    setLoadingSubmission(true);
-
-    try {
-      const response = await submissionApi.getSubmissionById(idSubmission);
-      setSubmission(response);
-    } catch (err: any) {
-      registrarErro("Erro na requisição de submissão", err);
-      setSubmission(null);
-
-      showAlert({
-        icon: "error",
-        title: "Erro ao buscar apresentação",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante a busca.",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingSubmission(false);
-    }
-  };
-
-  const createSubmission = async (body: SubmissionParams) => {
-    setLoadingSubmission(true);
-
-    return submissionApi
-      .createSubmission(body)
-      .then((response) => {
+      try {
+        const response = await submissionApi.getSubmissionById(idSubmission);
         setSubmission(response);
+      } catch (err: unknown) {
+        registrarErro("Erro na requisição de submissão", err);
+        setSubmission(null);
 
-        getSubmissions({ eventEditionId: body.eventEditionId });
+        showAlert({
+          icon: "error",
+          title: "Erro ao buscar apresentação",
+          text: getErrorMessage(err, "Ocorreu um erro durante a busca."),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingSubmission(false);
+      }
+    },
+    [showAlert]
+  );
+
+  const createSubmission = useCallback(
+    async (body: SubmissionParams) => {
+      setLoadingSubmission(true);
+
+      try {
+        const response = await submissionApi.createSubmission(body);
+        setSubmission(response);
         invalidarListas();
-
-        const modalElementButton = document.getElementById(
-          "editarApresentacaoModalClose"
-        ) as HTMLButtonElement;
-
-        if (modalElementButton) {
-          modalElementButton.click();
-        }
 
         showAlert({
           icon: "success",
@@ -130,123 +93,122 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
         });
 
         return true;
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao cadastrar apresentação",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
 
         return false;
-      })
-      .finally(() => {
+      } finally {
         setLoadingSubmission(false);
-      });
-  };
+      }
+    },
+    [invalidarListas, showAlert]
+  );
 
-  const updateSubmissionById = async (
-    idSubmission: string,
-    body: SubmissionParams
-  ) => {
-    setLoadingSubmission(true);
+  const updateSubmissionById = useCallback(
+    async (idSubmission: string, body: SubmissionParams) => {
+      setLoadingSubmission(true);
 
-    return submissionApi
-      .updateSubmissionById(idSubmission, body)
-      .then((response) => {
+      try {
+        const response = await submissionApi.updateSubmissionById(
+          idSubmission,
+          body
+        );
         setSubmission(response);
         invalidarListas();
 
-        return getSubmissions({ eventEditionId: body.eventEditionId }).then(
-          () => {
-            const modalElementButton = document.getElementById(
-              "editarApresentacaoModalClose"
-            ) as HTMLButtonElement;
+        showAlert({
+          icon: "success",
+          title: "Apresentação editada com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
 
-            if (modalElementButton) {
-              modalElementButton.click();
-            }
-
-            showAlert({
-              icon: "success",
-              title: "Apresentação editada com sucesso!",
-              timer: 3000,
-              showConfirmButton: false,
-            });
-
-            return true;
-          }
-        );
-      })
-      .catch((err) => {
+        return true;
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao editar apresentação",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante a edição. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a edição. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
 
         return false;
-      })
-      .finally(() => {
+      } finally {
         setLoadingSubmission(false);
-      });
-  };
+      }
+    },
+    [invalidarListas, showAlert]
+  );
 
-  const deleteSubmissionById = async (idSubmission: string) => {
-    setLoadingSubmission(true);
+  const deleteSubmissionById = useCallback(
+    async (idSubmission: string) => {
+      setLoadingSubmission(true);
 
-    try {
-      const response = await submissionApi.deleteSubmissionById(idSubmission);
-      setSubmission(response);
-      invalidarListas();
+      try {
+        const response = await submissionApi.deleteSubmissionById(idSubmission);
+        setSubmission(response);
+        invalidarListas();
 
-      showAlert({
-        icon: "success",
-        title: "Apresentação removida com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-    } catch (err: any) {
-      registrarErro("Erro na requisição de submissão", err);
-      setSubmission(null);
+        showAlert({
+          icon: "success",
+          title: "Apresentação removida com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+      } catch (err: unknown) {
+        registrarErro("Erro na requisição de submissão", err);
+        setSubmission(null);
 
-      showAlert({
-        icon: "error",
-        title: "Erro ao remover apresentação",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante a remoção. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingSubmission(false);
-    }
-  };
+        showAlert({
+          icon: "error",
+          title: "Erro ao remover apresentação",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a remoção. Tente novamente mais tarde!"
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingSubmission(false);
+      }
+    },
+    [invalidarListas, showAlert]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      loadingSubmission,
+      submission,
+      setSubmission,
+      getSubmissionById,
+      createSubmission,
+      updateSubmissionById,
+      deleteSubmissionById,
+    }),
+    [
+      loadingSubmission,
+      submission,
+      setSubmission,
+      getSubmissionById,
+      createSubmission,
+      updateSubmissionById,
+      deleteSubmissionById,
+    ]
+  );
 
   return (
-    <SubmissionContext.Provider
-      value={{
-        loadingSubmission,
-        loadingSubmissionList,
-        submission,
-        setSubmission,
-        submissionList,
-        getSubmissions,
-        getSubmissionById,
-        createSubmission,
-        updateSubmissionById,
-        deleteSubmissionById,
-      }}
-    >
+    <SubmissionContext.Provider value={contextValue}>
       {children}
     </SubmissionContext.Provider>
   );

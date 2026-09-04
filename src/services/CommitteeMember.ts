@@ -1,5 +1,6 @@
 "use client"
 import axiosInstance from '@/utils/api';
+import { Committer } from '@/models/committer';
 
 const instance = axiosInstance;
 const baseUrl = "/committee-member/";

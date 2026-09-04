@@ -16,7 +16,7 @@ export default function AlterarSenha({ params }: { params: { token: string } }) 
         <>
           <div className="mx-auto w-full max-w-[654px]">
             <h1 className="ms-2 mt-5 flex justify-center text-5xl font-normal text-[#0066BA]">
-              {Edicao?.name || "Carregando..."}
+              {Edicao?.name || "WEPGCOMP"}
             </h1>
             <hr className="border-[0.125rem] border-brand-orange" />
             <h2 className="mb-4 flex justify-center text-2xl font-bold text-black">

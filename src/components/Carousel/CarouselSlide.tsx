@@ -17,16 +17,19 @@ export default function CarouselSlide({
   return (
     <div
       className={cn(
-        "absolute inset-0 transition-opacity duration-[600ms] ease-in-out",
+        "absolute inset-0 transition-opacity duration-700 ease-in-out",
         isActive ? "z-10 opacity-100" : "pointer-events-none z-0 opacity-0",
       )}
       aria-hidden={!isActive}
     >
       <div
-        className="flex h-[40vh] min-h-[300px] w-screen flex-col items-center justify-center px-8 pb-16 pt-4 text-white max-xl:pt-24 max-[760px]:h-[35vh] max-[700px]:min-h-[250px] max-[480px]:min-h-[180px] bg-cover bg-bottom"
+        className="relative flex min-h-[460px] md:min-h-[500px] w-full flex-col items-center justify-center bg-cover bg-center px-4 py-12 pb-20 text-white"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
-        {children}
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="relative z-10 flex w-full max-w-4xl flex-col items-center justify-center gap-3 text-center">
+          {children}
+        </div>
       </div>
     </div>
   );

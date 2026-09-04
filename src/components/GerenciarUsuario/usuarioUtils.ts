@@ -1,5 +1,6 @@
 import type { FiltrosUsuario } from "./constants";
 import { normalizarTextoBusca } from "@/features/shared/texto";
+import { User } from "@/models/user";
 
 // Reexporta a fonte \u00fanica de verdade (movida para features/shared) para n\u00e3o
 // quebrar importa\u00e7\u00f5es existentes de `normalizarTextoBusca` a partir daqui.

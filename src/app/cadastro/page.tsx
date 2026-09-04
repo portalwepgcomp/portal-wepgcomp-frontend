@@ -19,11 +19,10 @@ export default function Cadastro() {
   }, [signed, router]);
 
   return (
-    <div className="relative mx-auto flex w-full max-w-[680px] flex-grow flex-col text-black">
+    <div className="relative mx-auto flex w-full max-w-[540px] flex-grow flex-col px-4 py-8 text-black">
       {loadingCreateUser && <LoadingPage />}
-      <div className="mx-auto w-full">
-        <hr className="border-[0.12rem] border-brand-orange" />
-        <h2 className="mb-4 flex justify-center text-5xl font-bold text-black max-[1000px]:text-2xl">
+      <div className="mx-auto w-full mb-6">
+        <h2 className="text-center text-3xl font-bold text-slate-900 md:text-4xl">
           {!loadingCreateUser && "Cadastro"}
         </h2>
       </div>

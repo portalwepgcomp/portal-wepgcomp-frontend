@@ -1,9 +1,9 @@
-type ProfileType = "Professor" | "Presenter" | "Listener";
-type SubprofileType = "Doctorate" | "Master" | "Bachelor" | "Other";
-type RoleType = "Superadmin" | "Admin" | "Default";
-type StatusType = "Active" | "Inactive";
+export type ProfileType = "Professor" | "Presenter" | "Listener";
+export type SubprofileType = "Doctorate" | "Master" | "Bachelor" | "Other";
+export type RoleType = "Superadmin" | "Admin" | "Default";
+export type StatusType = "Active" | "Inactive";
 
-interface UserAccount {
+export interface UserAccount {
   id: string;
   name: string;
   email: string;
@@ -15,19 +15,27 @@ interface UserAccount {
   lattesUrl?: string;
 }
 
-interface GetUserParams {
-  profiles?: ProfileType;
+export interface GetUserParams {
+  profiles?: ProfileType | ProfileType[] | string;
   subprofiles?: SubprofileType;
-  roles?: RoleType;
+  roles?: RoleType | RoleType[] | string;
   status?: StatusType;
+  /** Busca server-side por nome ou e-mail. */
+  search?: string;
+  /** Número da página (base 1) para paginação por envelope (P3.2). */
+  page?: number;
+  /** Quantidade de registros por página. */
+  pageSize?: number;
+  /** Se true, o backend responde com envelope PaginatedResponse. */
+  paginated?: boolean;
 }
 
-interface SetPermissionParams {
+export interface SetPermissionParams {
   requestUserId: string;
   targetUserId: string;
 }
 
-interface RegisterUserParams {
+export interface RegisterUserParams {
   name: string;
   email: string;
   password: string;
@@ -41,7 +49,7 @@ interface RegisterUserParams {
   subprofile?: SubprofileType | null;
 }
 
-interface User extends RegisterUserParams {
+export interface User extends RegisterUserParams {
   id: string;
   createdAt: Date;
   deletedAt: Date;
@@ -55,27 +63,27 @@ interface User extends RegisterUserParams {
   hasSubmission: boolean;
 }
 
-interface ResetPasswordSendEmailParams {
+export interface ResetPasswordSendEmailParams {
   email: string;
 }
 
-interface ResetPasswordParams {
+export interface ResetPasswordParams {
   token: string;
   newPassword: string;
 }
 
-interface CreateProfessorBySuperadminParams {
+export interface CreateProfessorBySuperadminParams {
   name: string;
   email: string;
   registrationNumber: string;
 }
 
-interface UserLogin {
+export interface UserLogin {
   email: string;
   password: string;
 }
 
-interface UserProfile {
+export interface UserProfile {
   id: string;
   name: string;
   profile: ProfileType;
@@ -83,7 +91,7 @@ interface UserProfile {
   isActive: boolean;
 }
 
-interface RegistrationNumberType {
+export interface RegistrationNumberType {
   CPF: "CPF";
   MATRICULA: "MATRICULA";
 }

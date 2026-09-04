@@ -1,9 +1,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/utils/cn";
+import { Presentation } from "@/models/presentation";
+import { PresentationBlock } from "@/models/session";
 
 interface LinhaAgendaProps {
-  presentation: Presentation | Sessao;
+  presentation: Presentation | PresentationBlock;
   type?: string;
   showTime?: boolean;
 }
@@ -36,7 +38,7 @@ export default function LinhaAgenda({
   };
 
   const submission = (presentation as Presentation).submission;
-  const sessao = presentation as Sessao;
+  const sessao = presentation as PresentationBlock;
 
   return (
     <div

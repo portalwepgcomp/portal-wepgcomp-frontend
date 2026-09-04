@@ -7,7 +7,6 @@ import ListaVazia from "@/components/layout/ListaVazia";
 import PaginaListagem from "@/components/layout/PaginaListagem";
 import ToolbarListagem from "@/components/layout/ToolbarListagem";
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
-import ModalEditarEdicao from "@/components/Modals/ModalEditarEdicao/Modal EditarEdição";
 import { useListaEdicoes } from "../hooks/useListaEdicoes";
 import CardEdicao from "./CardEdicao";
 
@@ -20,7 +19,6 @@ export default function ListaEdicoes() {
     busca,
     setBusca,
     edicaoAtiva,
-    edicaoSelecionada,
     abrirEdicao,
     excluir,
   } = useListaEdicoes();
@@ -30,47 +28,43 @@ export default function ListaEdicoes() {
     : undefined;
 
   return (
-    <>
-      <PaginaListagem
-        titulo="Edições do Evento"
-        toolbar={
-          <ToolbarListagem
-            busca={busca}
-            onBuscaChange={setBusca}
-            placeholderBusca="Pesquise por edição"
-            criar={criar}
-          />
-        }
-      >
-        <ContadorItens
-          total={total}
-          rotulo={{
-            singular: "edição cadastrada",
-            plural: "edições cadastradas",
-          }}
+    <PaginaListagem
+      titulo="Edições do Evento"
+      toolbar={
+        <ToolbarListagem
+          busca={busca}
+          onBuscaChange={setBusca}
+          placeholderBusca="Pesquise por edição"
+          criar={criar}
         />
+      }
+    >
+      <ContadorItens
+        total={total}
+        rotulo={{
+          singular: "edição cadastrada",
+          plural: "edições cadastradas",
+        }}
+      />
 
-        <div className="grid gap-4">
-          {isLoading ? (
-            <IndicadorDeCarregamento />
-          ) : (
-            <>
-              {itens.map((edicao) => (
-                <CardEdicao
-                  key={edicao.id}
-                  edicao={edicao}
-                  edicaoAtiva={edicaoAtiva}
-                  onEditar={() => abrirEdicao(edicao.id)}
-                  onExcluir={() => excluir(edicao.id)}
-                />
-              ))}
-              {itens.length === 0 && <ListaVazia />}
-            </>
-          )}
-        </div>
-      </PaginaListagem>
-
-      <ModalEditarEdicao edicaoData={edicaoSelecionada} />
-    </>
+      <div className="grid gap-4">
+        {isLoading ? (
+          <IndicadorDeCarregamento />
+        ) : (
+          <>
+            {itens.map((edicao) => (
+              <CardEdicao
+                key={edicao.id}
+                edicao={edicao}
+                edicaoAtiva={edicaoAtiva}
+                onEditar={() => abrirEdicao(edicao.id)}
+                onExcluir={() => excluir(edicao.id)}
+              />
+            ))}
+            {itens.length === 0 && <ListaVazia />}
+          </>
+        )}
+      </div>
+    </PaginaListagem>
   );
 }

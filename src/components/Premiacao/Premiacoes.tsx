@@ -36,7 +36,12 @@ export default function Premiacoes({
       default:
         break;
     }
-  }, [categoria]);
+  }, [
+    categoria,
+    getPremiacoesAudiencia,
+    getPremiacoesAvaliadores,
+    getPremiacoesBanca,
+  ]);
 
   const getAwards = () => {
     switch (categoria) {

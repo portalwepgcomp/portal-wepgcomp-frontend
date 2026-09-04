@@ -1,46 +1,49 @@
-import { useContext } from "react";
-
 import {
+  useContext,
   createContext,
   Dispatch,
   ReactNode,
   SetStateAction,
   useState,
+  useCallback,
+  useMemo,
 } from "react";
+
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useSweetToast } from "@/hooks/useToast";
 import { sessionApi } from "@/services/sessions";
+import {
+  PresentationBlock,
+  PresentationBlockParams,
+  SwapPresentationsOnSession,
+} from "@/models/session";
+import { getErrorMessage } from "@/utils/error";
 
 interface SessionProps {
   children: ReactNode;
 }
 
 interface SessionProviderData {
-  loadingSessoesList: boolean;
   loadingSessao: boolean;
-  sessoesList: Sessao[];
-  sessao: Sessao | null;
-  roomsList: Room[];
-  loadingRoomsList: boolean;
-  setSessao: Dispatch<SetStateAction<Sessao | null>>;
-  listSessions: (eventEditionId: string) => void;
-  listRooms: (eventEditionId: string) => void;
-  getSessionById: (idSession: string) => void;
+  sessao: PresentationBlock | null;
+  setSessao: Dispatch<SetStateAction<PresentationBlock | null>>;
+  getSessionById: (idSession: string) => Promise<void>;
   createSession: (
     eventEditionId: string,
-    body: SessaoParams
+    body: PresentationBlockParams
   ) => Promise<boolean>;
   updateSession: (
     idSession: string,
     eventEditionId: string,
-    body: SessaoParams
+    body: PresentationBlockParams
   ) => Promise<boolean>;
-  deleteSession: (idSession: string, eventEditionId: string) => void;
+  deleteSession: (idSession: string, eventEditionId?: string) => Promise<boolean>;
   swapPresentationsOnSession: (
     idSession: string,
-    eventEditionId: string,
-    bodies: SwapPresentationsOnSession[]
+    eventEditionId?: string,
+    bodies?: SwapPresentationsOnSession[]
   ) => Promise<boolean>;
 }
 
@@ -51,78 +54,37 @@ export const SessionContext = createContext<SessionProviderData>(
 export const useSession = () => useContext(SessionContext);
 
 export const SessionProvider = ({ children }: SessionProps) => {
-  const [loadingSessoesList, setLoadingSessoesList] = useState<boolean>(false);
   const [loadingSessao, setLoadingSessao] = useState<boolean>(false);
-  const [sessoesList, setSessoesList] = useState<Sessao[]>([]);
-  const [sessao, setSessao] = useState<Sessao | null>(null);
-  const [loadingRoomsList, setLoadingRoomsList] = useState<boolean>(false);
-  const [roomsList, setRoomsList] = useState<Room[]>([]);
+  const [sessao, setSessao] = useState<PresentationBlock | null>(null);
 
   const { showAlert } = useSweetAlert();
   const { showToast } = useSweetToast();
+  const queryClient = useQueryClient();
 
-  const listSessions = async (eventEditionId: string) => {
-    if (!eventEditionId) {
-      setSessoesList([]);
-      return;
-    }
-    setLoadingSessoesList(true);
-    sessionApi
-      .listSessions(eventEditionId)
-      .then((response) => {
-        setSessoesList(response);
-      })
-      .catch(() => {
-        setSessoesList([]);
-      })
-      .finally(() => {
-        setLoadingSessoesList(false);
-      });
-  };
+  const invalidarSessoes = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
+    [queryClient]
+  );
 
-  const listRooms = async (eventEditionId: string) => {
-    if (!eventEditionId) {
-      setRoomsList([]);
-      return;
-    }
-    setLoadingRoomsList(true);
+  const getSessionById = useCallback(async (idSession: string) => {
+    setLoadingSessao(true);
     try {
-      const response = await sessionApi.listRooms(eventEditionId);
-      setRoomsList(response);
+      const response = await sessionApi.getSessionById(idSession);
+      setSessao(response);
     } catch {
-      showAlert({
-        icon: "error",
-        title: "Erro ao carregar as salas",
-        text: "Ocorreu um erro ao carregar as salas. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
+      setSessao(null);
     } finally {
-      setLoadingRoomsList(false);
+      setLoadingSessao(false);
     }
-  };
+  }, []);
 
-  const getSessionById = async (idSession: string) => {
-    setLoadingSessao(true);
-    sessionApi
-      .getSessionById(idSession)
-      .then((response) => {
+  const createSession = useCallback(
+    async (_eventEditionId: string, body: PresentationBlockParams) => {
+      setLoadingSessao(true);
+      try {
+        const response = await sessionApi.createSession(body);
         setSessao(response);
-      })
-      .catch(() => {
-        setSessao(null);
-      })
-      .finally(() => {
-        setLoadingSessao(false);
-      });
-  };
-
-  const createSession = async (eventEditionId: string, body: SessaoParams) => {
-    setLoadingSessao(true);
-
-    return sessionApi
-      .createSession(body)
-      .then((response) => {
-        setSessao(response);
+        invalidarSessoes();
         showAlert({
           icon: "success",
           title: "Cadastro de sessão realizado com sucesso!",
@@ -130,44 +92,36 @@ export const SessionProvider = ({ children }: SessionProps) => {
           showConfirmButton: false,
         });
 
-        const modalElementButton = document.getElementById(
-          "sessaoModalClose"
-        ) as HTMLButtonElement;
-
-        if (modalElementButton) {
-          modalElementButton.click();
-        }
-
-        listSessions(eventEditionId);
         return true;
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao cadastrar sessão",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
         return false;
-      })
-      .finally(() => {
+      } finally {
         setLoadingSessao(false);
-      });
-  };
+      }
+    },
+    [invalidarSessoes, showAlert]
+  );
 
-  const updateSession = async (
-    idSession: string,
-    eventEditionId: string,
-    body: SessaoParams
-  ) => {
-    setLoadingSessao(true);
-    return sessionApi
-      .updateSessionById(idSession, body)
-      .then((response) => {
+  const updateSession = useCallback(
+    async (
+      idSession: string,
+      _eventEditionId: string,
+      body: PresentationBlockParams
+    ) => {
+      setLoadingSessao(true);
+      try {
+        const response = await sessionApi.updateSessionById(idSession, body);
         setSessao(response);
+        invalidarSessoes();
         showAlert({
           icon: "success",
           title: "Atualização de sessão realizada com sucesso!",
@@ -175,38 +129,31 @@ export const SessionProvider = ({ children }: SessionProps) => {
           showConfirmButton: false,
         });
 
-        const modalElementButton = document.getElementById(
-          "sessaoModalClose"
-        ) as HTMLButtonElement;
-
-        if (modalElementButton) {
-          modalElementButton.click();
-        }
-        listSessions(eventEditionId);
         return true;
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao atualizar sessão",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
         return false;
-      })
-      .finally(() => {
+      } finally {
         setLoadingSessao(false);
-      });
-  };
+      }
+    },
+    [invalidarSessoes, showAlert]
+  );
 
-  const deleteSession = async (idSession: string, eventEditionId: string) => {
-    setLoadingSessao(true);
-    sessionApi
-      .deleteSessionById(idSession)
-      .then(() => {
+  const deleteSession = useCallback(
+    async (idSession: string, _eventEditionId?: string) => {
+      setLoadingSessao(true);
+      try {
+        await sessionApi.deleteSessionById(idSession);
+        invalidarSessoes();
         showAlert({
           icon: "success",
           title: "Sessão deletada com sucesso!",
@@ -214,79 +161,83 @@ export const SessionProvider = ({ children }: SessionProps) => {
           showConfirmButton: false,
         });
 
-        listSessions(eventEditionId);
-
         return true;
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao deletar sessão",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante a deleção. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a deleção. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
         return false;
-      })
-      .finally(() => {
+      } finally {
         setSessao(null);
         setLoadingSessao(false);
-      });
-  };
+      }
+    },
+    [invalidarSessoes, showAlert]
+  );
 
-  const swapPresentationsOnSession = async (
-    idSession: string,
-    eventEditionId: string,
-    presentations: SwapPresentationsOnSession[]
-  ) => {
-    setLoadingSessao(true);
-    const body = { presentations };
-    return sessionApi
-      .swapPresentationsOnSession(idSession, body)
-      .then(() => {
+  const swapPresentationsOnSession = useCallback(
+    async (
+      idSession: string,
+      _eventEditionId?: string,
+      presentations: SwapPresentationsOnSession[] = []
+    ) => {
+      setLoadingSessao(true);
+      const body = { presentations };
+      try {
+        await sessionApi.swapPresentationsOnSession(idSession, body);
+        invalidarSessoes();
         showToast({
           icon: "success",
           title:
             "Troca na ordem das apresentações da sessão realizada com sucesso!",
         });
-        listSessions(eventEditionId);
 
         return true;
-      })
-      .catch(() => {
+      } catch {
         showToast({
           icon: "error",
           title: "Erro na troca da ordem das apresentações da sessão",
         });
 
         return false;
-      })
-      .finally(() => {
+      } finally {
         setLoadingSessao(false);
-      });
-  };
+      }
+    },
+    [invalidarSessoes, showToast]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      loadingSessao,
+      sessao,
+      setSessao,
+      getSessionById,
+      createSession,
+      updateSession,
+      deleteSession,
+      swapPresentationsOnSession,
+    }),
+    [
+      loadingSessao,
+      sessao,
+      setSessao,
+      getSessionById,
+      createSession,
+      updateSession,
+      deleteSession,
+      swapPresentationsOnSession,
+    ]
+  );
 
   return (
-    <SessionContext.Provider
-      value={{
-        loadingSessao,
-        loadingSessoesList,
-        sessao,
-        setSessao,
-        sessoesList,
-        listSessions,
-        listRooms,
-        roomsList,
-        loadingRoomsList,
-        getSessionById,
-        createSession,
-        updateSession,
-        deleteSession,
-        swapPresentationsOnSession,
-      }}
-    >
+    <SessionContext.Provider value={contextValue}>
       {children}
     </SessionContext.Provider>
   );

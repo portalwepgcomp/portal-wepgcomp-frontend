@@ -2,6 +2,7 @@
 
 import { FormEdicao } from "@/components/Forms/CadastroEdicao/FormEdicao";
 import ModalComponent from "@/components/UI/ModalComponent/ModalComponent";
+import { Edicao } from "@/models/edicao";
 
 interface ModalEditarEdicaoProps {
   edicaoData: Edicao | null;

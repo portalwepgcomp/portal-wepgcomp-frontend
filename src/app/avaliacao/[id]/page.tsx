@@ -14,6 +14,12 @@ import { useEdicao } from "@/hooks/useEdicao";
 import { useEvaluation } from "@/hooks/useEvaluation";
 import { usePresentation } from "@/hooks/usePresentation";
 import { Info } from "lucide-react";
+import { Presentation } from "@/models/presentation";
+import {
+  Evaluation,
+  EvaluationCriteria,
+  EvaluationParams,
+} from "@/models/evaluation";
 
 const tooltipTexto =
   "O sistema calcula a nota final de cada apresentação usando média bayesiana, separando avaliações de avaliadores e público geral. A fórmula central é: (N × Média da Amostra + C × Média Prévia) / (N + C), onde N é o número de avaliações recebidas pela apresentação, C é o número de confiança (calculado pelo percentil 40% do número de avaliações por apresentação no evento), Média da Amostra é a média ponderada das avaliações recebidas pela apresentação e Média Prévia é a média geral do evento. Se não houver dados suficientes para o calculo das estatisticas do evento (geral em seu inicio), são utiliados valores padrão: Número de Confiança: 5 para o público e 3 para os avaliadores.";
@@ -52,7 +58,13 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
     getPresentationAll(Edicao.id);
     getEvaluationCriteria(Edicao.id);
     getEvaluationByUser(user.id);
-  }, [Edicao?.id, user?.id]);
+  }, [
+    Edicao?.id,
+    user?.id,
+    getPresentationAll,
+    getEvaluationCriteria,
+    getEvaluationByUser,
+  ]);
 
   useEffect(() => {
     if (params?.id) {
@@ -81,9 +93,10 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
       }
     }
   }, [
-    presentationList.length,
-    evaluations?.length,
-    evaluationCriteria?.length,
+    params?.id,
+    presentationList,
+    evaluations,
+    evaluationCriteria,
   ]);
 
   return (

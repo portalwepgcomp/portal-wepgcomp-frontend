@@ -50,10 +50,9 @@ export default function ModalAlterarSenha() {
       onConfirm={handleSendEmail}
     >
       <div className="flex w-full flex-col items-center text-black">
-        <h1 className="mt-5 flex justify-center border-b-[3px] border-brand-orange pb-2 text-xl font-normal">
-          {Edicao?.name || "Carregando..."}
+        <h1 className="mt-2 text-xl font-bold text-brand-navy">
+          {Edicao?.name || "WEPGCOMP"}
         </h1>
-        <hr className="my-4 w-full border-line" />
 
         <div className="mb-4 flex flex-col items-center text-center">
           <h2 className="text-2xl font-semibold">Esqueci minha senha</h2>

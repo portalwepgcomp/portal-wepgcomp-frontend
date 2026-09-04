@@ -1,10 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import { Home } from "lucide-react";
 
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 
@@ -15,6 +16,7 @@ import PerfilProfessor from "../Perfil/PerfilProfessor";
 
 import { useActiveEdition } from "@/hooks/useActiveEdition";
 import { useEdicao } from "@/hooks/useEdicao";
+import type { Edicao as EdicaoType } from "@/models/edicao";
 import { cn } from "@/utils/cn";
 
 type MenuItem = "inicio" | "programação do evento" | "contato" | "login";
@@ -24,7 +26,7 @@ const navItemBase = "cursor-pointer";
 
 export default function Header() {
   const { user, signed } = useContext(AuthContext);
-  const { listEdicao, edicoesList, getEdicaoByYear } = useEdicao();
+  const { listEdicao, edicoesList, getEdicaoByYear, Edicao } = useEdicao();
   const { setSelectEdition, selectEdition } = useActiveEdition();
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
@@ -42,29 +44,41 @@ export default function Header() {
     }
   };
 
-  const yearsOptions = edicoesList
-    ?.map((ed) => {
-      if (ed.startDate) {
-        const fullYear = new Date(ed?.startDate).getFullYear();
+  const getYearFromEdicao = (ed?: EdicaoType | null): string => {
+    if (!ed) return "";
+    if (ed.startDate) {
+      const parsed = new Date(ed.startDate).getFullYear();
+      if (!isNaN(parsed)) return String(parsed);
+    }
+    const match = ed.name?.match(/\b(20\d{2})\b/);
+    return match ? match[1] : "";
+  };
 
-        return {
-          value: fullYear,
-          label: `Edição ${fullYear}`,
-          isActive: ed.isActive,
-        };
-      }
+  const yearsOptions = useMemo(() => {
+    const filtered = (edicoesList ?? [])
+      .map((edicao) => {
+        const rawYear = getYearFromEdicao(edicao);
+        if (rawYear) {
+          return {
+            value: rawYear,
+            label: `Edição ${rawYear}`,
+            isActive: edicao.isActive,
+          };
+        }
+        return { value: "", label: "", isActive: false };
+      })
+      .filter(
+        (option, index, self) =>
+          option.value &&
+          self.findIndex((o) => o.value === option.value) === index,
+      );
 
-      return { value: "", label: "", isActive: false };
-    })
-    ?.filter(
-      (option, index, self) =>
-        option.value &&
-        self.findIndex((o) => o.value === option.value) === index,
-    )
-    ?.toSorted((a, b) => Number(b.value) - Number(a.value));
+    return [...filtered].sort((a, b) => Number(b.value) - Number(a.value));
+  }, [edicoesList]);
 
   function perfil() {
     if (!user) return null;
+
     if (user.level !== "Default")
       return <PerfilAdmin profile={user?.profile} role={user?.level} />;
 
@@ -82,17 +96,18 @@ export default function Header() {
   }
 
   useEffect(() => {
-    const currentPath = pathname;
-    const currentHash = window.location.hash;
     listEdicao();
+  }, [listEdicao]);
 
-    if (currentPath === "/home") {
+  useEffect(() => {
+    if (pathname === "/home") {
+      const currentHash = typeof window !== "undefined" ? window.location.hash : "";
       if (currentHash === "#inicio") setSelectedItem("inicio");
       else if (currentHash === "#Programacao")
         setSelectedItem("programação do evento");
       else if (currentHash === "#Contato") setSelectedItem("contato");
       else setSelectedItem(null);
-    } else if (currentPath === "/login") {
+    } else if (pathname === "/login") {
       setSelectedItem("login");
     } else {
       setSelectedItem(null);
@@ -100,19 +115,23 @@ export default function Header() {
   }, [pathname]);
 
   useEffect(() => {
-    if (selectEdition.year) {
+    if (
+      selectEdition.year &&
+      (!Edicao || getYearFromEdicao(Edicao) !== selectEdition.year)
+    ) {
       getEdicaoByYear(selectEdition.year);
     }
-  }, [selectEdition.year]);
+  }, [selectEdition.year, Edicao, getEdicaoByYear]);
 
   useEffect(() => {
     if (edicoesList?.length && !selectEdition.year) {
-      const edAtiva = edicoesList.find((v) => v.isActive);
+      const edAtiva = edicoesList.find((v) => v.isActive) || edicoesList[0];
+      const detectedYear = getYearFromEdicao(edAtiva);
 
-      if (edAtiva?.startDate) {
+      if (detectedYear) {
         setSelectEdition({
-          year: String(new Date(edAtiva.startDate).getFullYear()),
-          isActive: true,
+          year: detectedYear,
+          isActive: !!edAtiva?.isActive,
         });
       }
     }
@@ -120,19 +139,18 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex min-h-[126px] items-center max-[1000px]:min-h-[152px]">
-        <span />
-      </div>
-      <nav className="fixed z-[1000] w-full bg-white px-2 py-6 max-[1000px]:p-1.5">
-        <div className="flex animate-[fadeInDown_1.5s_ease] flex-wrap items-center justify-between gap-4 max-[1000px]:justify-center max-[500px]:gap-2">
-          <div className="flex items-center gap-4 max-[500px]:w-full">
-            <Link className="relative mx-auto" href="/">
+      <div className="h-20 md:h-24 w-full" aria-hidden="true" />
+      <nav className="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm px-4 py-3 md:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 max-[1000px]:justify-center max-[500px]:gap-2">
+          <div className="flex items-center gap-4 max-[500px]:w-full max-[500px]:justify-center">
+            <Link className="flex items-center" href="/">
               <Image
                 src="/assets/images/logo_PGCOMP.svg"
                 alt="PGCOMP Logo"
-                className="h-auto w-full max-w-[250px]"
-                width={300}
-                height={100}
+                className="h-12 md:h-14 w-auto object-contain max-w-[280px] md:max-w-[340px]"
+                width={353}
+                height={75}
+                priority
               />
             </Link>
           </div>
@@ -143,16 +161,16 @@ export default function Header() {
                 id="event-edition-select"
                 className="max-w-48 rounded-md border border-line bg-white px-3 py-2 text-sm max-[500px]:w-full max-[500px]:max-w-none max-[500px]:text-xs"
                 value={selectEdition.year}
-                onChange={(ed) =>
+                onChange={(ed: React.ChangeEvent<HTMLSelectElement>) =>
                   setSelectEdition({
                     year: ed.target.value,
                     isActive:
-                      yearsOptions.find((v) => v.value == ed.target.value)
+                      yearsOptions.find((v: { value: string; isActive: boolean }) => v.value == ed.target.value)
                         ?.isActive ?? false,
                   })
                 }
               >
-                {yearsOptions?.map((op, i) => (
+                {yearsOptions?.map((op: { value: string; label: string }, i: number) => (
                   <option id={`edicao-op${i}`} key={op.value} value={op.value}>
                     {op.label}
                   </option>
@@ -170,7 +188,8 @@ export default function Header() {
               aria-expanded={menuOpen}
               aria-label="Toggle navigation"
             >
-              <i className="bi bi-house" />
+              {/* Ícone de navegação mobile moderno do lucide-react */}
+              <Home className="h-5 w-5 text-gray-700" aria-hidden="true" />
             </button>
             <div className="flex h-10 w-1/2 items-center justify-center rounded-lg border border-gray-400">
               {signed ? (

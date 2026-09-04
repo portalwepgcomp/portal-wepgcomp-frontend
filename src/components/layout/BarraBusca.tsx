@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { Search } from "lucide-react";
 import { Input } from "@/components/UI/Input";
 import { cn } from "@/utils/cn";
 
@@ -14,8 +14,7 @@ interface BarraBuscaProps {
 }
 
 /**
- * Campo de busca reutilizável (input + ícone). Extraído de `ListagemToolbar`.
- * Puro: recebe valor e onChange; sem estado nem domínio.
+ * Campo de busca reutilizável (input + ícone com contraste adequado).
  */
 export default function BarraBusca({
   valor,
@@ -27,11 +26,10 @@ export default function BarraBusca({
   return (
     <div
       className={cn(
-        "flex max-w-96 max-[980px]:min-w-0 max-md:w-full",
+        "flex w-full max-w-md items-stretch",
         ocultar && "invisible",
         className,
       )}
-      style={{ minWidth: ocultar ? undefined : "350px" }}
     >
       <Input
         placeholder={placeholder}
@@ -40,15 +38,15 @@ export default function BarraBusca({
         aria-describedby="botao-busca"
         value={valor}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-r-none border-[3px] border-brand-orange"
+        className="rounded-r-none border-[2px] border-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
       />
       <button
-        className="flex items-center justify-center rounded-r-md border border-l-0 border-line bg-white px-3"
+        className="flex items-center justify-center rounded-r-md border border-brand-orange bg-brand-orange px-4 text-white transition-colors duration-200 hover:bg-orange-600 focus:outline-none"
         type="button"
         id="botao-busca"
         aria-label="Buscar"
       >
-        <Image src="/assets/images/search.svg" alt="" width={24} height={24} />
+        <Search className="h-5 w-5" />
       </button>
     </div>
   );

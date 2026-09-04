@@ -1,14 +1,20 @@
 "use client";
+
 import { useContext, useEffect, useState } from "react";
 import Select from "react-select";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { Award, Save, Users } from "lucide-react";
+
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { usePremiacao } from "@/hooks/usePremiacao";
 import { registrarErro } from "@/utils/logError";
+import { AvaliadorParams } from "@/models/premiacao";
+import { OptionType } from "@/models/forms";
 
 const formMelhorAvaliadorSchema = z.object({
   avaliadores: z
@@ -20,31 +26,34 @@ const formMelhorAvaliadorSchema = z.object({
         }),
       }),
     )
-    .max(3, { message: "Você deve selecionar até 3 avaliadores!" }),
+    .max(3, { message: "Você deve selecionar no máximo 3 avaliadores!" }),
   eventEditionId: z.string(),
 });
-type formMelhorAvaliadorSchema = z.infer<typeof formMelhorAvaliadorSchema>;
+
+type FormMelhorAvaliadorSchema = z.infer<typeof formMelhorAvaliadorSchema>;
 
 export function FormMelhorAvaliador() {
+  const router = useRouter();
   const { showAlert } = useSweetAlert();
   const { user } = useContext(AuthContext);
   const [panelistsLoaded, setPanelistsLoaded] = useState(false);
-  const { createAwardedPanelists, getPanelists, listPanelists } =
-    usePremiacao();
+  const { createAwardedPanelists, getPanelists, listPanelists } = usePremiacao();
 
-  const [avaliadoresOptions, setAvaliadoresOptions] = useState<OptionType[]>(
-    [],
-  );
+  const [avaliadoresOptions, setAvaliadoresOptions] = useState<OptionType[]>([]);
   const {
     control,
     handleSubmit,
-    formState: { errors },
-  } = useForm<formMelhorAvaliadorSchema>({
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<FormMelhorAvaliadorSchema>({
     resolver: zodResolver(formMelhorAvaliadorSchema),
     defaultValues: {
       eventEditionId: getEventEditionIdStorage() ?? "",
+      avaliadores: [],
     },
   });
+
+  const selectedAvaliadores = watch("avaliadores") || [];
 
   useEffect(() => {
     if (!panelistsLoaded) {
@@ -53,7 +62,7 @@ export function FormMelhorAvaliador() {
     }
   }, [panelistsLoaded, getPanelists]);
 
-  const handleFormAvaliadores = async (data: formMelhorAvaliadorSchema) => {
+  const handleFormAvaliadores = async (data: FormMelhorAvaliadorSchema) => {
     const { avaliadores, eventEditionId } = data;
 
     const body = {
@@ -67,7 +76,6 @@ export function FormMelhorAvaliador() {
         text: "Você precisa estar logado para escolher os avaliadores.",
         confirmButtonText: "Retornar",
       });
-
       return;
     }
 
@@ -82,9 +90,13 @@ export function FormMelhorAvaliador() {
 
     if (eventEditionId) {
       await createAwardedPanelists(body);
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
+      showAlert({
+        icon: "success",
+        title: "Premiação Salva!",
+        text: "Os avaliadores homenageados foram registrados com sucesso.",
+      }).then(() => {
+        router.push("/premiacao");
+      });
     }
   };
 
@@ -103,31 +115,94 @@ export function FormMelhorAvaliador() {
 
   return (
     <form
-      className="row g-3 w-80"
+      className="space-y-6 w-full"
       id="avaliadores-form"
       onSubmit={handleSubmit(handleFormAvaliadores, onInvalid)}
     >
-      <div className="col-12 mb-1">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-bold text-foreground flex items-center gap-2">
+            <Users className="h-4 w-4 text-brand-blue" />
+            Selecione os Membros da Banca
+          </label>
+          <span
+            className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+              selectedAvaliadores.length > 3
+                ? "bg-red-100 text-red-700"
+                : "bg-brand-blue/10 text-brand-blue"
+            }`}
+          >
+            {selectedAvaliadores.length} / 3 selecionados
+          </span>
+        </div>
+
         <Controller
           name="avaliadores"
           control={control}
-          rules={{ required: "Você deve selecionar exatamente 3 avaliadores!" }}
           render={({ field }) => (
             <Select
               {...field}
               id="melhoresAvaliadores-select"
               isMulti
+              menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
+              menuPosition="fixed"
+              styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 99999 }),
+                control: (base, state) => ({
+                  ...base,
+                  borderColor: state.isFocused ? "#0066ba" : "#d9dce0",
+                  borderRadius: "0.5rem",
+                  padding: "0.125rem",
+                  boxShadow: state.isFocused ? "0 0 0 2px rgba(0, 102, 186, 0.15)" : "none",
+                }),
+              }}
               options={avaliadoresOptions}
-              placeholder="Escolha o(s) usuário(s)"
+              placeholder="Digite ou selecione os nomes dos avaliadores..."
               isClearable
               onChange={(selected) => field.onChange(selected)}
               value={field.value || []}
             />
           )}
         />
-        <p className="text-danger error-message">
-          {errors.avaliadores?.message}
-        </p>
+        {errors.avaliadores?.message && (
+          <p className="mt-1 text-sm text-error font-medium">
+            {errors.avaliadores.message}
+          </p>
+        )}
+      </div>
+
+      {/* Selected Preview Chips */}
+      {selectedAvaliadores.length > 0 && (
+        <div className="rounded-xl border border-line bg-muted-light/20 p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted mb-3">
+            Avaliadores que receberão o certificado de destaque:
+          </p>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {selectedAvaliadores.map((av, idx) => (
+              <div
+                key={av.value}
+                className="flex items-center gap-2.5 rounded-lg bg-card p-3 border border-line shadow-2xs"
+              >
+                <Award className="h-5 w-5 text-amber-500 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted font-medium">Destaque #{idx + 1}</p>
+                  <p className="text-sm font-bold text-foreground truncate">{av.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-orange px-8 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Save className="h-5 w-5" />
+          <span>Salvar Premiação</span>
+        </button>
       </div>
     </form>
   );

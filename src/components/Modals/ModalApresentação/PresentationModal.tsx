@@ -8,8 +8,15 @@ import Star from "@/components/UI/Star";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useEdicao } from "@/hooks/useEdicao";
 import { usePresentation } from "@/hooks/usePresentation";
+import { Presentation, PresentationBookmark } from "@/models/presentation";
 
-export default function PresentationModal({ props }: { props: any }) {
+export interface PresentationModalData extends Partial<Presentation> {
+  id: string;
+  startTime?: string;
+  mainAuthor?: { name?: string; email?: string };
+}
+
+export default function PresentationModal({ props }: { props: PresentationModalData }) {
   const presentationBookmarkData = { presentationId: props.id };
   const {
     getPresentationBookmark,
@@ -29,7 +36,8 @@ export default function PresentationModal({ props }: { props: any }) {
         setpresentationBookmark,
       );
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signed, props.id]);
 
   function handleFavorite() {
     if (!signed) {
@@ -50,8 +58,12 @@ export default function PresentationModal({ props }: { props: any }) {
     window.location.href = `/avaliacao/${props.id}`;
   };
 
-  const presentationDate = dayjs(props.startTime).format("DD/MM");
-  const presentationTime = dayjs(props.startTime).format("HH:mm");
+  const presentationDate = props.startTime
+    ? dayjs(props.startTime).format("DD/MM")
+    : "";
+  const presentationTime = props.startTime
+    ? dayjs(props.startTime).format("HH:mm")
+    : "";
 
   return (
     <div
@@ -90,9 +102,11 @@ export default function PresentationModal({ props }: { props: any }) {
         )}
       </div>
       <div className="flex items-center gap-4">
-        <h5 className="m-0 rounded-md bg-brand-orange px-4 py-2 text-white max-[500px]:px-2 max-[500px]:py-1 max-[500px]:text-sm">
-          {presentationDate} - {presentationTime}
-        </h5>
+        {props.startTime && (
+          <h5 className="m-0 rounded-md bg-brand-orange px-4 py-2 text-white max-[500px]:px-2 max-[500px]:py-1 max-[500px]:text-sm">
+            {presentationDate} - {presentationTime}
+          </h5>
+        )}
         {!!signed && !!Edicao?.isActive && (
           <div onClick={handleFavorite} className="cursor-pointer">
             {presentationBookmark && (

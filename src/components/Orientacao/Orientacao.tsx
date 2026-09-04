@@ -35,7 +35,7 @@ export default function Orientacao() {
 
 	useEffect(() => {
 		getOrientacoes();
-	}, []);
+	}, [getOrientacoes]);
 
 	useEffect(() => {
 		setContent(orientacoes?.summary || "");

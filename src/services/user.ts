@@ -1,6 +1,13 @@
 "use client";
 import axiosInstance from "@/utils/api";
 import { UpdateUserRequest } from "@/models/update-user";
+import {
+  GetUserParams,
+  RegisterUserParams,
+  CreateProfessorBySuperadminParams,
+  ResetPasswordSendEmailParams,
+  ResetPasswordParams,
+} from "@/models/user";
 
 const baseUrl = "/users";
 const authBaseUrl = "/auth";

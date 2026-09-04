@@ -7,6 +7,7 @@ import Star from "@/components/UI/Star";
 import { usePresentation } from "@/hooks/usePresentation";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { PresentationBookmark } from "@/models/presentation";
 
 interface PresentationCardProps {
   key?: string;
@@ -49,12 +50,12 @@ export default function PresentationCard({
   const router = useRouter();
 
   useEffect(() => {
-    if (signed) {
-      getPresentationBookmark(presentationBookmarkData).then(
+    if (signed && id) {
+      getPresentationBookmark({ presentationId: id }).then(
         setpresentationBookmark,
       );
     }
-  }, []);
+  }, [signed, id, getPresentationBookmark]);
 
   function handleFavorite() {
     if (!signed) {

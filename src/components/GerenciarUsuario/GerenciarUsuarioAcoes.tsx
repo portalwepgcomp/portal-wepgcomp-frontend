@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { cn } from "@/utils/cn";
 import { actionBtnBase } from "./constants";
+import { User, UserProfile } from "@/models/user";
 
 interface GerenciarUsuarioAcoesProps {
   usuario: User;

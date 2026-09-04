@@ -32,13 +32,13 @@ const slide3 = {
 };
 
 const botaoOutline =
-  "mt-3 inline-block rounded-[20px] border-2 border-white px-4 py-2 text-base font-semibold text-white transition hover:bg-white/10 max-[760px]:text-base";
+  "mt-4 inline-block rounded-full border-2 border-white px-6 py-2.5 text-sm md:text-base font-semibold text-white transition hover:bg-white/15 active:scale-95 shadow-md";
 
 const titulo =
-  "text-center text-[70px] font-extrabold max-xl:text-[2.75rem] max-[760px]:text-[1.6rem]";
+  "text-center text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight drop-shadow-md";
 
 const paragrafo =
-  "w-full text-center text-[22px] max-[760px]:text-base max-[480px]:text-left";
+  "w-full text-center text-sm md:text-lg lg:text-xl text-white/95 max-w-3xl leading-relaxed";
 
 export default function Carousel() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -59,22 +59,24 @@ export default function Carousel() {
   return (
     <div
       id="carousel-wepgcomp"
-      className="relative mb-10 min-h-[300px] max-[700px]:min-h-[250px] max-[480px]:min-h-[180px]"
+      className="relative mb-10 min-h-[460px] md:min-h-[500px] w-full overflow-hidden"
     >
       <CarouselSlide
         imageUrl={slide1.backgroundUrl}
         isActive={activeIndex === 0}
       >
-        <h2 className={cn(titulo, "text-white")}>
-          {Edicao?.name || "Carregando..."}
+        <h2 className={titulo}>
+          {Edicao?.name || "WEPGCOMP"}
         </h2>
-        <p className={paragrafo}>{Edicao?.description || "Carregando..."}</p>
-        <p className={cn(paragrafo, "font-semibold")}>
+        <p className={paragrafo}>
+          {Edicao?.description || "Workshop de Estudantes da Pós-Graduação em Ciência da Computação"}
+        </p>
+        <p className={cn(paragrafo, "font-semibold text-amber-300")}>
           {Edicao?.startDate
             ? formatDateEvent(Edicao?.startDate, Edicao?.endDate)
-            : "Carregando..."}
+            : "Data a definir"}
         </p>
-        <Link className={cn(botaoOutline, "text-xl")} href="#Programacao">
+        <Link className={botaoOutline} href="#Programacao">
           {slide1.labelButton}
         </Link>
       </CarouselSlide>
@@ -84,20 +86,20 @@ export default function Carousel() {
         isActive={activeIndex === 1}
       >
         <h2 className={titulo}>{slide2.title}</h2>
-        <div className="flex max-w-[70%] max-[480px]:max-w-full max-[1024px]:flex-col max-[760px]:flex-col">
-          <div className="mt-[-75px] flex flex-col items-center max-[1024px]:hidden max-[480px]:mt-0">
-            <p className={cn(paragrafo, "mb-10 font-semibold")}>
+        <div className="flex w-full max-w-4xl flex-col md:flex-row items-center justify-center gap-6 md:gap-10 mt-2">
+          <div className="flex flex-col items-center justify-center shrink-0 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-4">
+            <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-amber-300">
               {slide2.concept_subtitles[0]}
-            </p>
-            <p className="text-[8rem] font-black leading-[3rem]">
+            </span>
+            <span className="text-4xl md:text-6xl font-black my-1 text-white">
               {slide2.concept_subtitles[1]}
-            </p>
-            <p className={cn(paragrafo, "mt-2 text-2xl font-semibold")}>
+            </span>
+            <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-amber-300">
               {slide2.concept_subtitles[2]}
-            </p>
+            </span>
           </div>
-          <div className="ml-12 flex flex-col max-[480px]:ml-0">
-            <p className={cn(paragrafo, "text-justify max-[480px]:text-left")}>
+          <div className="flex flex-col text-left md:text-justify">
+            <p className="text-sm md:text-base lg:text-lg text-white/95 leading-relaxed">
               {slide2.subtitles[0]}
             </p>
           </div>
@@ -109,17 +111,19 @@ export default function Carousel() {
         isActive={activeIndex === 2}
       >
         <h2 className={titulo}>{slide3.title}</h2>
-        <p className={paragrafo}>
-          Inscrições: até {formatDateUniq(Edicao?.startDate)}
-        </p>
-        <p className={paragrafo}>
-          Data do evento:{" "}
-          {formatDateEvent(Edicao?.startDate, Edicao?.endDate)}
-        </p>
-        <p className={paragrafo}>
-          Data limite para submissão:{" "}
-          {formatDateUniq(Edicao?.submissionDeadline)}
-        </p>
+        <div className="flex flex-col items-center gap-2 my-2">
+          <p className={paragrafo}>
+            <span className="font-semibold text-amber-300">Inscrições:</span> até {formatDateUniq(Edicao?.startDate)}
+          </p>
+          <p className={paragrafo}>
+            <span className="font-semibold text-amber-300">Data do evento:</span>{" "}
+            {formatDateEvent(Edicao?.startDate, Edicao?.endDate)}
+          </p>
+          <p className={paragrafo}>
+            <span className="font-semibold text-amber-300">Data limite para submissão:</span>{" "}
+            {formatDateUniq(Edicao?.submissionDeadline)}
+          </p>
+        </div>
         {!signed && (
           <Link className={botaoOutline} href="/cadastro">
             {slide3.labelButton}
@@ -127,15 +131,17 @@ export default function Carousel() {
         )}
       </CarouselSlide>
 
-      <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2">
+      <div className="absolute bottom-5 left-0 right-0 z-20 flex justify-center gap-2.5">
         {Array.from({ length: SLIDE_COUNT }, (_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => goToSlide(i)}
             className={cn(
-              "h-[15px] w-[15px] rounded-full border-0 transition",
-              activeIndex === i ? "bg-white" : "bg-white/50 hover:bg-white/70",
+              "h-3 w-3 rounded-full border-0 transition-all duration-300",
+              activeIndex === i
+                ? "bg-white w-8"
+                : "bg-white/50 hover:bg-white/80",
             )}
             aria-label={`Slide ${i + 1}`}
             aria-current={activeIndex === i ? "true" : undefined}

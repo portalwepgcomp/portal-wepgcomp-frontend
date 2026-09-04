@@ -1,5 +1,6 @@
 "use client"
 import axiosInstance from "@/utils/api"
+import { EvaluationParams, EvaluationCriteriaParams } from "@/models/evaluation";
 
 const baseUrl = "/evaluations";
 const baseUrlCriteria = "/evaluation-criteria";

@@ -10,6 +10,8 @@ import { useUsers } from "@/hooks/useUsers";
 import { ArrowLeft, Mail, Send, UserCircle, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ProfileType, RoleType, SubprofileType } from "@/models/user";
+import { getErrorMessage } from "@/utils/error";
 
 type GroupType = "professors" | "admins" | "superadmins" | "presenters" | "listeners" | "all";
 
@@ -74,6 +76,7 @@ const SendEmail = () => {
         subprofiles: groupConfig.subprofiles?.[0],
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup]);
 
   const recipientCount = userList?.length || 0;
@@ -131,11 +134,11 @@ const SendEmail = () => {
       };
 
       await sendGroupEmail(emailData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       showAlert({
         icon: "error",
         title: "Erro ao Enviar E-mail",
-        text: err.response?.data?.message || "Ocorreu um erro ao enviar o e-mail.",
+        text: getErrorMessage(err, "Ocorreu um erro ao enviar o e-mail."),
       });
     } finally {
       setIsSending(false);

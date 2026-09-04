@@ -1,5 +1,3 @@
-import { useContext } from "react";
-
 import {
   createContext,
   Dispatch,
@@ -7,11 +5,16 @@ import {
   SetStateAction,
   useState,
   useEffect,
+  useContext,
+  useCallback,
+  useMemo,
 } from "react";
 
 import { edicaoApi } from "@/services/edicao";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { setEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { Edicao, EdicaoParams } from "@/models/edicao";
+import { getErrorMessage } from "@/utils/error";
 
 interface EdicaoProps {
   children: ReactNode;
@@ -24,11 +27,11 @@ interface EdicaoProviderData {
   Edicao: Edicao | null;
   setEdicao: Dispatch<SetStateAction<Edicao | null>>;
   listEdicao: () => Promise<Edicao[]>;
-  getEdicaoById: (idEdicao: string) => void;
-  getEdicaoByYear: (year: string) => void;
+  getEdicaoById: (idEdicao: string) => Promise<Edicao | null>;
+  getEdicaoByYear: (year: string) => Promise<Edicao | null>;
   createEdicao: (body: EdicaoParams) => Promise<boolean>;
-  updateEdicao: (idEdicao: string, body: EdicaoParams) => void;
-  updateEdicaoActivate: (idEdicao: string, body: EdicaoParams) => void;
+  updateEdicao: (idEdicao: string, body: EdicaoParams) => Promise<void>;
+  updateEdicaoActivate: (idEdicao: string, body: EdicaoParams) => Promise<void>;
   deleteEdicao: (idEdicao: string) => Promise<boolean>;
   clearEdicao: () => void;
 }
@@ -39,7 +42,6 @@ export const EdicaoContext = createContext<EdicaoProviderData>(
 
 export const useEdicao = () => useContext(EdicaoContext);
 
-
 export const EdicaoProvider = ({ children }: EdicaoProps) => {
   const [loadingEdicoesList, setLoadingEdicoesList] = useState<boolean>(false);
   const [loadingEdicao, setLoadingEdicao] = useState<boolean>(false);
@@ -47,12 +49,13 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
   const [Edicao, setEdicao] = useState<Edicao | null>(null);
 
   const { showAlert } = useSweetAlert();
+
   useEffect(() => {
     const storedEdicao = localStorage.getItem("edicaoAtiva");
     if (storedEdicao) {
       try {
         setEdicao(JSON.parse(storedEdicao));
-      } catch (e) {
+      } catch (_e) {
         localStorage.removeItem("edicaoAtiva");
       }
     }
@@ -64,12 +67,12 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
     }
   }, [Edicao]);
 
-  const clearEdicao = () => {
+  const clearEdicao = useCallback(() => {
     setEdicao(null);
     localStorage.removeItem("edicaoAtiva");
-  };
+  }, []);
 
-  const listEdicao = async () => {
+  const listEdicao = useCallback(async () => {
     setLoadingEdicoesList(true);
     try {
       const response = await edicaoApi.listEdicao();
@@ -81,164 +84,194 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
     } finally {
       setLoadingEdicoesList(false);
     }
-  };
+  }, []);
 
-  const getEdicaoById = async (idEdicao: string) => {
+  const getEdicaoById = useCallback(async (idEdicao: string) => {
     setLoadingEdicao(true);
     try {
       const response = await edicaoApi.getEdicaoById(idEdicao);
       setEdicao(response);
       setEventEditionIdStorage(response.id);
+      return response;
     } catch {
+      return null;
     } finally {
       setLoadingEdicao(false);
     }
-  };
+  }, []);
 
-  const getEdicaoByYear = async (year: string) => {
+  const getEdicaoByYear = useCallback(async (year: string) => {
+    if (!year) return null;
     setLoadingEdicao(true);
     try {
       const response = await edicaoApi.getEdicaoByYear(year);
       setEdicao(response);
       setEventEditionIdStorage(response.id);
+      return response;
     } catch {
+      return null;
     } finally {
       setLoadingEdicao(false);
     }
-  };
+  }, []);
 
-  const createEdicao = async (body: EdicaoParams): Promise<boolean> => {
-    setLoadingEdicao(true);
-    try {
-      const response = await edicaoApi.createEdicao(body);
-      setEdicao(response);
-      setEventEditionIdStorage(response.id);
-      showAlert({
-        icon: "success",
-        title: "Edição cadastrada com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      return true;
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao cadastrar Edição",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
-      return false;
-    } finally {
-      setLoadingEdicao(false);
-    }
-  };
+  const createEdicao = useCallback(
+    async (body: EdicaoParams): Promise<boolean> => {
+      setLoadingEdicao(true);
+      try {
+        const response = await edicaoApi.createEdicao(body);
+        setEdicao(response);
+        setEventEditionIdStorage(response.id);
+        showAlert({
+          icon: "success",
+          title: "Edição cadastrada com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        return true;
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao cadastrar Edição",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+        return false;
+      } finally {
+        setLoadingEdicao(false);
+      }
+    },
+    [showAlert]
+  );
 
-  const updateEdicao = async (idEdicao: string, body: EdicaoParams) => {
-    setLoadingEdicao(true);
-    try {
-      const response = await edicaoApi.updateEdicaoById(idEdicao, body);
-      setEdicao(response);
-      setEventEditionIdStorage(response.id);
-      showAlert({
-        icon: "success",
-        title: "Edição atualizada com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao atualizar a Edição",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante a atualização. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingEdicao(false);
-    }
-  };
+  const updateEdicao = useCallback(
+    async (idEdicao: string, body: EdicaoParams) => {
+      setLoadingEdicao(true);
+      try {
+        const response = await edicaoApi.updateEdicaoById(idEdicao, body);
+        setEdicao(response);
+        setEventEditionIdStorage(response.id);
+        showAlert({
+          icon: "success",
+          title: "Edição atualizada com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao atualizar a Edição",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a atualização. Tente novamente mais tarde!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingEdicao(false);
+      }
+    },
+    [showAlert]
+  );
 
-  const updateEdicaoActivate = async (
-    idEdicao: string,
-    body: EdicaoParams
-  ) => {
-    setLoadingEdicao(true);
-    try {
-      const response = await edicaoApi.updateEdicaoActivate(idEdicao, body);
-      setEdicao(response);
-      showAlert({
-        icon: "success",
-        title: "Edição atualizada com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao atualizar a Edição",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante a edição. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingEdicao(false);
-    }
-  };
+  const updateEdicaoActivate = useCallback(
+    async (idEdicao: string, body: EdicaoParams) => {
+      setLoadingEdicao(true);
+      try {
+        const response = await edicaoApi.updateEdicaoActivate(idEdicao, body);
+        setEdicao(response);
+        showAlert({
+          icon: "success",
+          title: "Edição atualizada com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao atualizar a Edição",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a edição. Tente novamente mais tarde!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingEdicao(false);
+      }
+    },
+    [showAlert]
+  );
 
-  const deleteEdicao = async (idEdicao: string): Promise<boolean> => {
-    setLoadingEdicao(true);
-    try {
-      await edicaoApi.deleteEdicaoById(idEdicao);
-      clearEdicao();
-      localStorage.removeItem("edicaoAtiva");
-      showAlert({
-        icon: "success",
-        title: "Edição removida com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      return true;
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao remover a Edição",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante a remoção. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
-      return false;
-    } finally {
-      setLoadingEdicao(false);
-    }
-  };
+  const deleteEdicao = useCallback(
+    async (idEdicao: string): Promise<boolean> => {
+      setLoadingEdicao(true);
+      try {
+        await edicaoApi.deleteEdicaoById(idEdicao);
+        clearEdicao();
+        localStorage.removeItem("edicaoAtiva");
+        showAlert({
+          icon: "success",
+          title: "Edição removida com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        return true;
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao remover a Edição",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a remoção. Tente novamente mais tarde!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+        return false;
+      } finally {
+        setLoadingEdicao(false);
+      }
+    },
+    [clearEdicao, showAlert]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      loadingEdicao,
+      loadingEdicoesList,
+      Edicao,
+      edicoesList,
+      setEdicao,
+      listEdicao,
+      getEdicaoById,
+      getEdicaoByYear,
+      createEdicao,
+      updateEdicao,
+      updateEdicaoActivate,
+      deleteEdicao,
+      clearEdicao,
+    }),
+    [
+      loadingEdicao,
+      loadingEdicoesList,
+      Edicao,
+      edicoesList,
+      listEdicao,
+      getEdicaoById,
+      getEdicaoByYear,
+      createEdicao,
+      updateEdicao,
+      updateEdicaoActivate,
+      deleteEdicao,
+      clearEdicao,
+    ]
+  );
 
   return (
-    <EdicaoContext.Provider
-      value={{
-        loadingEdicao,
-        loadingEdicoesList,
-        Edicao,
-        edicoesList,
-        setEdicao,
-        listEdicao,
-        getEdicaoById,
-        getEdicaoByYear,
-        createEdicao,
-        updateEdicao,
-        updateEdicaoActivate,
-        deleteEdicao,
-        clearEdicao,
-      }}
-    >
+    <EdicaoContext.Provider value={contextValue}>
       {children}
     </EdicaoContext.Provider>
   );

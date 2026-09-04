@@ -1,15 +1,19 @@
 "use client";
 
-import { useUsers } from "@/hooks/useUsers";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import PasswordEye from "@/components/UI/PasswordEye";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ShieldCheck, ShieldX } from "lucide-react";
+
+import { useUsers } from "@/hooks/useUsers";
 import Button from "@/components/UI/Button";
-import { Campo } from "@/components/UI/Input";
+import { Campo, PasswordInput } from "@/components/UI/Input";
 import { cn } from "@/utils/cn";
 
+/**
+ * Esquema de validação para a redefinição de senha via token.
+ */
 const formAlterarSenhaSchema = z
   .object({
     senha: z
@@ -25,56 +29,11 @@ const formAlterarSenhaSchema = z
 
 type FormAlterarSenhaSchema = z.infer<typeof formAlterarSenhaSchema>;
 
-function CampoSenha({
-  id,
-  label,
-  erro,
-  eye,
-  onToggleEye,
-  registerProps,
-  onChange,
-  placeholder,
-}: {
-  id: string;
-  label: React.ReactNode;
-  erro?: string;
-  eye: boolean;
-  onToggleEye: () => void;
-  registerProps: ReturnType<
-    ReturnType<typeof useForm<FormAlterarSenhaSchema>>["register"]
-  >;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string;
-}) {
-  return (
-    <Campo label={label} htmlFor={id} erro={erro} className="mb-1">
-      <div className="flex flex-row items-center gap-2">
-        <div className="flex flex-1 flex-row items-center gap-1 rounded-md border border-[#e4e4e4] px-1">
-          <input
-            type={eye ? "text" : "password"}
-            id={id}
-            placeholder={placeholder}
-            className="flex-1 border-0 bg-transparent px-2 py-2.5 text-sm outline-none placeholder:text-[#ADB5BD]"
-            {...registerProps}
-            onChange={onChange}
-          />
-          <button
-            type="button"
-            className="cursor-pointer border-0 bg-transparent p-1"
-            onClick={onToggleEye}
-          >
-            <PasswordEye color={eye ? "blue" : "black"} />
-          </button>
-        </div>
-      </div>
-    </Campo>
-  );
-}
-
-export function FormAlterarSenha({ params }: { params: { token: string } }) {
+/**
+ * Formulário de Redefinição/Alteração de Senha.
+ */
+export function FormAlterarSenha({ params }: Readonly<{ params: { token: string } }>) {
   const { resetPassword } = useUsers();
-  const [eye1, setEye1] = useState(false);
-  const [eye2, setEye2] = useState(false);
 
   const {
     register,
@@ -90,11 +49,14 @@ export function FormAlterarSenha({ params }: { params: { token: string } }) {
     number: false,
   });
 
-  const handleFormCadastro = (data: FormAlterarSenhaSchema) => {
+  const handleFormAlterarSenha = (data: FormAlterarSenhaSchema) => {
     resetPassword({ token: params.token, newPassword: data.senha });
   };
 
+  const { onChange: onSenhaChange, ...senhaRegisterProps } = register("senha");
+
   const handleChangeSenha = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSenhaChange(e);
     const value = e.target.value;
     setRequisitos({
       minLength: value.length >= 8,
@@ -110,17 +72,20 @@ export function FormAlterarSenha({ params }: { params: { token: string } }) {
   );
 
   return (
-    <form className="w-full max-w-[583px]" onSubmit={handleSubmit(handleFormCadastro)}>
-      <CampoSenha
-        id="senha"
+    <form className="w-full max-w-[583px]" onSubmit={handleSubmit(handleFormAlterarSenha)}>
+      <Campo
         label={labelObrigatorio("Senha")}
+        htmlFor="senha"
         erro={errors.senha?.message}
-        eye={eye1}
-        onToggleEye={() => setEye1(!eye1)}
-        registerProps={register("senha")}
-        onChange={handleChangeSenha}
-        placeholder="Insira sua senha"
-      />
+        className="mb-1"
+      >
+        <PasswordInput
+          id="senha"
+          placeholder="Insira sua nova senha"
+          {...senhaRegisterProps}
+          onChange={handleChangeSenha}
+        />
+      </Campo>
 
       <div className="mb-1 mt-3">
         <p className="mb-1 text-xs font-semibold text-[#555555]">
@@ -135,36 +100,38 @@ export function FormAlterarSenha({ params }: { params: { token: string } }) {
             <li
               key={req.text}
               className={cn(
-                "text-xs font-semibold",
+                "text-xs font-semibold flex items-center gap-1 mb-1",
                 req.ok ? "text-success" : "text-error",
               )}
             >
-              <i
-                className={cn(
-                  "bi",
-                  req.ok ? "bi-shield-fill-check" : "bi-shield-fill-x",
-                )}
-              />{" "}
+              {req.ok ? (
+                <ShieldCheck className="h-3.5 w-3.5 inline text-success" aria-hidden="true" />
+              ) : (
+                <ShieldX className="h-3.5 w-3.5 inline text-error" aria-hidden="true" />
+              )}
               {req.text}
             </li>
           ))}
         </ul>
       </div>
 
-      <CampoSenha
-        id="confirmaSenha"
+      <Campo
         label={labelObrigatorio("Confirmação de senha")}
+        htmlFor="confirmaSenha"
         erro={errors.confirmaSenha?.message}
-        eye={eye2}
-        onToggleEye={() => setEye2(!eye2)}
-        registerProps={register("confirmaSenha")}
-        placeholder="Insira sua senha novamente"
-      />
+        className="mb-1"
+      >
+        <PasswordInput
+          id="confirmaSenha"
+          placeholder="Insira sua senha novamente"
+          {...register("confirmaSenha")}
+        />
+      </Campo>
 
       <div className="mx-auto mt-4 flex justify-center">
         <Button
           type="submit"
-          className="bg-brand-orange text-xl font-bold hover:bg-brand-orange"
+          className="bg-brand-orange text-base font-bold hover:bg-brand-orange px-8"
         >
           Enviar
         </Button>

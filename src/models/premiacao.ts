@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { Submission } from "@/models/submission";
 
-type PremiacaoCategoriaProps = {
+export type PremiacaoCategoriaProps = {
   categoria: string;
   searchValue: string;
   premiacoes: Premiacoes[];
   avaliadores: AuthorOrEvaluator[];
 };
 
-interface AuthorOrEvaluator {
+export interface AuthorOrEvaluator {
   id: string;
   name: string;
   email: string;
@@ -19,14 +20,14 @@ interface AuthorOrEvaluator {
   isActive?: boolean;
 }
 
-interface AvaliadorParams {
+export interface AvaliadorParams {
   eventEditionId: string;
   panelists: {
     userId: string;
   }[];
 }
 
-interface PanelistsParams {
+export interface PanelistsParams {
   id: string;
   name: string;
   email: string;
@@ -39,7 +40,7 @@ interface PanelistsParams {
   isVerified?: boolean;
 }
 
-interface Premiacoes {
+export interface Premiacoes {
   id: string;
   presentationBlockId: string;
   positionWithinBlock: number;

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useEffect, useState } from "react";
 
 import { useSweetAlert } from "@/hooks/useAlert";
+import { UserLogin, UserProfile } from "@/models/user";
 import {
   getUserLocalStorage,
   LoginRequest,
@@ -11,6 +12,7 @@ import {
   setUserLocalStorage,
   validateToken,
 } from "./util";
+import { getErrorMessage } from "@/utils/error";
 import api from "../../utils/api";
 
 export const AuthContext = createContext<IContextLogin>({} as IContextLogin);
@@ -34,28 +36,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkTokenValidity = async () => {
       const userSigned = getUserLocalStorage();
-      
+
       if (userSigned) {
         const isValid = await validateToken();
-        
+
         if (isValid) {
           setUser(JSON.parse(userSigned));
         } else {
-          // Token expirado ou inválido
+          // Token expirado ou inválido: limpa o storage silenciosamente
           localStorage.clear();
           setUser(null);
-          
-          showAlert({
-            icon: "warning",
-            title: "Sessão Expirada",
-            text: "Sua sessão expirou. Por favor, faça login novamente.",
-            confirmButtonText: "Ok",
-          });
-          
-          router.push("/login");
         }
       }
-      
+
       setIsValidatingToken(false);
     };
 
@@ -98,15 +91,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       api.defaults.headers.common["Authorization"] = `Bearer ${payload.token}`;
       setTokenLocalStorage(payload.token);
       setUserLocalStorage(payload.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setUser(null);
 
       showAlert({
         icon: "error",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
+        text: getErrorMessage(
+          err,
           "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde!",
+        ),
         confirmButtonText: "Retornar",
       });
     }

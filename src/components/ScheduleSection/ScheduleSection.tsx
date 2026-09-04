@@ -10,53 +10,35 @@ import { useEffect, useRef, useState } from "react";
 
 dayjs.extend(utc);
 
-import PresentationModal from "../Modals/ModalApresentação/PresentationModal";
-import Modal from "../UI/Modal/Modal";
-
 import { useEdicao } from "@/hooks/useEdicao";
-import { useSession } from "@/hooks/useSession";
+import { useSessoesQuery } from "@/features/sessoes/hooks/useSessoesQuery";
+import { useRoomsQuery } from "@/features/sessoes/hooks/useRoomsQuery";
 
 import { useActiveEdition } from "@/hooks/useActiveEdition";
 import { cn } from "@/utils/cn";
 import IndicadorDeCarregamento from "../IndicadorDeCarregamento/IndicadorDeCarregamento";
 import LinhaAgenda from "./LinhaAgenda";
+import { Presentation } from "@/models/presentation";
+import { PresentationBlock } from "@/models/session";
 
 export default function ScheduleSection() {
-  const {
-    listSessions,
-    sessoesList,
-    listRooms,
-    roomsList,
-    loadingRoomsList,
-    loadingSessoesList,
-  } = useSession();
   const { Edicao } = useEdicao();
   const { selectEdition } = useActiveEdition();
   const { ensureActiveEdition } = useActiveEdition();
 
+  const { sessoes, isLoading: isSessoesLoading } = useSessoesQuery(Edicao?.id);
+  const { data: rooms, isLoading: isRoomsLoading } = useRoomsQuery(Edicao?.id);
+  const roomsList = rooms ?? [];
+
   const [dates, setDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const openModal = useRef<HTMLButtonElement | null>(null);
-  const [modalContent, setModalContent] = useState<Presentation>(
-    {} as Presentation,
-  );
 
-  const isLoading = loadingRoomsList || loadingSessoesList;
+  const isLoading = isRoomsLoading || isSessoesLoading;
 
   useEffect(() => {
     dayjs.locale("pt-br");
-  }, []);
 
-  useEffect(() => {
-    if (!Edicao?.id) {
-      ensureActiveEdition?.();
-    }
-  }, [Edicao?.id, ensureActiveEdition]);
-
-  useEffect(() => {
-    if (Edicao?.id && Edicao?.startDate && Edicao?.endDate) {
-      listSessions(Edicao?.id);
-
+    if (Edicao?.startDate && Edicao?.endDate) {
       const generatedDates = generateDatesBetween(
         Edicao.startDate,
         Edicao.endDate,
@@ -64,19 +46,25 @@ export default function ScheduleSection() {
 
       setDates(generatedDates);
 
-      const today = dayjs().format("YYYY-MM-DD");
+      const today = dayjs.utc().format("YYYY-MM-DD");
       const todayInsideEvent = generatedDates.includes(today);
 
       setSelectedDate(todayInsideEvent ? today : generatedDates[0]);
     }
+  }, [Edicao?.id, Edicao?.startDate, Edicao?.endDate, selectEdition.year]);
 
-    if (Edicao?.id) listRooms(Edicao?.id);
-  }, [Edicao?.id, selectEdition]);
+  const hasAttemptedActiveRef = useRef(false);
+  useEffect(() => {
+    if (!Edicao?.id && !hasAttemptedActiveRef.current) {
+      hasAttemptedActiveRef.current = true;
+      ensureActiveEdition?.();
+    }
+  }, [Edicao?.id, ensureActiveEdition]);
 
   function generateDatesBetween(startDate: string, endDate: string): string[] {
     const datesArray: string[] = [];
-    let currentDate = dayjs(startDate);
-    const finalDate = dayjs(endDate);
+    let currentDate = dayjs.utc(startDate).startOf("day");
+    const finalDate = dayjs.utc(endDate).startOf("day");
 
     while (!currentDate.isAfter(finalDate, "day")) {
       datesArray.push(currentDate.format("YYYY-MM-DD"));
@@ -89,18 +77,14 @@ export default function ScheduleSection() {
     setSelectedDate(date);
   }
 
-  function corrigeData(data: string): { dia: number; mes: number; ano: number } {
-    const arrayData = data.split("-");
-    return {
-      ano: parseInt(arrayData[0], 10),
-      mes: parseInt(arrayData[1], 10) - 1,
-      dia: parseInt(arrayData[2], 10),
-    };
-  }
-
   function formatDateLabel(date: string) {
-    const { ano, mes, dia } = corrigeData(date);
-    return new Date(ano, mes, dia).toLocaleDateString("pt-BR", {
+    if (!date) return "";
+    const parts = date.split("-").map(Number);
+    if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) {
+      return date;
+    }
+    const [ano, mes, dia] = parts;
+    return new Date(ano, mes - 1, dia).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "long",
     });
@@ -148,23 +132,26 @@ export default function ScheduleSection() {
 
                 <div className="ml-6 flex flex-col gap-5 border-l-[3px] border-brand-blue/30 py-4 pl-8 max-md:ml-6 max-md:px-2 max-md:py-1">
                   {(() => {
-                    const filteredSessions = sessoesList
+                    const filteredSessions = sessoes
                       ?.filter(
                         (sessao) =>
                           dayjs.utc(sessao.startTime).format("YYYY-MM-DD") ===
-                          dayjs(selectedDate).format("YYYY-MM-DD"),
+                          selectedDate,
                       )
                       ?.filter(
                         (sessao) =>
                           sessao.type === "General" || sessao.roomId === room.id,
-                      )
-                      ?.toSorted(
-                        (a, b) =>
-                          new Date(a.startTime).getTime() -
-                          new Date(b.startTime).getTime(),
                       );
 
-                    const groupedByTitle = filteredSessions
+                    const sortedSessions = filteredSessions
+                      ? [...filteredSessions].sort(
+                          (a, b) =>
+                            new Date(a.startTime).getTime() -
+                            new Date(b.startTime).getTime(),
+                        )
+                      : [];
+
+                    const groupedByTitle = sortedSessions
                       ?.filter(
                         (sessao) =>
                           sessao.type !== "General" &&
@@ -178,12 +165,12 @@ export default function ScheduleSection() {
                           }
                           return acc;
                         },
-                        {} as Record<string, Sessao[]>,
+                        {} as Record<string, PresentationBlock[]>,
                       );
 
                     return (
                       <>
-                        {filteredSessions?.map((item, index) => {
+                        {sortedSessions?.map((item, index) => {
                           if (item.type === "General") {
                             return (
                               <div
@@ -210,11 +197,11 @@ export default function ScheduleSection() {
                                   {item.title}
                                 </h2>
                                 {group.flatMap((sess, sessIndex) =>
-                                  sess.presentations
-                                    ?.toSorted(
+                                  (sess.presentations ? [...sess.presentations] : [])
+                                    .sort(
                                       (a, b) =>
-                                        a.positionWithinBlock -
-                                        b.positionWithinBlock,
+                                        (a.positionWithinBlock ?? 0) -
+                                        (b.positionWithinBlock ?? 0),
                                     )
                                     .map((pres: Presentation) => (
                                       <div
@@ -237,10 +224,10 @@ export default function ScheduleSection() {
                     );
                   })()}
 
-                  {!sessoesList?.some(
+                  {!sessoes?.some(
                     (sessao) =>
                       dayjs.utc(sessao.startTime).format("YYYY-MM-DD") ===
-                        dayjs(selectedDate).format("YYYY-MM-DD") &&
+                        selectedDate &&
                       sessao.roomId === room.id,
                   ) && (
                     <div className="flex flex-col items-center gap-4 py-12 text-[#777]">
@@ -260,11 +247,6 @@ export default function ScheduleSection() {
             ))}
           </div>
         )}
-
-        <Modal
-          content={<PresentationModal props={modalContent} />}
-          reference={openModal}
-        />
       </div>
     </div>
   );

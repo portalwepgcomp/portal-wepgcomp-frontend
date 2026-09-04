@@ -8,11 +8,14 @@ import { useForm } from "react-hook-form";
 
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { useSubmissionsQuery } from "@/features/apresentacoes/hooks/useSubmissionsQuery";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useEdicao } from "@/hooks/useEdicao";
-import { SubmissionContext, useSubmission } from "@/hooks/useSubmission";
+import { useSubmission } from "@/hooks/useSubmission";
 import { useSubmissionFile } from "@/hooks/useSubmissionFile";
 import { UserContext } from "@/hooks/useUsers";
+import { unwrapPaginatedList } from "@/types/api";
+import { Submission, SubmissionParams } from "@/models/submission";
 import { formatLink } from "@/utils/formatLink";
 import { registrarErro } from "@/utils/logError";
 import {
@@ -31,12 +34,19 @@ export function useFormCadastroApresentacao() {
   const { showAlert } = useSweetAlert();
   const { user } = useContext(AuthContext);
   const { createSubmission, updateSubmissionById, submission, setSubmission } =
-    useContext(SubmissionContext);
+    useSubmission();
   const { getAdvisors, advisors, getUsers, userList, loadingUserList } =
     useContext(UserContext);
   const { sendFile, deleteFile } = useSubmissionFile();
   const { Edicao } = useEdicao();
-  const { submissionList } = useSubmission();
+  const eventEditionId = Edicao?.id || getEventEditionIdStorage() || undefined;
+  const { data: submissoes } = useSubmissionsQuery(
+    eventEditionId ? { eventEditionId } : undefined,
+  );
+  const submissoesList = useMemo<Submission[]>(
+    () => unwrapPaginatedList(submissoes) as Submission[],
+    [submissoes],
+  );
 
   const [professoresCarregou, setProfessoresCarregou] = useState(false);
   const [arquivo, setArquivo] = useState<File | null>(null);
@@ -89,12 +99,12 @@ export function useFormCadastroApresentacao() {
       .map((u) => ({
         ...u,
         displayLabel: `${u.name} | ${
-          submissionList.some((sub) => sub.mainAuthorId === u.id)
+          submissoesList.some((sub) => sub.mainAuthorId === u.id)
             ? "Possui apresentação"
             : "Não possui apresentação"
         }`,
       }));
-  }, [userList, submissionList]);
+  }, [userList, submissoesList]);
 
   useEffect(() => {
     if (!professoresCarregou) {
@@ -125,23 +135,29 @@ export function useFormCadastroApresentacao() {
     return {
       ...submission,
       eventEditionId: getEventEditionIdStorage() ?? "",
-      mainAuthorId: data.apresentador || user?.id,
+      mainAuthorId: data.apresentador || user?.id || "",
       title: data.titulo,
       abstractText: data.resumo,
       advisorId: data.orientador as UUID,
       coAdvisor: data.coorientador || "",
-      dateSuggestion: data.data ? new Date(data.data) : undefined,
       pdfFile: arquivoPdf,
       phoneNumber: data.celular,
       linkHostedFile: formatLink(data.linkApresentacao || ""),
     };
   };
 
-  const processarSubmissao = async (dadosSubmissao: any): Promise<boolean> => {
+  const processarSubmissao = async (
+    dadosSubmissao: SubmissionParams,
+  ): Promise<boolean> => {
     setCarregandoEnvio(true);
     try {
       if (submission?.id) {
-        return await updateSubmissionById(submission.id, dadosSubmissao);
+        const sucesso = await updateSubmissionById(submission.id, dadosSubmissao);
+        if (sucesso) {
+          const destino = user?.level === "Default" ? "/minha-apresentacao" : "/apresentacoes";
+          roteador.push(destino);
+        }
+        return sucesso;
       } else {
         const sucesso = await createSubmission(dadosSubmissao);
         if (sucesso && user?.profile === "Presenter") {
@@ -217,7 +233,7 @@ export function useFormCadastroApresentacao() {
       } else {
         throw new Error("Falha ao processar submissão");
       }
-    } catch (e) {
+    } catch (_e) {
       if (arquivoEnviadoKey) {
         await limparArquivoOrfao(arquivoEnviadoKey);
       }

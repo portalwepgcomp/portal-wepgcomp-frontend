@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import {
+  PremiacaoCategoriaProps,
+  Premiacoes,
+  AuthorOrEvaluator,
+} from "@/models/premiacao";
 
 export default function Premiacao({
   categoria,
@@ -45,7 +50,7 @@ export default function Premiacao({
   );
 
   const cardClass =
-    "flex items-center justify-between rounded-[0.625rem] border-[3px] border-brand-accent p-3";
+    "flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md";
 
   return (
     <div className="mb-5 grid gap-3">

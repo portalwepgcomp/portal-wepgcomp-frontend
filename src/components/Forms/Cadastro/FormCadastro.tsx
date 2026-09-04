@@ -6,13 +6,19 @@ import { z } from "zod";
 
 import { useUsers } from "@/hooks/useUsers";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ProfileType, SubprofileType, RegisterUserParams } from "@/models/user";
 
 import Loading from "@/components/LoadingPage";
 import Button from "@/components/UI/Button";
-import { Campo, Input } from "@/components/UI/Input";
-import PasswordEye from "@/components/UI/PasswordEye";
+import { Campo, Input, PasswordInput } from "@/components/UI/Input";
+import { Info, ShieldCheck, ShieldX } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { maskCPF } from "@/lib/masks";
 
+/**
+ * Esquema de validação para o cadastro de novos usuários no portal.
+ * Valida regras específicas para cada perfil (Apresentador, Professor, Ouvinte).
+ */
 const formCadastroSchema = z
   .object({
     nome: z
@@ -117,53 +123,10 @@ const labelObrigatorio = (texto: string) => (
 const radioLabel =
   "flex cursor-pointer items-center gap-2 text-sm font-bold text-foreground";
 
-function CampoSenha({
-  id,
-  label,
-  erro,
-  eye,
-  onToggleEye,
-  registerProps,
-  value,
-  onChange,
-  placeholder,
-}: {
-  id: string;
-  label: React.ReactNode;
-  erro?: string;
-  eye: boolean;
-  onToggleEye: () => void;
-  registerProps: ReturnType<ReturnType<typeof useForm<FormCadastroSchema>>["register"]>;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string;
-}) {
-  return (
-    <Campo label={label} htmlFor={id} erro={erro} className="mb-1">
-      <div className="flex flex-row items-center gap-1 rounded-md border border-[#e4e4e4] px-1">
-        <input
-          type={eye ? "text" : "password"}
-          id={id}
-          placeholder={placeholder}
-          className="flex-1 border-0 bg-transparent px-2 py-2.5 text-sm outline-none placeholder:text-[#ADB5BD]"
-          {...registerProps}
-          value={value}
-          onChange={onChange}
-        />
-        <button
-          type="button"
-          className="cursor-pointer border-0 bg-transparent p-1"
-          onClick={onToggleEye}
-          aria-label={eye ? "Ocultar senha" : "Mostrar senha"}
-        >
-          <PasswordEye color={eye ? "blue" : "black"} />
-        </button>
-      </div>
-    </Campo>
-  );
-}
-
-export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
+/**
+ * Formulário principal de Cadastro de novos usuários.
+ */
+export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>) {
   const { registerUser } = useUsers();
   const {
     register,
@@ -179,29 +142,17 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
     },
   });
 
-  const [senha, setSenha] = useState("");
   const [requisitos, setRequisitos] = useState({
     minLength: false,
     hasLetter: false,
     number: false,
   });
 
-  const aplicarMascaraCpf = (value: string): string => {
-    const digits = value.replace(/\D/g, "");
-
-    return digits
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-      .replace(/(-\d{2})\d+?$/, "$1");
-  };
-
   const handleMudancaMatricula = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     if (perfil === "ouvinte" && watch("subperfil") === "outro") {
-      const maskedValue = aplicarMascaraCpf(value);
-      setValue("matricula", maskedValue);
+      setValue("matricula", maskCPF(value));
     } else {
       const numbersOnly = value.replace(/\D/g, "");
       setValue("matricula", numbersOnly);
@@ -255,9 +206,11 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
     registerUser(body as RegisterUserParams);
   };
 
+  const { onChange: onSenhaChange, ...senhaRegisterProps } = register("senha");
+
   const handleChangeSenha = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSenhaChange(e);
     const value = e.target.value;
-    setSenha(value);
     setRequisitos({
       minLength: value.length >= 8,
       hasLetter: /[a-zA-Z]/.test(value),
@@ -274,9 +227,6 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
   const perfil = watch("perfil");
   const subperfil = watch("subperfil");
 
-  const [eye1, setEye1] = useState(false);
-  const [eye2, setEye2] = useState(false);
-
   useEffect(() => {
     setValue("matricula", "");
   }, [perfil, setValue]);
@@ -286,7 +236,7 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
   }
 
   return (
-    <form className="w-full max-w-[680px]" onSubmit={handleSubmit(handleFormCadastro)}>
+    <form className="w-full max-w-[540px]" onSubmit={handleSubmit(handleFormCadastro)}>
       <Campo
         label={labelObrigatorio("Nome completo")}
         htmlFor="nome"
@@ -332,19 +282,28 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
                 "Participantes que irão assistir ou expor no workshop.",
             },
           ].map((opcao) => (
-            <label key={opcao.id} className={radioLabel} htmlFor={opcao.id}>
+            <label
+              key={opcao.id}
+              className={cn(
+                radioLabel,
+                "inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700 hover:text-slate-900",
+              )}
+              htmlFor={opcao.id}
+            >
               <input
                 type="radio"
-                className="h-4 w-4 accent-brand-orange"
+                className="h-4 w-4 accent-brand-orange cursor-pointer"
                 id={opcao.id}
                 {...register("perfil")}
                 value={opcao.value}
               />
-              {opcao.label}
-              <i
-                className="bi bi-info-circle"
-                title={opcao.tooltip}
-              />
+              <span>{opcao.label}</span>
+              <span title={opcao.tooltip} className="inline-flex items-center">
+                <Info
+                  className="h-4 w-4 cursor-pointer text-slate-400 transition hover:text-slate-600"
+                  aria-label={opcao.tooltip}
+                />
+              </span>
             </label>
           ))}
         </div>
@@ -436,17 +395,19 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
         />
       </Campo>
 
-      <CampoSenha
-        id="senha"
+      <Campo
         label={labelObrigatorio("Senha")}
+        htmlFor="senha"
         erro={errors.senha?.message}
-        eye={eye1}
-        onToggleEye={() => setEye1(!eye1)}
-        registerProps={register("senha")}
-        value={senha}
-        onChange={handleChangeSenha}
-        placeholder="Insira sua senha"
-      />
+        className="mb-1"
+      >
+        <PasswordInput
+          id="senha"
+          placeholder="Insira sua senha"
+          {...senhaRegisterProps}
+          onChange={handleChangeSenha}
+        />
+      </Campo>
 
       <div className="mb-1 mt-3">
         <p className="mb-1 text-xs font-semibold text-[#555555]">
@@ -465,27 +426,29 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
                 req.ok ? "text-success" : "text-error",
               )}
             >
-              <i
-                className={cn(
-                  "bi",
-                  req.ok ? "bi-shield-fill-check" : "bi-shield-fill-x",
-                )}
-              />{" "}
+              {req.ok ? (
+                <ShieldCheck className="h-3.5 w-3.5 inline mr-1 text-success" aria-hidden="true" />
+              ) : (
+                <ShieldX className="h-3.5 w-3.5 inline mr-1 text-error" aria-hidden="true" />
+              )}
               {req.text}
             </li>
           ))}
         </ul>
       </div>
 
-      <CampoSenha
-        id="confirmaSenha"
+      <Campo
         label={labelObrigatorio("Confirmação de senha")}
+        htmlFor="confirmaSenha"
         erro={errors.confirmaSenha?.message}
-        eye={eye2}
-        onToggleEye={() => setEye2(!eye2)}
-        registerProps={register("confirmaSenha")}
-        placeholder="Insira sua senha novamente"
-      />
+        className="mb-1"
+      >
+        <PasswordInput
+          id="confirmaSenha"
+          placeholder="Insira sua senha novamente"
+          {...register("confirmaSenha")}
+        />
+      </Campo>
 
       <div className="mx-auto mt-2 flex w-full max-[1000px]:justify-center">
         <Button

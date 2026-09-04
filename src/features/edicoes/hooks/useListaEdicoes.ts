@@ -1,43 +1,43 @@
 "use client";
 
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
-import { useModal } from "@/context/ModalProvider";
 import { useEdicao } from "@/hooks/useEdicao";
 import { edicaoApi } from "@/services/edicao";
+import type { Edicao as EdicaoType } from "@/models/edicao";
+import { unwrapPaginatedList, getPaginationMeta, PaginatedResponse } from "@/types/api";
 
 /**
  * Estado + ações da listagem de edições do evento.
  *
- * Lista via React Query (busca server-side). A edição selecionada para editar
- * é mantida localmente e passada ao `ModalEditarEdicao` (que recebe por prop,
- * diferente dos demais modais que leem estado global).
+ * Lista via React Query (busca server-side).
+ * Suporta respostas em array simples ou no envelope PaginatedResponse.
+ * `abrirEdicao` agora navega para a página dedicada `/edicoes/[id]/editar`.
  */
 export function useListaEdicoes() {
   const { deleteEdicao, Edicao } = useEdicao();
-  const { openModal } = useModal();
+  const router = useRouter();
 
   const [busca, setBusca] = useState("");
   const buscaTrim = useDeferredValue(busca).trim();
-  const [edicaoSelecionada, setEdicaoSelecionada] = useState<Edicao | null>(
-    null,
-  );
 
-  const { data, isLoading, refetch } = useQuery<Edicao[]>({
+  const { data, isLoading, refetch } = useQuery<EdicaoType[] | PaginatedResponse<EdicaoType>>({
     queryKey: ["editions", buscaTrim],
     queryFn: () => edicaoApi.listEdicao(buscaTrim || undefined),
   });
 
-  const itens = data ?? [];
+  const itens = useMemo<EdicaoType[]>(
+    () => unwrapPaginatedList(data) as EdicaoType[],
+    [data],
+  );
+
+  const metaPaginacao = useMemo(() => getPaginationMeta(data), [data]);
   const edicaoAtiva = !!Edicao?.isActive;
 
   const abrirEdicao = (id: string) => {
-    const edicao = itens.find((e) => e.id === id);
-    if (edicao) {
-      setEdicaoSelecionada(edicao);
-      openModal("editarEdicaoModal");
-    }
+    router.push(`/edicoes/${id}/editar`);
   };
 
   const excluir = async (id: string) => {
@@ -47,13 +47,14 @@ export function useListaEdicoes() {
 
   return {
     itens,
-    total: itens.length,
+    total: metaPaginacao.total,
+    metaPaginacao,
     isLoading,
     busca,
     setBusca,
     edicaoAtiva,
-    edicaoSelecionada,
     abrirEdicao,
     excluir,
+    recarregar: refetch,
   };
 }

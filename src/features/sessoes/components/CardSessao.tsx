@@ -51,7 +51,7 @@ export default function CardSessao({
   };
 
   return (
-    <div className="flex items-center justify-between rounded-[10px] border-[3px] border-brand-accent max-[980px]:flex-col">
+    <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-md max-[980px]:flex-col">
       <div className="w-full p-4 text-black">
         <h5 className="mb-1 text-xl font-bold text-black">
           {sessao.title || "Sem Título"}

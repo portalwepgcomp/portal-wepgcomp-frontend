@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
+import { Search, Info } from "lucide-react";
 import { cn } from "@/utils/cn";
 import FilterSelect from "./FilterSelect";
 import { opcoesFiltro } from "./constants";
 import type { FiltrosUsuario } from "./constants";
+import { User } from "@/models/user";
 
 interface GerenciarFiltrosProps {
   busca: string;
@@ -16,6 +17,9 @@ interface GerenciarFiltrosProps {
   onToggleInfo: () => void;
 }
 
+/**
+ * Componente de barra de filtros e busca para a listagem e gerenciamento de usuários.
+ */
 export default function GerenciarFiltros({
   busca,
   onBuscaChange,
@@ -24,27 +28,22 @@ export default function GerenciarFiltros({
   onFiltroChange,
   infoVisivel,
   onToggleInfo,
-}: GerenciarFiltrosProps) {
+}: Readonly<GerenciarFiltrosProps>) {
   return (
     <div className="rounded-xl border border-[#e9ecef] bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
       <div className="relative mb-4 flex items-center">
         <input
           type="text"
           className={cn(
-            "flex-1 rounded-lg border-2 border-[#e9ecef] px-4 py-2 text-base transition-[border-color] duration-200",
+            "flex-1 rounded-lg border-2 border-[#e9ecef] px-4 py-2 pr-10 text-base transition-[border-color] duration-200",
             "placeholder:text-[#6c757d] focus:border-[#007bff] focus:outline-none focus:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]",
           )}
           placeholder="Pesquise pelo nome ou e-mail do usuário"
           onChange={(e) => onBuscaChange(e.target.value)}
           value={busca}
         />
-        <div className="absolute right-2 z-10 flex items-center justify-center text-[#6c757d]">
-          <Image
-            src="/assets/images/search.svg"
-            alt=""
-            height={24}
-            width={24}
-          />
+        <div className="pointer-events-none absolute right-3 z-10 flex items-center justify-center text-[#6c757d]">
+          <Search className="h-5 w-5 text-muted" aria-hidden="true" />
         </div>
       </div>
 
@@ -84,9 +83,7 @@ export default function GerenciarFiltros({
           aria-label="Mostrar informações"
           aria-pressed={infoVisivel}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z" />
-          </svg>
+          <Info className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
     </div>

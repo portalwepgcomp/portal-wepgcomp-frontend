@@ -1,4 +1,5 @@
 import axiosInstance from '@/utils/api';
+import { GetSubmissionParams, SubmissionParams } from "@/models/submission";
 
 const baseUrl = "/submission";
 const instance = axiosInstance;

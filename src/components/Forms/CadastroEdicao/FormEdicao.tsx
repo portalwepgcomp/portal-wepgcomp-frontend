@@ -18,6 +18,7 @@ import {
   datepickerClasse,
   formatarEntradaNumerica,
 } from "./formEdicaoSchema";
+import { Edicao } from "@/models/edicao";
 
 const labelObrigatorio = (texto: string) => (
   <>
@@ -47,12 +48,12 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
 
   return (
     <form
-      className="grid w-3/4 grid-cols-1 gap-3"
+      className="grid w-full max-w-2xl grid-cols-1 gap-4 mx-auto"
       onSubmit={handleSubmit}
       id="form-edicao"
     >
       <Campo
-        label={<span className="text-xl">{labelObrigatorio("Nome do evento")}</span>}
+        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Nome do evento")}</span>}
         htmlFor="nomeEvento"
         erro={errors.titulo?.message}
         className="mb-1"
@@ -67,7 +68,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <Campo
-        label={<span className="text-xl">{labelObrigatorio("Descrição do evento")}</span>}
+        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Descrição do evento")}</span>}
         htmlFor="descricao"
         erro={errors.descricao?.message}
         className="mb-1"
@@ -83,7 +84,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
 
       <Campo
         label={
-          <span className="text-xl">
+          <span className="text-sm font-semibold text-slate-700">
             {labelObrigatorio("Data de início e fim do evento")}
           </span>
         }
@@ -140,7 +141,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <Campo
-        label={<span className="text-xl">{labelObrigatorio("Local do evento")}</span>}
+        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Local do evento")}</span>}
         htmlFor="local"
         erro={errors.local?.message}
         className="mb-1"
@@ -155,7 +156,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <Campo
-        label={<span className="text-xl">Sala(s) do evento</span>}
+        label={<span className="text-sm font-semibold text-slate-700">Sala(s) do evento</span>}
         erro={errors.salas?.message}
         className="mb-1"
       >
@@ -190,7 +191,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
 
       <Campo
         label={
-          <span className="text-xl">{labelObrigatorio("Comissão organizadora")}</span>
+          <span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Comissão organizadora")}</span>
         }
         erro={errors.comissao?.message}
         className="mb-1"
@@ -212,11 +213,11 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <div className="flex flex-col justify-start">
-        <div className="text-2xl">Sessões e apresentações</div>
+        <div className="text-lg font-bold text-slate-800">Sessões e apresentações</div>
         <div className="mt-3 flex flex-col justify-start gap-3">
           <Campo
             label={
-              <span className="text-xl">{labelObrigatorio("Número de sessões")}</span>
+              <span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Número de sessões")}</span>
             }
             htmlFor="quantidadeSessão"
             erro={errors.sessoes?.message}
@@ -238,7 +239,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
           </Campo>
           <Campo
             label={
-              <span className="text-xl">
+              <span className="text-sm font-semibold text-slate-700">
                 {labelObrigatorio("Duração da Apresentação (minutos)")}
               </span>
             }
@@ -265,7 +266,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
 
       <Campo
         label={
-          <span className="text-xl">
+          <span className="text-sm font-semibold text-slate-700">
             {labelObrigatorio("Texto da Chamada para Submissão de Trabalhos")}
           </span>
         }
@@ -284,7 +285,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
 
       <Campo
         label={
-          <span className="text-xl">
+          <span className="text-sm font-semibold text-slate-700">
             {labelObrigatorio("Data limite para a submissão")}
           </span>
         }
@@ -322,7 +323,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
           type="submit"
           disabled={!Edicao?.isActive || !isValid}
           larguraTotal
-          className="bg-brand-orange text-xl hover:bg-brand-orange"
+          className="bg-brand-orange text-base font-bold hover:bg-brand-orange"
         >
           Salvar
         </Button>

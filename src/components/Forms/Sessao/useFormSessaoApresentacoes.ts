@@ -3,16 +3,21 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 import { useEdicao } from "@/hooks/useEdicao";
 import { useSession } from "@/hooks/useSession";
-import { useSubmission } from "@/hooks/useSubmission";
 import { useUsers } from "@/hooks/useUsers";
+import { useRoomsQuery } from "@/features/sessoes/hooks/useRoomsQuery";
+import { useSubmissionsQuery } from "@/features/apresentacoes/hooks/useSubmissionsQuery";
+import { unwrapPaginatedList } from "@/types/api";
+import { Submission } from "@/models/submission";
 import { formatOptions } from "@/utils/formatOptions";
 import {
   formSessaoApresentacoesSchema,
   type FormSessaoApresentacoesSchema,
 } from "./formSessaoApresentacoesSchema";
+import { PresentationBlockParams } from "@/models/session";
 
 export interface ApresentacaoOpt {
   value: string;
@@ -29,11 +34,18 @@ export interface ApresentacaoOpt {
 export function useFormSessaoApresentacoes(
   disabledIntervals: { start: Date; end: Date }[],
 ) {
-  const { createSession, updateSession, sessao, setSessao, roomsList } =
-    useSession();
+  const { createSession, updateSession, sessao, setSessao } = useSession();
   const { userList } = useUsers();
-  const { submissionList } = useSubmission();
   const { Edicao } = useEdicao();
+  const router = useRouter();
+
+  const eventEditionId = sessao?.eventEditionId || Edicao?.id;
+  const { data: rooms } = useRoomsQuery(eventEditionId);
+  const { data: submissoes } = useSubmissionsQuery(
+    eventEditionId
+      ? { eventEditionId, withouPresentation: true }
+      : undefined,
+  );
 
   const defaultValues = sessao?.id
     ? {
@@ -61,16 +73,17 @@ export function useFormSessaoApresentacoes(
     defaultValues,
   });
 
-  const salasOptions = formatOptions(roomsList, "name");
+  const salasOptions = formatOptions(rooms ?? [], "name");
   const avaliadoresOptions = formatOptions(userList, "name");
 
   const apresentacoesOptions = useMemo<ApresentacaoOpt[]>(() => {
-    return (submissionList || []).map((v) => {
+    const lista = unwrapPaginatedList(submissoes) as Submission[];
+    return lista.map((v) => {
       const presenterName = v?.mainAuthor?.name || "Apresentador não informado";
       const title = v?.title || "Título não informado";
       return { value: v.id, label: title, title, presenterName };
     });
-  }, [submissionList]);
+  }, [submissoes]);
 
   const [orderedApresentacoes, setOrderedApresentacoes] = useState<
     ApresentacaoOpt[]
@@ -88,8 +101,8 @@ export function useFormSessaoApresentacoes(
   useEffect(() => {
     if (sessao?.id && sessao?.presentations?.length) {
       const loaded =
-        sessao.presentations
-          .toSorted((a, b) => a.positionWithinBlock - b.positionWithinBlock)
+        [...sessao.presentations]
+          .sort((a, b) => a.positionWithinBlock - b.positionWithinBlock)
           .map((p) => {
             const presenterName =
               p.submission?.mainAuthor?.name || "Apresentador não informado";
@@ -100,7 +113,7 @@ export function useFormSessaoApresentacoes(
               title,
               presenterName,
             };
-          }) || [];
+          });
       syncFormApresentacoes(loaded);
     } else {
       syncFormApresentacoes([]);
@@ -178,13 +191,14 @@ export function useFormSessaoApresentacoes(
       panelists: avaliadores?.length
         ? avaliadores?.map((v) => v.value)
         : undefined,
-    } as SessaoParams;
+    } as PresentationBlockParams;
 
     if (sessao?.id) {
       updateSession(sessao.id, Edicao.id, body).then((status) => {
         if (status) {
           reset();
           setSessao(null);
+          router.push("/sessoes");
         }
       });
       return;
@@ -194,6 +208,7 @@ export function useFormSessaoApresentacoes(
       if (status) {
         reset();
         setSessao(null);
+        router.push("/sessoes");
       }
     });
   };

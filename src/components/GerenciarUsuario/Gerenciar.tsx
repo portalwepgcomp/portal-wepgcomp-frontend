@@ -1,7 +1,6 @@
 "use client";
 
 import LoadingPage from "../LoadingPage";
-import ModalCadastroProfessor from "../Modals/ModalCadastroProfessor/ModalCadastroProfessor";
 import GerenciarFiltros from "./GerenciarFiltros";
 import GerenciarInfoCards from "./GerenciarInfoCards";
 import GerenciarListaVazia from "./GerenciarListaVazia";
@@ -31,7 +30,6 @@ export default function Gerenciar() {
     promoteToSuperadmin,
     demoteUser,
     deleteUser,
-    recarregarUsuarios,
   } = useGerenciarUsuarios();
 
   const handleFiltroChange = (tipo: keyof FiltrosUsuario, valor: string) => {
@@ -87,10 +85,6 @@ export default function Gerenciar() {
           <GerenciarListaVazia comFiltros={temFiltros} />
         )}
       </div>
-
-      {currentUser?.level === "Superadmin" && (
-        <ModalCadastroProfessor onSuccess={recarregarUsuarios} />
-      )}
     </div>
   );
 }

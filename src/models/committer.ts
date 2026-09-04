@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-interface Committer {
+export interface Committer {
     id: string,
     eventEditionId: string,
     userId: string,
