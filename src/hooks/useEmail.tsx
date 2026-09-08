@@ -1,9 +1,10 @@
-// contexts/EmailContext.tsx
 "use client";
 
-import { createContext, useCallback, useContext, useState, ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from "react";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { emailApi } from "@/services/emailApi";
+import { ProfileType, RoleType, SubprofileType } from "@/models/user";
+import { getErrorMessage } from "@/utils/error";
 
 interface SendGroupEmailParams {
   subject: string;
@@ -51,11 +52,8 @@ export const EmailProvider = ({ children }: EmailProviderProps) => {
         });
 
         return response;
-      } catch (err: any) {
-        const errorMessage =
-          err.response?.data?.message.message ||
-          err.message ||
-          "Ocorreu um erro ao enviar o e-mail.";
+      } catch (err: unknown) {
+        const errorMessage = getErrorMessage(err, "Ocorreu um erro ao enviar o e-mail.");
 
         showAlert({
           icon: "error",
@@ -71,13 +69,16 @@ export const EmailProvider = ({ children }: EmailProviderProps) => {
     [showAlert]
   );
 
+  const contextValue = useMemo(
+    () => ({
+      sendGroupEmail,
+      sendingEmail,
+    }),
+    [sendGroupEmail, sendingEmail]
+  );
+
   return (
-    <EmailContext.Provider
-      value={{
-        sendGroupEmail,
-        sendingEmail,
-      }}
-    >
+    <EmailContext.Provider value={contextValue}>
       {children}
     </EmailContext.Provider>
   );

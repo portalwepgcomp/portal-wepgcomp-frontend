@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-interface EvaluationParams{
+export interface EvaluationParams{
     userId?: string;
     submissionId: string;
     evaluationCriteriaId: string;
@@ -7,13 +6,13 @@ interface EvaluationParams{
     comments?: string;
 }
 
-interface Evaluation extends EvaluationParams{
+export interface Evaluation extends EvaluationParams{
     id?: string;
     email?: string;
     name?: string;
 }
 
-interface EvaluationCriteriaParams{
+export interface EvaluationCriteriaParams{
     id?: string;
     eventEditionId: string;
     title: string;
@@ -21,7 +20,7 @@ interface EvaluationCriteriaParams{
     weightRadio: number | null;
 }
 
-interface EvaluationCriteria extends EvaluationCriteriaParams{
+export interface EvaluationCriteria extends EvaluationCriteriaParams{
     createdAt: Date;
     updatedAt: Date;
 }

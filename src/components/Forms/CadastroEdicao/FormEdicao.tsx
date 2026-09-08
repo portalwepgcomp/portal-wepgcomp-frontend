@@ -1,334 +1,97 @@
 "use client";
-import { useContext, useEffect, useState } from "react";
+
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { Controller } from "react-hook-form";
 import { startOfYear, endOfYear } from "date-fns";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { useEdicao } from "@/hooks/useEdicao";
-import { ModalSessaoMock } from "@/mocks/ModalSessoes";
-import "./style.scss";
-import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { useRouter } from "next/navigation";
 import { ptBR } from "date-fns/locale";
-import { UserContext } from "@/hooks/useUsers";
-import { useSweetAlert } from "@/hooks/useAlert";
-import { useCommittee } from "@/hooks/useCommittee";
 import dayjs from "dayjs";
+import Button from "@/components/UI/Button";
+import { Campo, Input } from "@/components/UI/Input";
+import { cn } from "@/utils/cn";
+import { useFormEdicao } from "./useFormEdicao";
+import {
+  bloquearTeclasInvalidas,
+  colarApenasNumeros,
+  datepickerClasse,
+  formatarEntradaNumerica,
+} from "./formEdicaoSchema";
+import { Edicao } from "@/models/edicao";
 
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
+const labelObrigatorio = (texto: string) => (
+  <>
+    {texto} <span className="text-error">*</span>
+  </>
+);
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+registerLocale("pt-BR", ptBR);
 
-const formEdicaoSchema = z.object({
-  titulo: z
-    .string({ invalid_type_error: "Campo Inválido" })
-    .min(1, "Nome do evento é obrigatório!"),
-
-  descricao: z
-    .string({ invalid_type_error: "Campo Inválido" })
-    .min(1, "Descrição do evento é obrigatório!"),
-
-  inicio: z
-    .string({
-      invalid_type_error: "Data de início são obrigatórios!",
-    })
-    .datetime({
-      message: "Data inválida!",
-    }),
-
-  final: z
-    .string({ invalid_type_error: "Data de fim são obrigatórios!" })
-    .datetime({
-      message: "Data inválida!",
-    }),
-
-  local: z
-    .string({ invalid_type_error: "Campo Inválido" })
-    .min(1, "Local do Evento é obrigatório!"),
-
-  salas: z
-    .array(
-      z.object({
-        label: z.string(),
-        value: z.string(),
-      }),
-      { invalid_type_error: "Campo inválido" },
-    )
-    .min(1, "Pelo menos uma sala é obrigatória")
-    .transform((salas) => salas.map((sala) => sala.value)),
-
-  comissao: z
-    .array(
-      z.object({
-        label: z.string(),
-        value: z.string({
-          invalid_type_error: "Campo inválido!",
-        }),
-      }),
-    )
-    .optional(),
-
-  sessoes: z
-    .number({
-      invalid_type_error: "O número de sessões é obrigatório!",
-    })
-    .nonnegative({
-      message: "O número de sessões não pode ser negativo!",
-    })
-    .gt(0, { message: "O número de sessões deve ser maior que 0!" }),
-
-  duracao: z
-    .number({
-      invalid_type_error: "Informar a duração é obrigatório!",
-    })
-    .nonnegative({
-      message: "A duração não pode ser negativa!",
-    })
-    .gt(0, { message: "A duração deve ser maior que 0!" }),
-  submissao: z
-    .string({ invalid_type_error: "Campo Inválido" })
-    .min(1, "O texto para submissão é obrigatório!"),
-
-  limite: z
-    .string({
-      invalid_type_error: "A data limite para submissão é obrigatória!",
-    })
-    .datetime({
-      message: "Data inválida!",
-    }),
-});
-type FormEdicaoSchema = z.infer<typeof formEdicaoSchema>;
-
-interface FormEdicao {
-  edicaoData?: any;
+interface FormEdicaoProps {
+  edicaoData?: Edicao | null;
 }
 
-export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
-  const { showAlert } = useSweetAlert();
-  const { createEdicao, updateEdicao, Edicao } = useEdicao();
-  const { getCommitterAll, committerList } = useCommittee();
-  const { user } = useContext(AuthContext);
-  const { getAdvisors, advisors } = useContext(UserContext);
-  const { getAdmins, admins } = useContext(UserContext);
-  const [advisorsLoaded, setAdvisorsLoaded] = useState(false);
-  const [adminsLoaded, setAdminsLoaded] = useState(false);
-  const [salaInputValue, setSalaInputValue] = useState("");
-  const [avaliadoresOptions, setAvaliadoresOptions] = useState<OptionType[]>(
-    [],
-  );
-  const [comissaoOptions, setComissaoOptions] = useState<OptionType[]>([]);
-  const router = useRouter();
-  const { confirmButton } = ModalSessaoMock;
-  registerLocale("pt-BR", ptBR);
-
+export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
   const {
-    register,
-    control,
+    form,
+    Edicao,
+    comissaoOptions,
+    salaInputValue,
+    setSalaInputValue,
     handleSubmit,
-    setValue,
-    formState: { errors, isValid },
-  } = useForm<FormEdicaoSchema>({
-    resolver: zodResolver(formEdicaoSchema),
-    mode: "onChange",
-    defaultValues: {
-      inicio: "",
-      final: "",
-      limite: "",
-    },
-  });
+    isValid,
+    errors,
+  } = useFormEdicao({ edicaoData });
 
-  useEffect(() => {
-    if (edicaoData && Object.keys(edicaoData).length) {
-      setValue("titulo", edicaoData.name);
-      setValue("descricao", edicaoData.description);
-      setValue("inicio", edicaoData.startDate);
-      setValue("final", edicaoData.endDate);
-      setValue("local", edicaoData.location);
-      const salasFormatadas =
-        edicaoData.roomName?.map((nomeSala) => ({
-          label: nomeSala,
-          value: nomeSala,
-        })) || [];
-      setValue("salas", salasFormatadas);
-      setValue(
-        "comissao",
-        committerList
-          ?.filter((value) => value.role === "OrganizingCommittee")
-          ?.map((v) => {
-            return { value: v.userId, label: v.userName };
-          }),
-      );
-      setValue("duracao", edicaoData.presentationDuration);
-      setValue("sessoes", edicaoData.presentationsPerPresentationBlock);
-      setValue("submissao", edicaoData.callForPapersText);
-      setValue("limite", edicaoData.submissionDeadline);
-    }
-  }, [committerList]);
-
-  useEffect(() => {
-    if (!advisorsLoaded) {
-      getAdvisors();
-      setAdvisorsLoaded(true);
-    }
-  }, [advisorsLoaded, getAdvisors]);
-
-  useEffect(() => {
-    if (!adminsLoaded) {
-      getAdmins();
-      setAdminsLoaded(true);
-    }
-  }, [adminsLoaded, getAdmins]);
-
-  const handleFormEdicao = async (data: FormEdicaoSchema) => {
-    const {
-      titulo,
-      descricao,
-      inicio,
-      final,
-      local,
-      salas,
-      comissao,
-      sessoes,
-      duracao,
-      submissao,
-      limite,
-    } = data;
-
-    if (!user) {
-      showAlert({
-        icon: "error",
-        text: "Você precisa estar logado para realizar a submissão.",
-        confirmButtonText: "Retornar",
-      });
-
-      return;
-    }
-
-    const body = {
-      ...edicaoData,
-      name: titulo,
-      description: descricao,
-      location: local,
-      roomName: salas,
-      coordinatorId: user?.id,
-      organizingCommitteeIds: comissao?.map((v) => v.value) || [],
-      itSupportIds: [],
-      administrativeSupportIds: [],
-      communicationIds: [],
-      presentationDuration: duracao,
-      presentationsPerPresentationBlock: sessoes,
-      callForPapersText: submissao,
-      startDate: inicio,
-      submissionDeadline: limite,
-      endDate: final,
-    } as EdicaoParams;
-    if (edicaoData?.id) {
-      updateEdicao(edicaoData?.id, body);
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    } else {
-      const status = await createEdicao(body);
-
-      if (status) {
-        router.push("/home");
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (advisors.length > 0) {
-      const users = advisors.map((v) => ({
-        value: v.id ?? "",
-        label: v.name ?? "",
-      }));
-      setAvaliadoresOptions(users);
-    }
-  }, [advisors]);
-
-  useEffect(() => {
-    if (admins.length > 0) {
-      const users = admins.map((v) => ({
-        value: v.id ?? "",
-        label: v.name ?? "",
-      }));
-      setComissaoOptions(users);
-    }
-  }, [admins]);
-
-  useEffect(() => {
-    if (edicaoData?.id) {
-      getCommitterAll(edicaoData?.id);
-    }
-  }, [edicaoData]);
-
-  const onInvalid = (errors) => console.error(errors);
-
-  const bloquearTeclasInvalidas = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    const blockedKeys = ["e", "E", "+", "-", ",", "."];
-    if (blockedKeys.includes(e.key)) e.preventDefault();
-  };
-
-  const formatarEntradaNumerica = (e: React.FormEvent<HTMLInputElement>) => {
-    const t = e.currentTarget;
-    const clean = t.value.replace(/\D/g, "").replace(/^0+/, "");
-    t.value = clean;
-  };
-
-  const colarApenasNumeros = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const text = e.clipboardData.getData("text");
-    if (!/^\d+$/.test(text)) e.preventDefault();
-  };
+  const { register, control } = form;
 
   return (
     <form
-      className="row g-3 w-75"
-      onSubmit={handleSubmit(handleFormEdicao, onInvalid)}
+      className="grid w-full max-w-2xl grid-cols-1 gap-4 mx-auto"
+      onSubmit={handleSubmit}
+      id="form-edicao"
     >
-      <div className="col-12 mb-1">
-        <label className="form-label form-title">
-          Nome do evento
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <input
+      <Campo
+        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Nome do evento")}</span>}
+        htmlFor="nomeEvento"
+        erro={errors.titulo?.message}
+        className="mb-1"
+      >
+        <Input
           type="text"
-          className="form-control input-title"
           id="nomeEvento"
           placeholder="WEPGCOMP 202.."
+          className="text-sm"
           {...register("titulo")}
         />
-        <p className="text-danger error-message">{errors.titulo?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label className="form-label form-title">
-          Descrição do evento
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <input
+      <Campo
+        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Descrição do evento")}</span>}
+        htmlFor="descricao"
+        erro={errors.descricao?.message}
+        className="mb-1"
+      >
+        <Input
           type="text"
-          className="form-control input-title"
           id="descricao"
           placeholder="Sobre o WEPGCOMP..."
+          className="text-sm"
           {...register("descricao")}
         />
-        <p className="text-danger error-message">{errors.descricao?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label className="form-label form-title">
-          Data de início e fim do evento
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <div className="d-flex flex-row justify-content-start gap-2 ">
+      <Campo
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Data de início e fim do evento")}
+          </span>
+        }
+        erro={errors.inicio?.message || errors.final?.message}
+        className="mb-1"
+      >
+        <div className="flex flex-row flex-wrap justify-start gap-2">
           <Controller
             name="inicio"
             control={control}
@@ -340,7 +103,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
                 }
                 selected={field.value ? dayjs(field.value).toDate() : null}
                 showIcon
-                className="form-control datepicker"
+                className={datepickerClasse}
                 dateFormat="dd/MM/yyyy"
                 locale="pt-BR"
                 minDate={startOfYear(new Date())}
@@ -350,8 +113,6 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
               />
             )}
           />
-          <p className="text-danger error-message">{errors.inicio?.message}</p>
-
           <Controller
             name="final"
             control={control}
@@ -360,15 +121,13 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
                 id="ed-final-data"
                 onChange={(date) =>
                   field.onChange(
-                    dayjs(date)
-                      .set("hour", 23)
-                      .set("minute", 59)
-                      .toISOString() || null,
+                    dayjs(date).set("hour", 23).set("minute", 59).toISOString() ||
+                      null,
                   )
                 }
                 selected={field.value ? dayjs(field.value).toDate() : null}
                 showIcon
-                className="form-control datepicker"
+                className={datepickerClasse}
                 dateFormat="dd/MM/yyyy"
                 locale="pt-BR"
                 minDate={startOfYear(new Date())}
@@ -378,27 +137,29 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
               />
             )}
           />
-          <p className="text-danger error-message">{errors.final?.message}</p>
         </div>
-      </div>
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label className="form-label  form-title">
-          Local do evento
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <input
+      <Campo
+        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Local do evento")}</span>}
+        htmlFor="local"
+        erro={errors.local?.message}
+        className="mb-1"
+      >
+        <Input
           type="text"
-          className="form-control input-title"
           id="local"
           placeholder="Digite o local do evento"
+          className="text-sm"
           {...register("local")}
         />
-        <p className="text-danger error-message">{errors.local?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label className="form-label  form-title">Sala(s) do evento</label>
+      <Campo
+        label={<span className="text-sm font-semibold text-slate-700">Sala(s) do evento</span>}
+        erro={errors.salas?.message}
+        className="mb-1"
+      >
         <Controller
           name="salas"
           control={control}
@@ -410,70 +171,63 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
               placeholder="Digite a sala e aperte Enter"
               isClearable
               menuIsOpen={false}
-              components={{
-                DropdownIndicator: null,
-                IndicatorSeparator: null,
-              }}
+              components={{ DropdownIndicator: null, IndicatorSeparator: null }}
               inputValue={salaInputValue}
-              onInputChange={(newValue) => setSalaInputValue(newValue)}
+              onInputChange={setSalaInputValue}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && salaInputValue) {
                   event.preventDefault();
-
-                  const newOption = {
-                    label: salaInputValue,
-                    value: salaInputValue,
-                  };
-                  field.onChange([...(field.value || []), newOption]);
+                  field.onChange([
+                    ...(field.value || []),
+                    { label: salaInputValue, value: salaInputValue },
+                  ]);
                   setSalaInputValue("");
                 }
               }}
             />
           )}
         />
-        <p className="text-danger error-message">{errors.salas?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="d-flex flex-column justify-content-center">
-        <div className="col-12 mb-1">
-          <label className="form-label  form-title">
-            Comissão organizadora
-            <span className="text-danger ms-1 form-title">*</span>
-          </label>
-          <Controller
-            name="comissao"
-            control={control}
-            render={({ field }) => (
-              <Select
-                {...field}
-                id="comissao-select"
-                isMulti
-                options={comissaoOptions}
-                placeholder="Escolha o(s) usuário(s)"
-                isClearable
-              />
-            )}
-          />
-          <p className="text-danger error-message">
-            {errors.comissao?.message}
-          </p>
-        </div>
-      </div>
+      <Campo
+        label={
+          <span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Comissão organizadora")}</span>
+        }
+        erro={errors.comissao?.message}
+        className="mb-1"
+      >
+        <Controller
+          name="comissao"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              id="comissao-select"
+              isMulti
+              options={comissaoOptions}
+              placeholder="Escolha o(s) usuário(s)"
+              isClearable
+            />
+          )}
+        />
+      </Campo>
 
-      <div className="d-flex flex-column justify-content-start">
-        <div className="fs-4"> Sessões e apresentações </div>
-
-        <div className="d-flex flex-column justify-content-start gap-3">
-          <div className="col-12 mb-1">
-            <label className="form-label form-title">
-              Número de sessões
-              <span className="text-danger ms-1 form-title">*</span>
-            </label>
-            <input
+      <div className="flex flex-col justify-start">
+        <div className="text-lg font-bold text-slate-800">Sessões e apresentações</div>
+        <div className="mt-3 flex flex-col justify-start gap-3">
+          <Campo
+            label={
+              <span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Número de sessões")}</span>
+            }
+            htmlFor="quantidadeSessão"
+            erro={errors.sessoes?.message}
+            className="mb-1"
+          >
+            <Input
               type="number"
-              className="form-control input-title"
               id="quantidadeSessão"
               placeholder="Quantidade de sessões"
+              className="text-sm"
               min={1}
               step={1}
               inputMode="numeric"
@@ -482,21 +236,22 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
               onPaste={colarApenasNumeros}
               {...register("sessoes", { valueAsNumber: true })}
             />
-            <p className="text-danger error-message">
-              {errors.sessoes?.message}
-            </p>
-          </div>
-
-          <div className="col-12 mb-1">
-            <label className="form-label  form-title">
-              Duração da Apresentação (minutos)
-              <span className="text-danger ms-1 form-title">*</span>
-            </label>
-            <input
+          </Campo>
+          <Campo
+            label={
+              <span className="text-sm font-semibold text-slate-700">
+                {labelObrigatorio("Duração da Apresentação (minutos)")}
+              </span>
+            }
+            htmlFor="sessao"
+            erro={errors.duracao?.message}
+            className="mb-1"
+          >
+            <Input
               type="number"
-              className="form-control input-title"
               id="sessao"
               placeholder="ex.: 20 minutos"
+              className="text-sm"
               min={1}
               step={1}
               inputMode="numeric"
@@ -505,74 +260,73 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicao>) {
               onPaste={colarApenasNumeros}
               {...register("duracao", { valueAsNumber: true })}
             />
-            <p className="text-danger error-message">
-              {errors.duracao?.message}
-            </p>
-          </div>
+          </Campo>
         </div>
       </div>
 
-      <div className="col-12 mb-1">
-        <label className="form-label form-title">
-          Texto da Chamada para Submissão de Trabalhos
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <input
+      <Campo
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Texto da Chamada para Submissão de Trabalhos")}
+          </span>
+        }
+        htmlFor="submissao"
+        erro={errors.submissao?.message}
+        className="mb-1"
+      >
+        <Input
           type="text"
-          className="form-control input-title"
           id="submissao"
           placeholder="Digite o texto aqui"
+          className="text-sm"
           {...register("submissao")}
         />
-        <p className="text-danger error-message">{errors.submissao?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="d-flex flex-column justify-content-start align-items-center gap-4">
-        <div className="col-12 mb-1">
-          <label className="form-label form-title">
-            Data limite para a submissão
-            <span className="text-danger ms-1 form-title">*</span>
-          </label>
-          <div className="input-group listagem-template-content-input w-100">
-            <Controller
-              control={control}
-              name="limite"
-              render={({ field }) => (
-                <DatePicker
-                  id="ed-deadline-data"
-                  showIcon
-                  onChange={(date) =>
-                    field.onChange(
-                      dayjs(date)
-                        .set("hour", 23)
-                        .set("minute", 59)
-                        .toISOString() || null,
-                    )
-                  }
-                  selected={field.value ? new Date(field.value) : null}
-                  placeholderText="(ex.: 22/10/2024)"
-                  className="form-control datepicker"
-                  dateFormat="dd/MM/yyyy"
-                  locale="pt-BR"
-                  minDate={startOfYear(new Date())}
-                  maxDate={endOfYear(new Date())}
-                  toggleCalendarOnIconClick
-                />
-              )}
+      <Campo
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Data limite para a submissão")}
+          </span>
+        }
+        erro={errors.limite?.message}
+        className="mb-1"
+      >
+        <Controller
+          control={control}
+          name="limite"
+          render={({ field }) => (
+            <DatePicker
+              id="ed-deadline-data"
+              showIcon
+              onChange={(date) =>
+                field.onChange(
+                  dayjs(date).set("hour", 23).set("minute", 59).toISOString() ||
+                    null,
+                )
+              }
+              selected={field.value ? new Date(field.value) : null}
+              placeholderText="(ex.: 22/10/2024)"
+              className={cn(datepickerClasse, "w-full")}
+              dateFormat="dd/MM/yyyy"
+              locale="pt-BR"
+              minDate={startOfYear(new Date())}
+              maxDate={endOfYear(new Date())}
+              toggleCalendarOnIconClick
             />
-          </div>
-          <p className="text-danger error-message">{errors.limite?.message}</p>
-        </div>
-      </div>
+          )}
+        />
+      </Campo>
 
-      <div className="d-grid gap-2 col-3 mx-auto">
-        <button
+      <div className="mx-auto my-5 w-full max-w-xs">
+        <Button
           type="submit"
-          className="btn text-white fs-5 submit-button"
           disabled={!Edicao?.isActive || !isValid}
+          larguraTotal
+          className="bg-brand-orange text-base font-bold hover:bg-brand-orange"
         >
-          {confirmButton.label}
-        </button>
+          Salvar
+        </Button>
       </div>
     </form>
   );

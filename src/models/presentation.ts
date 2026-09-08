@@ -1,33 +1,22 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-interface Presentation {
+import { Submission } from "@/models/submission";
+
+export interface Presentation {
   id: string;
   presentationBlockId: string;
   positionWithinBlock: number;
   presentationTime?: string;
   submission: Submission | null;
-  submissionId: symbol;
+  submissionId: string;
   status: string;
   startTime: string;
   createdAt: string;
   updatedAt: string;
 }
 
-interface PresentationBookmark {
+export interface PresentationBookmark {
   bookmarked: boolean;
 }
 
-interface PresentationBookmarkRegister {
+export interface PresentationBookmarkRegister {
   presentationId: string;
-}
-
-interface UserAccount {
-  id: string
-  name: string
-  email: string
-  registrationNumber: string
-  photoFilePath: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-  lattesUrl?: string
 }

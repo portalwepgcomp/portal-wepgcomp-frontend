@@ -1,9 +1,21 @@
-import { useContext } from "react";
-
-import { createContext, ReactNode, useState } from "react";
+import {
+  useContext,
+  createContext,
+  ReactNode,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { evaluationApi } from "@/services/evaluation";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useRouter } from "next/navigation";
+import {
+  Evaluation,
+  EvaluationCriteria,
+  EvaluationParams,
+  EvaluationCriteriaParams,
+} from "@/models/evaluation";
+import { getErrorMessage } from "@/utils/error";
 
 interface EvaluationProps {
   children: ReactNode;
@@ -14,10 +26,10 @@ interface EvaluationProviderData {
   loadingEvaluationCriteria: boolean;
   evaluations: Evaluation[];
   evaluationCriteria: EvaluationCriteria[];
-  getEvaluations: (submissionId: string) => void;
-  getEvaluationByUser: (userId: string) => void;
-  makeEvaluation: (body: EvaluationParams[]) => void;
-  getEvaluationCriteria: (eventEditionId: string) => void;
+  getEvaluations: (submissionId: string) => Promise<void>;
+  getEvaluationByUser: (userId: string) => Promise<void>;
+  makeEvaluation: (body: EvaluationParams[]) => Promise<void>;
+  getEvaluationCriteria: (eventEditionId: string) => Promise<void>;
   createEvaluationCriteria: (
     body: EvaluationCriteriaParams[]
   ) => Promise<boolean>;
@@ -42,14 +54,13 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
   >([]);
 
   const { showAlert } = useSweetAlert();
-
   const router = useRouter();
 
-  const makeEvaluation = async (body: EvaluationParams[]) => {
-    setLoadingEvaluation(true);
-    evaluationApi
-      .makeEvaluation(body)
-      .then((response) => {
+  const makeEvaluation = useCallback(
+    async (body: EvaluationParams[]) => {
+      setLoadingEvaluation(true);
+      try {
+        const response = await evaluationApi.makeEvaluation(body);
         setEvaluations(response);
         showAlert({
           icon: "success",
@@ -58,74 +69,65 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
           showConfirmButton: false,
         });
         router.push("/home");
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         setEvaluations([]);
         showAlert({
           icon: "error",
           title: "Erro ao avaliar",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante a avaliação. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a avaliação. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
-      })
-      .finally(() => {
+      } finally {
         setLoadingEvaluation(false);
-      });
-  };
+      }
+    },
+    [router, showAlert]
+  );
 
-  const getEvaluationByUser = async (userId: string) => {
+  const getEvaluationByUser = useCallback(async (userId: string) => {
     setLoadingEvaluation(true);
-    evaluationApi
-      .getEvaluationByUser(userId)
-      .then((response) => {
-        setEvaluations(response);
-      })
-      .catch(() => {
-        setEvaluations([]);
-      })
-      .finally(() => {
-        setLoadingEvaluation(false);
-      });
-  };
+    try {
+      const response = await evaluationApi.getEvaluationByUser(userId);
+      setEvaluations(response);
+    } catch {
+      setEvaluations([]);
+    } finally {
+      setLoadingEvaluation(false);
+    }
+  }, []);
 
-  const getEvaluations = async (submissionId: string) => {
+  const getEvaluations = useCallback(async (submissionId: string) => {
     setLoadingEvaluation(true);
-    evaluationApi
-      .getEvaluation(submissionId)
-      .then((response) => {
-        setEvaluations(response);
-      })
-      .catch(() => {
-        setEvaluations([]);
-      })
-      .finally(() => {
-        setLoadingEvaluation(false);
-      });
-  };
+    try {
+      const response = await evaluationApi.getEvaluation(submissionId);
+      setEvaluations(response);
+    } catch {
+      setEvaluations([]);
+    } finally {
+      setLoadingEvaluation(false);
+    }
+  }, []);
 
-  const getEvaluationCriteria = async (eventEditionId: string) => {
+  const getEvaluationCriteria = useCallback(async (eventEditionId: string) => {
     setLoadingEvaluation(true);
-    evaluationApi
-      .getEvaluationCriteria(eventEditionId)
-      .then((response) => {
-        setEvaluationCriteria(response);
-      })
-      .catch(() => {
-        setEvaluationCriteria([]);
-      })
-      .finally(() => {
-        setLoadingEvaluation(false);
-      });
-  };
+    try {
+      const response = await evaluationApi.getEvaluationCriteria(eventEditionId);
+      setEvaluationCriteria(response);
+    } catch {
+      setEvaluationCriteria([]);
+    } finally {
+      setLoadingEvaluation(false);
+    }
+  }, []);
 
-  const createEvaluationCriteria = async (body: EvaluationCriteriaParams[]) => {
-    setLoadingEvaluationCriteria(true);
-    return evaluationApi
-      .createEvaluationCriteria(body)
-      .then(() => {
+  const createEvaluationCriteria = useCallback(
+    async (body: EvaluationCriteriaParams[]) => {
+      setLoadingEvaluationCriteria(true);
+      try {
+        await evaluationApi.createEvaluationCriteria(body);
         showAlert({
           icon: "success",
           title: "Critérios criados com sucesso!",
@@ -133,86 +135,85 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
           showConfirmButton: false,
         });
 
-        const modalElementButton = document.getElementById(
-          "criteriosModalClose"
-        ) as HTMLButtonElement;
-
-        if (modalElementButton) {
-          modalElementButton.click();
-        }
-
         return true;
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao criar",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante a criação. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a criação. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
         return false;
-      })
-      .finally(() => {
+      } finally {
         setLoadingEvaluationCriteria(false);
-      });
-  };
+      }
+    },
+    [showAlert]
+  );
 
-  const updateEvaluationCriteria = async (body: EvaluationCriteriaParams[]) => {
-    setLoadingEvaluationCriteria(true);
-    return evaluationApi
-      .updateEvaluationCriteria(body)
-      .then(() => {
+  const updateEvaluationCriteria = useCallback(
+    async (body: EvaluationCriteriaParams[]) => {
+      setLoadingEvaluationCriteria(true);
+      try {
+        await evaluationApi.updateEvaluationCriteria(body);
         showAlert({
           icon: "success",
           title: "Avaliação atualizada com sucesso!",
           timer: 3000,
           showConfirmButton: false,
         });
-        const modalElementButton = document.getElementById(
-          "criteriosModalClose"
-        ) as HTMLButtonElement;
-
-        if (modalElementButton) {
-          modalElementButton.click();
-        }
 
         return true;
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao atualizar",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
-            "Ocorreu um erro durante a atualização. Tente novamente mais tarde!",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante a atualização. Tente novamente mais tarde!"
+          ),
           confirmButtonText: "Retornar",
         });
         return false;
-      })
-      .finally(() => {
+      } finally {
         setLoadingEvaluationCriteria(false);
-      });
-  };
+      }
+    },
+    [showAlert]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      loadingEvaluation,
+      loadingEvaluationCriteria,
+      evaluations,
+      evaluationCriteria,
+      makeEvaluation,
+      getEvaluationByUser,
+      getEvaluations,
+      getEvaluationCriteria,
+      createEvaluationCriteria,
+      updateEvaluationCriteria,
+    }),
+    [
+      loadingEvaluation,
+      loadingEvaluationCriteria,
+      evaluations,
+      evaluationCriteria,
+      makeEvaluation,
+      getEvaluationByUser,
+      getEvaluations,
+      getEvaluationCriteria,
+      createEvaluationCriteria,
+      updateEvaluationCriteria,
+    ]
+  );
 
   return (
-    <EvaluationContext.Provider
-      value={{
-        loadingEvaluation,
-        loadingEvaluationCriteria,
-        evaluations,
-        evaluationCriteria,
-        makeEvaluation,
-        getEvaluationByUser,
-        getEvaluations,
-        getEvaluationCriteria,
-        createEvaluationCriteria,
-        updateEvaluationCriteria,
-      }}
-    >
+    <EvaluationContext.Provider value={contextValue}>
       {children}
     </EvaluationContext.Provider>
   );

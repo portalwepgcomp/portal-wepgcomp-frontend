@@ -7,14 +7,24 @@ import Rating from "@/components/Rating/Rating";
 
 import LoadingPage from "@/components/LoadingPage";
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
+import Banner from "@/components/UI/Banner";
+import Button from "@/components/UI/Button";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useEvaluation } from "@/hooks/useEvaluation";
 import { usePresentation } from "@/hooks/usePresentation";
-import "./style.scss";
-import Banner from "@/components/UI/Banner";
+import { Info } from "lucide-react";
+import { Presentation } from "@/models/presentation";
+import {
+  Evaluation,
+  EvaluationCriteria,
+  EvaluationParams,
+} from "@/models/evaluation";
 
-export default function Avaliacao({ params }) {
+const tooltipTexto =
+  "O sistema calcula a nota final de cada apresentação usando média bayesiana, separando avaliações de avaliadores e público geral. A fórmula central é: (N × Média da Amostra + C × Média Prévia) / (N + C), onde N é o número de avaliações recebidas pela apresentação, C é o número de confiança (calculado pelo percentil 40% do número de avaliações por apresentação no evento), Média da Amostra é a média ponderada das avaliações recebidas pela apresentação e Média Prévia é a média geral do evento. Se não houver dados suficientes para o calculo das estatisticas do evento (geral em seu inicio), são utiliados valores padrão: Número de Confiança: 5 para o público e 3 para os avaliadores.";
+
+export default function Avaliacao({ params }: { params: { id: string } }) {
   const [saveEvaluation, setSaveEvaluation] = useState<
     { evaluation: Evaluation | null; criteria: EvaluationCriteria | null }[]
   >([]);
@@ -48,7 +58,13 @@ export default function Avaliacao({ params }) {
     getPresentationAll(Edicao.id);
     getEvaluationCriteria(Edicao.id);
     getEvaluationByUser(user.id);
-  }, [Edicao?.id, user?.id]);
+  }, [
+    Edicao?.id,
+    user?.id,
+    getPresentationAll,
+    getEvaluationCriteria,
+    getEvaluationByUser,
+  ]);
 
   useEffect(() => {
     if (params?.id) {
@@ -77,44 +93,40 @@ export default function Avaliacao({ params }) {
       }
     }
   }, [
-    presentationList.length,
-    evaluations?.length,
-    evaluationCriteria?.length,
+    params?.id,
+    presentationList,
+    evaluations,
+    evaluationCriteria,
   ]);
 
   return (
     <ProtectedLayout>
-      <div
-        className="d-flex flex-column"
-        style={{
-          gap: "10px",
-        }}
-      >
+      <div className="flex flex-col gap-2.5">
         <Banner title="Avaliação" />
         {(loadingEvaluation || !presentation?.submission?.title) && (
           <LoadingPage />
         )}
         {!loadingEvaluation && presentation?.submission?.title && (
-          <div className="avalieApresentacao">
-            <div className="avalieElementos">
-              <div className="avalieIdentificador">
-                <div className="avalieApresentador">
+          <div className="mb-[300px] flex flex-col items-center gap-[50px]">
+            <div className="h-[90px] w-[800px] max-w-[90%] rounded-xl pl-[5px] text-center max-[830px]:h-auto">
+              <div className="flex flex-col px-2">
+                <div className="text-2xl font-bold">
                   {presentation?.submission?.mainAuthor?.name}
                 </div>
-                <hr className="avalieDivisor" />
-                <div className="avaliePesquisa">
+                <hr className="my-2 border-line" />
+                <div className="text-xl">
                   {presentation?.submission?.title}
                 </div>
               </div>
             </div>
 
-            <div className="avaliePerguntas">
+            <div className="flex flex-col items-center justify-center gap-[30px]">
               {saveEvaluation?.map((evaluationData, devIndex) => (
                 <div
                   key={evaluationData?.criteria?.id}
-                  className="avalieQuestion"
+                  className="flex flex-col items-center"
                 >
-                  <div className="avalieTexto">
+                  <div className="text-xl max-[830px]:w-[95%] max-[830px]:text-center">
                     {`${devIndex + 1}. ${
                       evaluationData?.criteria?.description
                     }`}
@@ -143,8 +155,8 @@ export default function Avaliacao({ params }) {
                 </div>
               ))}
               {!saveEvaluation?.length && (
-                <div className="d-flex align-items-center justify-content-center p-3 mt-4 me-5">
-                  <h4 className="empty-list mb-0">
+                <div className="mt-4 flex items-center justify-center p-3">
+                  <h4 className="mb-0 flex items-center gap-2 text-foreground">
                     <Image
                       src="/assets/images/empty_box.svg"
                       alt="Lista vazia"
@@ -156,22 +168,17 @@ export default function Avaliacao({ params }) {
                 </div>
               )}
             </div>
-            <div className="d-flex  flex-direction-row">
-              <button
-                className="avalieButton"
+            <div className="flex flex-row items-center">
+              <Button
+                className="h-[43px] w-[246px] rounded-xl border-2 border-brand-orange bg-brand-orange text-xl font-bold hover:bg-[#E68A00]"
                 onClick={sendEvaluation}
                 disabled={loadingEvaluation || !Edicao?.isActive}
               >
                 Avaliar
-              </button>
-              <i
-                className="bi bi-info-circle ms-4 gap-3 fs-5"
-                data-bs-toggle="tooltip"
-                title="O sistema calcula a nota final de cada apresentação usando média bayesiana, separando avaliações de avaliadores e público geral. 
-              A fórmula central é: (N × Média da Amostra + C × Média Prévia) / (N + C), onde N é o número de avaliações recebidas pela apresentação, C é o número de confiança (calculado pelo percentil 40% do número de avaliações por apresentação no evento), Média da Amostra é a média ponderada das avaliações recebidas pela apresentação e Média Prévia é a média geral do evento.
-              Se não houver dados suficientes para o calculo das estatisticas do evento (geral em seu inicio), são utiliados valores padrão:
-              Número de Confiança: 5 para o público e 3 para os avaliadores."
-              ></i>
+              </Button>
+              <span title={tooltipTexto} className="ml-4 inline-flex cursor-help">
+                <Info className="h-5 w-5 text-muted" />
+              </span>
             </div>
           </div>
         )}

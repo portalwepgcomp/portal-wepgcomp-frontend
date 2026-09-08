@@ -1,9 +1,7 @@
-import "./style.scss";
-
 export default function Footer() {
   return (
-    <footer className="navbar-fixed-bottom text-center text-white pt-2 pb-2">
-      <div className="footer-text">© WEPGCOMP</div>
+    <footer className="mt-auto flex items-center justify-center bg-[#AAAAAA] py-2 text-center text-white">
+      <div className="text-base">© WEPGCOMP</div>
     </footer>
   );
 }

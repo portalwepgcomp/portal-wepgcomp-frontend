@@ -1,9 +1,14 @@
 import axiosInstance from "@/utils/api";
+import { UserProfile } from "@/models/user";
 
 export const api = axiosInstance;
  
-export function setTokenLocalStorage(token: any){
-    localStorage.setItem("@Auth:token", token)
+export function setTokenLocalStorage(token: string | null) {
+  if (token) {
+    localStorage.setItem("@Auth:token", token);
+  } else {
+    localStorage.removeItem("@Auth:token");
+  }
 }
 
 export function setUserLocalStorage(user: UserProfile) {
@@ -82,7 +87,7 @@ export async function validateToken(): Promise<boolean> {
 
     await api.get("auth/validate-token");
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

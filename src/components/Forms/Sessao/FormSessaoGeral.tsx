@@ -1,6 +1,5 @@
 "use client";
 
-import { ModalSessaoMock } from "@/mocks/ModalSessoes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -8,20 +7,60 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useSession } from "@/hooks/useSession";
+import { useRoomsQuery } from "@/features/sessoes/hooks/useRoomsQuery";
 
-import "./style.scss";
 import { getDurationInMinutes } from "@/utils/formatDate";
 import { formatOptions } from "@/utils/formatOptions";
 import { useEffect } from "react";
 import { useEdicao } from "@/hooks/useEdicao";
 import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
+import Button from "@/components/UI/Button";
+import { Campo, Input } from "@/components/UI/Input";
 
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { PresentationBlockParams } from "@/models/session";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+const formAuxiliarFields = {
+  titulo: {
+    label: "Título",
+    placeholder: "Insira o título da sua sessão",
+  },
+  nome: {
+    label: "Nome do(a) palestrante",
+    placeholder: "Insira o título do(a) palestrante",
+  },
+  sala: {
+    label: "Sala do evento",
+    placeholder: "Selecione a sala do evento",
+  },
+  inicio: {
+    label: "Data e horário de início da sessão",
+    placeholder: "(ex.: 22/10/2024 20:00)",
+  },
+  final: {
+    label: "Data e horário de fim da sessão",
+    placeholder: "(ex.: 22/10/2024 20:00)",
+  },
+};
+
+const confirmButton = { label: "Salvar" };
+
+const labelObrigatorio = (texto: string) => (
+  <>
+    {texto} <span className="text-error">*</span>
+  </>
+);
+
+const selectClasse =
+  "w-full rounded-md border border-[#d9dce0] bg-white px-3 py-2.5 text-sm leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10";
+
+const datepickerClasse =
+  "w-full rounded-md border border-[#d9dce0] bg-white px-3 py-2.5 text-sm leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10";
 
 const formSessaoAuxiliarSchema = z
   .object({
@@ -83,10 +122,12 @@ interface FormSessaoAuxiliarProps {
 export default function FormSessaoAuxiliar({
   disabledIntervals,
 }: Readonly<FormSessaoAuxiliarProps>) {
-  const { formAuxiliarFields, confirmButton } = ModalSessaoMock;
-  const { createSession, updateSession, sessao, setSessao, roomsList } =
+  const { createSession, updateSession, sessao, setSessao } =
     useSession();
   const { Edicao } = useEdicao();
+  const router = useRouter();
+  const eventEditionId = sessao?.eventEditionId || Edicao?.id;
+  const { data: rooms } = useRoomsQuery(eventEditionId);
 
   type FormSessaoAuxiliarSchema = z.infer<typeof formSessaoAuxiliarSchema>;
 
@@ -115,7 +156,7 @@ export default function FormSessaoAuxiliar({
     defaultValues,
   });
 
-  const roomsOptions = formatOptions(roomsList, "name");
+  const roomsOptions = formatOptions(rooms ?? [], "name");
 
   const combinedTimeFilter = (time: Date) => {
     const hour = time.getHours();
@@ -153,13 +194,14 @@ export default function FormSessaoAuxiliar({
       roomId: sala,
       startTime: inicio,
       duration,
-    } as SessaoParams;
+    } as PresentationBlockParams;
 
     if (sessao?.id) {
       updateSession(sessao.id, Edicao.id, body).then((status) => {
         if (status) {
           reset();
           setSessao(null);
+          router.push("/sessoes");
         }
       });
       return;
@@ -169,6 +211,7 @@ export default function FormSessaoAuxiliar({
       if (status) {
         reset();
         setSessao(null);
+        router.push("/sessoes");
       }
     });
   };
@@ -192,49 +235,60 @@ export default function FormSessaoAuxiliar({
       setValue("inicio", "");
       setValue("final", "");
     }
-  }, [sessao?.id]);
+  }, [sessao, setValue]);
 
   return (
     <form
-      className="row g-3 form-sessao"
+      className="grid grid-cols-1 gap-3"
       onSubmit={handleSubmit(handleFormSessaoAuxiliar)}
     >
-      <div className="col-12 mb-1">
-        <label className="form-label fw-bold form-title ">
-          {formAuxiliarFields.titulo.label}
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <input
+      <Campo
+        label={
+          <span className="font-bold">
+            {labelObrigatorio(formAuxiliarFields.titulo.label)}
+          </span>
+        }
+        htmlFor="sg-titulo-input"
+        erro={errors.titulo?.message}
+        className="mb-1"
+      >
+        <Input
           type="text"
-          className="form-control input-title"
           id="sg-titulo-input"
           placeholder={formAuxiliarFields.titulo.placeholder}
+          className="text-sm"
           {...register("titulo")}
         />
-        <p className="text-danger error-message">{errors.titulo?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label className="form-label fw-bold form-title">
-          {formAuxiliarFields.nome.label}
-        </label>
-        <input
+      <Campo
+        label={
+          <span className="font-bold">{formAuxiliarFields.nome.label}</span>
+        }
+        htmlFor="sg-nome-input"
+        erro={errors.nome?.message}
+        className="mb-1"
+      >
+        <Input
           type="text"
-          className="form-control input-title"
           id="sg-nome-input"
           placeholder={formAuxiliarFields.nome.placeholder}
+          className="text-sm"
           {...register("nome")}
         />
-        <p className="text-danger error-message">{errors.nome?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label className="form-label fw-bold form-title">
-          {formAuxiliarFields.sala.label}
-        </label>
+      <Campo
+        label={
+          <span className="font-bold">{formAuxiliarFields.sala.label}</span>
+        }
+        htmlFor="sg-sala-select"
+        erro={errors.sala?.message}
+        className="mb-1"
+      >
         <select
           id="sg-sala-select"
-          className="form-select"
+          className={selectClasse}
           {...register("sala")}
         >
           <option value="" hidden>
@@ -246,103 +300,97 @@ export default function FormSessaoAuxiliar({
             </option>
           ))}
         </select>
-        <p className="text-danger error-message">{errors.sala?.message}</p>
-      </div>
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label
-          htmlFor="datetime-local"
-          className="form-label fw-bold form-title"
-        >
-          {formAuxiliarFields.inicio.label}
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
+      <Campo
+        label={
+          <span className="font-bold">
+            {labelObrigatorio(formAuxiliarFields.inicio.label)}
+          </span>
+        }
+        erro={errors.inicio?.message}
+        className="mb-1"
+      >
+        <Controller
+          control={control}
+          name="inicio"
+          render={({ field }) => (
+            <DatePicker
+              id="sg-inicio-data"
+              showIcon
+              onChange={(date) => field.onChange(date?.toISOString() || null)}
+              selected={field.value ? new Date(field.value) : null}
+              showTimeSelect
+              className={datepickerClasse}
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="dd/MM/yyyy HH:mm"
+              minDate={dayjs(Edicao?.startDate || "")
+                .tz("America/Sao_Paulo", true)
+                .toDate()}
+              maxDate={dayjs(Edicao?.endDate || "")
+                .tz("America/Sao_Paulo", true)
+                .toDate()}
+              isClearable
+              filterTime={(time) =>
+                field.value ? combinedTimeFilter(time) : false
+              }
+              placeholderText={formAuxiliarFields.inicio.placeholder}
+              toggleCalendarOnIconClick
+            />
+          )}
+        />
+      </Campo>
 
-        <div className="input-group listagem-template-content-input">
-          <Controller
-            control={control}
-            name="inicio"
-            render={({ field }) => (
-              <DatePicker
-                id="sg-inicio-data"
-                showIcon
-                onChange={(date) => field.onChange(date?.toISOString() || null)}
-                selected={field.value ? new Date(field.value) : null}
-                showTimeSelect
-                className="form-control datepicker"
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                dateFormat="dd/MM/yyyy HH:mm"
-                minDate={dayjs(Edicao?.startDate || "")
-                  .tz("America/Sao_Paulo", true)
-                  .toDate()}
-                maxDate={dayjs(Edicao?.endDate || "")
-                  .tz("America/Sao_Paulo", true)
-                  .toDate()}
-                isClearable
-                filterTime={(time) =>
-                  field.value ? combinedTimeFilter(time) : false
-                }
-                placeholderText={formAuxiliarFields.inicio.placeholder}
-                toggleCalendarOnIconClick
-              />
-            )}
-          />
-        </div>
-        <p className="text-danger error-message">{errors.inicio?.message}</p>
-      </div>
+      <Campo
+        label={
+          <span className="font-bold">
+            {labelObrigatorio(formAuxiliarFields.final.label)}
+          </span>
+        }
+        erro={errors.final?.message}
+        className="mb-1"
+      >
+        <Controller
+          control={control}
+          name="final"
+          render={({ field }) => (
+            <DatePicker
+              id="sg-final-data"
+              showIcon
+              onChange={(date) => field.onChange(date?.toISOString() || null)}
+              selected={field.value ? new Date(field.value) : null}
+              showTimeSelect
+              className={datepickerClasse}
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="dd/MM/yyyy HH:mm"
+              minDate={dayjs(Edicao?.startDate || "")
+                .tz("America/Sao_Paulo", true)
+                .toDate()}
+              maxDate={dayjs(Edicao?.endDate || "")
+                .tz("America/Sao_Paulo", true)
+                .toDate()}
+              isClearable
+              filterTime={(time) =>
+                field.value ? combinedTimeFilter(time) : false
+              }
+              placeholderText={formAuxiliarFields.final.placeholder}
+              toggleCalendarOnIconClick
+            />
+          )}
+        />
+      </Campo>
 
-      <div className="col-12 mb-1">
-        <label
-          htmlFor="datetime-local"
-          className="form-label fw-bold form-title"
-        >
-          {formAuxiliarFields.final.label}
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-
-        <div className="input-group listagem-template-content-input">
-          <Controller
-            control={control}
-            name="final"
-            render={({ field }) => (
-              <DatePicker
-                id="sg-final-data"
-                showIcon
-                onChange={(date) => field.onChange(date?.toISOString() || null)}
-                selected={field.value ? new Date(field.value) : null}
-                showTimeSelect
-                className="form-control datepicker"
-                timeFormat="HH:mm"
-                timeIntervals={15}
-                dateFormat="dd/MM/yyyy HH:mm"
-                minDate={dayjs(Edicao?.startDate || "")
-                  .tz("America/Sao_Paulo", true)
-                  .toDate()}
-                maxDate={dayjs(Edicao?.endDate || "")
-                  .tz("America/Sao_Paulo", true)
-                  .toDate()}
-                isClearable
-                filterTime={(time) =>
-                  field.value ? combinedTimeFilter(time) : false
-                }
-                placeholderText={formAuxiliarFields.final.placeholder}
-                toggleCalendarOnIconClick
-              />
-            )}
-          />
-        </div>
-        <p className="text-danger error-message">{errors.final?.message}</p>
-      </div>
-      <div className="d-flex justify-content-center">
-        <button
+      <div className="flex justify-center">
+        <Button
           type="submit"
           id="sg-submit-button"
-          className="btn btn-primary button-modal-component button-sessao-auxiliar"
           disabled={!Edicao?.isActive}
+          className="bg-brand-orange hover:bg-brand-orange"
         >
           {confirmButton.label}
-        </button>
+        </Button>
       </div>
     </form>
   );

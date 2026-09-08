@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-interface EdicaoParams {
+export interface EdicaoParams {
   name: string;
   description?: string;
   startDate?: string;
@@ -21,7 +21,18 @@ interface EdicaoParams {
 }
 
 
-interface Edicao extends EdicaoParams {
+export interface GetEdicaoParams {
+  /** Busca textual em nome / descrição da edição */
+  search?: string;
+  /** Número da página (base 1) para paginação por envelope (P3.2). */
+  page?: number;
+  /** Quantidade de registros por página. */
+  pageSize?: number;
+  /** Se true, o backend responde com envelope PaginatedResponse. */
+  paginated?: boolean;
+}
+
+export interface Edicao extends EdicaoParams {
   id: string;
   createdAt: string;
   deletedAt: string;

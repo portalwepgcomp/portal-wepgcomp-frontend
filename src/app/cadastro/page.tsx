@@ -3,17 +3,13 @@
 import { FormCadastro } from "@/components/Forms/Cadastro/FormCadastro";
 import LoadingPage from "@/components/LoadingPage";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { useEdicao } from "@/hooks/useEdicao";
 import { useUsers } from "@/hooks/useUsers";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
-import "./style.scss";
 
 export default function Cadastro() {
   const { loadingCreateUser } = useUsers();
   const { signed } = useContext(AuthContext);
-  const { Edicao } = useEdicao();
-
   const router = useRouter();
 
   useEffect(() => {
@@ -23,16 +19,17 @@ export default function Cadastro() {
   }, [signed, router]);
 
   return (
-    <div className='container d-flex flex-column flex-grow-1 text-black cadastro position-relative'>
+    <div className="relative mx-auto flex w-full max-w-[540px] flex-grow flex-col px-4 py-8 text-black">
       {loadingCreateUser && <LoadingPage />}
-      <div className='container'>
-        <hr />
-        <h2 className='d-flex justify-content-center mb-4 fw-bold text-black'>
+      <div className="mx-auto w-full mb-6">
+        <h2 className="text-center text-3xl font-bold text-slate-900 md:text-4xl">
           {!loadingCreateUser && "Cadastro"}
         </h2>
       </div>
-      <div className='container d-flex justify-content-center mb-5'>
-        {!loadingCreateUser && <FormCadastro loadingCreateUser={loadingCreateUser} />}
+      <div className="mx-auto mb-5 flex w-full justify-center">
+        {!loadingCreateUser && (
+          <FormCadastro loadingCreateUser={loadingCreateUser} />
+        )}
       </div>
     </div>
   );

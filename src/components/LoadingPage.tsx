@@ -1,13 +1,14 @@
 "use client";
 
+import Spinner from "@/components/UI/Spinner";
+
 export default function Loading() {
   return (
-    <div
-      className="d-flex flex-column justify-content-center align-items-center m-5"
-      style={{ height: "100%" }}
-    >
-      <div className="spinner-border text-success" role="status"></div>
-      <span className="text-success fw-bold fs-2">Carregando...</span>
+    <div className="m-5 flex h-full flex-col items-center justify-center">
+      <Spinner colorClassName="text-success" className="h-10 w-10" />
+      <span className="mt-2 text-2xl font-bold text-success">
+        Carregando...
+      </span>
     </div>
   );
 }

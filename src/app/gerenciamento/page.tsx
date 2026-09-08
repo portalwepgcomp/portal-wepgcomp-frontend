@@ -1,51 +1,54 @@
 "use client";
 
-import { GraduationCap, Mail, Users } from "lucide-react";
+import { GraduationCap, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
-import "../../components/UI/styles/button.scss";
-import "../../components/UI/styles/card.scss";
-import "./styles.scss";
+import Button from "@/components/UI/Button";
 
 const Index = () => {
   const router = useRouter();
 
   return (
-    <div className="index-page">
-      <header className="index-page__header">
-        <p className="index-page__subtitle">Painel Administrativo</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f3f7] to-[#e8eef5]">
+      <header className="border-b border-line bg-card px-8 py-12 text-center shadow-sm">
+        <p className="m-0 text-xl font-medium text-foreground">
+          Painel Administrativo
+        </p>
       </header>
 
-      <main className="index-page__main">
-        <div className="index-page__grid">
-          <div className="feature-card feature-card--active">
-            <div className="feature-card__icon">
-              <Mail />
+      <main className="mx-auto max-w-[1280px] px-8 py-12">
+        <div className="mx-auto grid max-w-[1200px] gap-8 md:grid-cols-3">
+          <div className="rounded-lg bg-card p-6 text-center shadow-md transition hover:-translate-y-1 hover:shadow-lg">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-light">
+              <Mail className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="feature-card__title">Envio de E-mails</h3>
-            <p className="feature-card__description">
+            <h3 className="mb-2 text-lg font-semibold text-foreground">
+              Envio de E-mails
+            </h3>
+            <p className="mb-8 text-sm text-muted">
               Envie mensagens para grupos específicos de usuários do sistema
             </p>
-            <button 
-              className="button button--primary button--full-width"
+            <Button
+              larguraTotal
               onClick={() => router.push("/gerenciamento/enviar-email")}
             >
               Acessar
-            </button>
+            </Button>
           </div>
-          <div className="feature-card feature-card">
-            <div className="feature-card__icon">
-              <GraduationCap  />
+
+          <div className="rounded-lg bg-card p-6 text-center shadow-md transition hover:-translate-y-1 hover:shadow-lg">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-light">
+              <GraduationCap className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="feature-card__title">Professores</h3>
-            <p className="feature-card__description">
-              Cadastre novos professores
-            </p>
-            <button 
-              className="button button--primary button--full-width"
+            <h3 className="mb-2 text-lg font-semibold text-foreground">
+              Professores
+            </h3>
+            <p className="mb-8 text-sm text-muted">Cadastre novos professores</p>
+            <Button
+              larguraTotal
               onClick={() => router.push("/gerenciamento/professores")}
             >
               Acessar
-            </button>
+            </Button>
           </div>
         </div>
       </main>

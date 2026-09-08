@@ -2,59 +2,105 @@
 
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
+import { ArrowLeft, FileText } from "lucide-react";
 
 import { useSweetAlert } from "@/hooks/useAlert";
-import { useUsers } from "@/hooks/useUsers";
-
 import { AuthContext } from "@/context/AuthProvider/authProvider";
-
 import { FormCadastroApresentacao } from "@/components/Forms/CadastroApresentacao/FormCadastroApresentacao";
-import LoadingPage from "@/components/LoadingPage";
-import ModalCadastroApresentacao from "@/components/Modals/ModalCadastroApresentacao/ModalCadastroApresentacao";
+import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
-
-import "./style.scss";
+import Banner from "@/components/UI/Banner";
 import { useEdicao } from "@/hooks/useEdicao";
+import { useSubmission } from "@/hooks/useSubmission";
+import { cn } from "@/utils/cn";
+
+const headerBtnClass = cn(
+  "inline-flex items-center gap-2 rounded-lg border border-line bg-card px-4 py-2.5",
+  "text-sm font-semibold text-foreground shadow-sm transition-all duration-200",
+  "hover:bg-muted-light hover:border-brand-blue hover:text-brand-blue",
+  "[&_svg]:h-4 [&_svg]:w-4",
+);
 
 export default function CadastroApresentacao() {
-  const { loadingCreateUser } = useUsers();
   const { user } = useContext(AuthContext);
   const { Edicao } = useEdicao();
+  const { submission } = useSubmission();
   const { showAlert } = useSweetAlert();
   const router = useRouter();
 
+  // Verifica permissão com segurança (permitido para Presenter, Professor e Administradores)
   useEffect(() => {
-    if (user?.profile !== "Presenter") {
+    if (!user) return;
+
+    const isPresenter = user.profile === "Presenter";
+    const isProfessor = user.profile === "Professor";
+    const isAdmin =
+      user.level === "Admin" ||
+      user.level === "Superadmin" ||
+      (user as unknown as { role?: string }).role === "Admin" ||
+      (user as unknown as { role?: string }).role === "Superadmin";
+
+    if (!isPresenter && !isProfessor && !isAdmin) {
       showAlert({
         icon: "error",
         title: "Acesso não autorizado",
-        text: "Você não tem permissão para acessar esta página.",
+        text: "Você não possui permissão para cadastrar ou editar apresentações.",
         confirmButtonText: "OK",
       }).then(() => {
         router.push("/");
       });
     }
-  }, []);
+  }, [router, showAlert, user]);
+
+  const destinoVoltar =
+    user?.level === "Default" && user?.profile === "Presenter"
+      ? "/minha-apresentacao"
+      : "/apresentacoes";
 
   return (
     <ProtectedLayout>
-      <div className='container d-flex flex-column flex-grow-1 text-black pageApresentacao'>
-        {loadingCreateUser && <LoadingPage />}
-        {!loadingCreateUser && (
-          <>
-            <div className='container'>
-              <h1 className='d-flex justify-content-center mt-5 fw-normal ms-2'>
-                {Edicao?.name || "Carregando..."}
-              </h1>
-              <hr />
+      <Banner
+        title={
+          submission && submission.id
+            ? "Editar Apresentação"
+            : "Submissão de Apresentação"
+        }
+      />
+
+      <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
+        <div className="mb-6 flex items-center justify-between">
+          <button className={headerBtnClass} onClick={() => router.push(destinoVoltar)}>
+            <ArrowLeft />
+            Voltar para {user?.level === "Default" ? "Minha Apresentação" : "Apresentações"}
+          </button>
+        </div>
+
+        {!user ? (
+          <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-line bg-card p-12 shadow-sm">
+            <IndicadorDeCarregamento />
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-line bg-card p-6 shadow-sm sm:p-8">
+            <div className="mb-8 flex items-start gap-4 border-b border-line pb-6">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-orange/10 text-brand-orange">
+                <FileText className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">
+                  {submission && submission.id
+                    ? "Editar Trabalho Submetido"
+                    : "Formulário de Submissão"}
+                </h1>
+                <p className="mt-1 text-sm text-muted">
+                  Edição: <strong>{Edicao?.name || "WEPGCOMP"}</strong> — Preencha as informações do trabalho e anexe o slide.
+                </p>
+              </div>
             </div>
-            <div className='container d-flex justify-content-center mb-5'>
-              <FormCadastroApresentacao />
-            </div>
-          </>
+
+            <FormCadastroApresentacao />
+          </div>
         )}
-        <ModalCadastroApresentacao />
-      </div>
+      </main>
     </ProtectedLayout>
   );
 }

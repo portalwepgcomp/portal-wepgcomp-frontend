@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { cn } from "@/utils/cn";
+import { User } from "@/models/user";
 
 interface FilterOption {
   value: string;
@@ -25,10 +27,8 @@ export default function FilterSelect({
   onChange,
   className = "",
 }: FilterSelectProps) {
-  // Mapeia as funções de contagem para cada tipo de filtro
   const countFunctions: Record<string, CountFunction> = useMemo(
     () => ({
-      // Status counts
       ativo: (user: User) =>
         user.isActive &&
         (user.profile !== "Professor" || user.isTeacherActive) &&
@@ -41,13 +41,9 @@ export default function FilterSelect({
           user.isActive &&
           !user.isPresenterActive),
       inativo: (user: User) => !user.isActive,
-
-      // Permission counts
       superadmin: (user: User) => user.isSuperadmin,
       admin: (user: User) => user.isAdmin && !user.isSuperadmin,
       normal: (user: User) => !user.isAdmin && !user.isSuperadmin,
-
-      // Profile counts
       apresentador: (user: User) => user.profile === "Presenter",
       professor: (user: User) => user.profile === "Professor",
       ouvinte: (user: User) => user.profile === "Listener",
@@ -55,7 +51,6 @@ export default function FilterSelect({
     [],
   );
 
-  // Calcula a contagem para cada opção
   const getCounts = useMemo(() => {
     const counts: Record<string, number> = {};
 
@@ -71,10 +66,21 @@ export default function FilterSelect({
   }, [userList, options, countFunctions]);
 
   return (
-    <div className={`filter-dropdown ${className}`}>
-      <label className="filter-dropdown-label">{label}</label>
+    <div
+      className={cn(
+        "flex min-w-0 flex-1 flex-col gap-2 max-md:w-full max-md:flex-none",
+        className,
+      )}
+    >
+      <label className="text-sm font-semibold uppercase tracking-wide text-[#495057]">
+        {label}
+      </label>
       <select
-        className="filter-dropdown-select"
+        className={cn(
+          "cursor-pointer rounded-lg border-2 border-[#e9ecef] bg-white px-4 py-2",
+          "text-sm text-[#495057] transition-[border-color] duration-200",
+          "focus:border-[#007bff] focus:outline-none focus:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]",
+        )}
         onChange={(e) => onChange(e.target.value)}
         value={value}
       >

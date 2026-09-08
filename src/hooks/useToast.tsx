@@ -1,18 +1,20 @@
-import Swal from "sweetalert2";
+import Swal, { SweetAlertOptions, SweetAlertResult } from "sweetalert2";
 
 export const useSweetToast = () => {
   const Toast = Swal.mixin({
     toast: true,
-    position: 'bottom-start',
-    iconColor: 'white',
+    position: "bottom-start",
+    iconColor: "white",
     customClass: {
-      popup: 'colored-toast',
+      popup: "colored-toast",
     },
     showConfirmButton: false,
     timer: 3000,
     timerProgressBar: true,
-  })
-  const showToast = async (options: any) => {
+  });
+  const showToast = async (
+    options: SweetAlertOptions,
+  ): Promise<SweetAlertResult> => {
     try {
       const result = await Toast.fire(options);
       return result;

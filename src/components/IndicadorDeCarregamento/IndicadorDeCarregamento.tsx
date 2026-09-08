@@ -1,13 +1,11 @@
-"use client"
+"use client";
 
-import "./style.scss";
+import Spinner from "@/components/UI/Spinner";
 
 export default function IndicadorDeCarregamento() {
-    return (
-        <div className="isLoading">
-          <div className="spinner-border " role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-    );
+  return (
+    <div className="flex h-[50vh] flex-col items-center justify-center">
+      <Spinner className="h-12 w-12" />
+    </div>
+  );
 }

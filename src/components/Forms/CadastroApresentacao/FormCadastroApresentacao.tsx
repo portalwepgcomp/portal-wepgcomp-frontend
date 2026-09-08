@@ -1,526 +1,294 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { UUID } from "crypto";
-import { useRouter } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
-import "react-datepicker/dist/react-datepicker.css";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-
-import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
-import { useSweetAlert } from "@/hooks/useAlert";
-import { SubmissionContext, useSubmission } from "@/hooks/useSubmission";
-import { useSubmissionFile } from "@/hooks/useSubmissionFile";
-import { UserContext } from "@/hooks/useUsers";
-
-import { useEdicao } from "@/hooks/useEdicao";
-import "./style.scss";
+import { Controller } from "react-hook-form";
+import { InputMask } from "@react-input/mask";
+import { FileUp, Save, Sparkles, UserCheck } from "lucide-react";
 
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
-import { formatLink } from "@/utils/formatLink";
-import InputMask from "react-input-mask";
+import { Campo, Input, Textarea } from "@/components/UI/Input";
+import { maskPhone } from "@/lib/masks";
+import { cn } from "@/utils/cn";
+import { useFormCadastroApresentacao } from "./useFormCadastroApresentacao";
 
-const esquemaCadastro = z.object({
-    id: z.string().optional(),
-    titulo: z
-        .string({ invalid_type_error: "Campo Inválido" })
-        .min(1, "O título é obrigatório"),
-    resumo: z
-        .string({ invalid_type_error: "Campo Inválido" })
-        .min(1, "O resumo é obrigatório"),
-    apresentador: z.string({ invalid_type_error: "Campo Inválido" }).optional(),
-    orientador: z
-        .string({ invalid_type_error: "Campo Inválido" })
-        .uuid({ message: "O orientador é obrigatório" }),
-    coorientador: z.string().optional(),
-    data: z.string().optional(),
-    celular: z.string().refine((value) => {
-        const celularFormatado = value.replace(/\D/g, "");
-        return celularFormatado.length >= 10 && celularFormatado.length <= 11;
-    }, "O celular deve conter 10 ou 11 dígitos"),
-    slide: z
-        .string({ invalid_type_error: "Campo Inválido" })
-        .refine((val) => val && val.trim().length > 0, {
-            message: "O envio do slide em PDF é obrigatório",
-        }),
-    linkApresentacao: z
-        .string()
-        .trim()
-        .optional()
-        .refine(
-            (val) =>
-                !val ||
-                /^https:\/\/(drive\.google\.com\/(file\/d\/[\w-]+(\/.*)?|open\?id=[\w-]+|uc\?id=[\w-]+|drive\/folders\/[\w-]+(\/.*)?)|docs\.google\.com\/presentation\/d\/[\w-]+(\/.*)?)$/i
-                    .test(val),
-            {
-                message:
-                    "Insira um link válido do Google Drive ou Google Docs Apresentações (arquivo deve ser um PDF ou apresentação)",
-            }
-        ),
-});
+const labelObrigatorio = (texto: string) => (
+  <>
+    {texto} <span className="text-error font-bold">*</span>
+  </>
+);
 
-type CadastroFormulario = z.infer<typeof esquemaCadastro>;
+const selectClasse =
+  "w-full rounded-lg border border-line bg-card px-3.5 py-2.5 text-sm leading-normal text-foreground transition-all duration-150 hover:border-muted focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15";
 
 export function FormCadastroApresentacao() {
-    const roteador = useRouter();
-    const { showAlert } = useSweetAlert();
-    const { user } = useContext(AuthContext);
-    const {
-        createSubmission,
-        updateSubmissionById,
-        submission,
-        setSubmission,
-    } = useContext(SubmissionContext);
-    const { getAdvisors, advisors, getUsers, userList, loadingUserList } =
-        useContext(UserContext);
-    const { sendFile, deleteFile } = useSubmissionFile();
-    const [professoresCarregou, setProfessoresCarregou] = useState(false);
-    const [arquivo, setArquivo] = useState<File | null>(null);
-    const [nomeArquivo, setNomeArquivo] = useState<string | null>(null);
-    const { Edicao } = useEdicao();
-    const [carregandoEnvio, setCarregandoEnvio] = useState(false);
-      const {
-        submissionList
-      } = useSubmission();
+  const {
+    register,
+    control,
+    errors,
+    onSubmit,
+    user,
+    loadingUserList,
+    opcoesApresentadoresSelect,
+    advisors,
+    nomeArquivo,
+    submission,
+    carregandoEnvio,
+    edicaoAtiva,
+    aoMudarArquivo,
+    aoMudarTextarea,
+  } = useFormCadastroApresentacao();
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        setValue,
-        reset,
-        control,
-    } = useForm<CadastroFormulario>({
-        resolver: zodResolver(esquemaCadastro),
-    });
-
-    useEffect(() => {
-        if (submission && Object.keys(submission).length) {
-            setValue("id", submission.id);
-            setValue("titulo", submission?.title);
-            setValue("resumo", submission?.abstract ?? "");
-            setValue("apresentador", submission?.mainAuthorId);
-            setValue("orientador", submission?.advisorId);
-            setValue("coorientador", submission?.coAdvisor);
-            setValue("slide", submission?.pdfFile);
-            setNomeArquivo(submission?.pdfFile);
-            setValue("celular", submission?.phoneNumber);
-            setValue("linkApresentacao", submission?.linkHostedFile || "");
-        } else {
-            setValue("id", "");
-            setValue("titulo", "");
-            setValue("resumo", "");
-            setValue("apresentador", "");
-            setValue("orientador", "");
-            setValue("coorientador", "");
-            setValue("data", "");
-            setValue("slide", "");
-            setValue("celular", "");
-            setValue("linkApresentacao", "");
-
-            setArquivo(null);
-            setNomeArquivo(null);
-        }
-    }, [submission, setValue]);
-
-    const opcoesApresentadoresSelect = useMemo(() => {
-        return userList
-            .filter((u) => u.profile === "Presenter")
-            .map((u) => ({
-                ...u,
-                displayLabel: `${u.name} | ${
-                    submissionList.some(sub => sub.mainAuthorId === u.id) ? "Possui apresentação" : "Não possui apresentação"
-                }`,
-            }));
-    }, [userList, submissionList]);
-
-    useEffect(() => {
-        if (!professoresCarregou) {
-            getAdvisors();
-            setProfessoresCarregou(true);
-        }
-    }, [professoresCarregou, getAdvisors]);
-
-    useEffect(() => {
-        if (user?.level !== "Default" && userList.length === 0) {
-            getUsers({ profiles: "Presenter" });
-        }
-    }, [user?.level, userList.length, getUsers]);
-
-
-    const aoMudarArquivo = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const arquivoSelecionado = e.target.files?.[0];
-
-        if (arquivoSelecionado) {
-            setArquivo(arquivoSelecionado);
-            setNomeArquivo(arquivoSelecionado.name);
-            setValue("slide", arquivoSelecionado.name, {
-                shouldValidate: true,
-            });
-        }
-    };
-
-    const criarDadosSubmissao = (
-        data: CadastroFormulario,
-        arquivoPdf: string
-    ) => {
-        return {
-            ...submission,
-            eventEditionId: getEventEditionIdStorage() ?? "",
-            mainAuthorId: data.apresentador || user?.id,
-            title: data.titulo,
-            abstractText: data.resumo,
-            advisorId: data.orientador as UUID,
-            coAdvisor: data.coorientador || "",
-            dateSuggestion: data.data ? new Date(data.data) : undefined,
-            pdfFile: arquivoPdf,
-            phoneNumber: data.celular,
-            linkHostedFile: formatLink(data.linkApresentacao || ""),
-        };
-    };
-
-    const processarSubmissao = async (
-        dadosSubmissao: any
-    ): Promise<boolean> => {
-        setCarregandoEnvio(true);
-        try {
-            if (submission?.id) {
-                return await updateSubmissionById(
-                    submission.id,
-                    dadosSubmissao
-                );
-            } else {
-                const sucesso = await createSubmission(dadosSubmissao);
-                if (sucesso && user?.profile === "Presenter") {
-                    roteador.push("/minha-apresentacao");
-                }
-                return sucesso;
-            }
-        } catch (erro) {
-            console.error("Erro ao processar submissão:", erro);
-            return false;
-        } finally {
-            setCarregandoEnvio(false);
-        }
-    };
-
-    const limparArquivoOrfao = async (arquivoKey: string) => {
-        try {
-            await deleteFile(arquivoKey);
-        } catch (erro) {
-            console.debug("Erro ao remover arquivo órfão:", erro);
-        }
-    };
-
-    const tratarPalavra = (w: string) =>
-        w
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-zA-Z]/g, "");
-
-    const montarNomeArquivoPdf = (
-        nomeCompleto: string,
-        date = new Date(),
-        titulo: string
-    ) => {
-        const parts = (nomeCompleto || "")
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean)
-            .map(tratarPalavra)
-            .filter(Boolean);
-
-        const primeiro = parts[0] || "Arquivo";
-        const ultimo = parts.length > 1 ? parts[parts.length - 1] : "";
-        const parteNome = ultimo ? `${primeiro}_${ultimo}` : primeiro;
-        const tituloPart = titulo.replaceAll(" ", "_");
-
-        const hh = String(date.getHours()).padStart(2, "0");
-        const dd = String(date.getDate()).padStart(2, "0");
-        const mm = String(date.getMinutes()).padStart(2, "0");
-        const mes = String(date.getMonth() + 1).padStart(2, "0");
-        const ano = date.getFullYear();
-        const segundos = String(date.getSeconds()).padStart(2, "0");
-
-        return `${parteNome}-${tituloPart}-${dd}.${mes}.${ano}.${hh}h.${mm}m.${segundos}s.pdf`;
-    };
-
-    const aoEnviar = async (data: CadastroFormulario) => {
-        if (!user) {
-            showAlert({
-                icon: "error",
-                text: "Você precisa estar logado para realizar a submissão.",
-                confirmButtonText: "Retornar",
-            });
-            return;
-        }
-
-        let arquivoEnviadoKey: string | null = null;
-
-        try {
-            const nomeApresentador =
-                (data.apresentador &&
-                    (userList.find((u) => u.id === data.apresentador)?.name ||
-                        "")) ||
-                user.name;
-
-            if (arquivo) {
-                const nomeMontado = montarNomeArquivoPdf(
-                    nomeApresentador,
-                    new Date(),
-                    data.titulo
-                );
-                const respostaUpload = await sendFile(
-                    arquivo,
-                    user.id,
-                    nomeMontado
-                );
-                if (!respostaUpload?.key) {
-                    throw new Error("Falha no upload do arquivo");
-                }
-                arquivoEnviadoKey = respostaUpload.key;
-            }
-
-            const dadosSubmissao = criarDadosSubmissao(
-                data,
-                arquivoEnviadoKey || data.slide || ""
-            );
-
-            const sucesso = await processarSubmissao(dadosSubmissao);
-
-            if (sucesso) {
-                reset();
-                setSubmission(null);
-                setArquivo(null);
-                setNomeArquivo("");
-
-                showAlert({
-                    icon: "success",
-                    text: "Submissão realizada com sucesso!",
-                    confirmButtonText: "OK",
-                });
-            } else {
-                throw new Error("Falha ao processar submissão");
-            }
-        } catch (e) {
-            if (arquivoEnviadoKey) {
-                await limparArquivoOrfao(arquivoEnviadoKey);
-            }
-        }
-    };
-
-    const aoErro = (erros) => console.error(erros);
-
-    const tituloModal =
-        submission && submission.id
-            ? "Editar Apresentação"
-            : "Cadastrar Apresentação";
-
-    const aoMudarTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        e.target.style.height = "auto";
-        e.target.style.height = `${e.target.scrollHeight}px`;
-    };
-
-    return carregandoEnvio ? (
+  if (carregandoEnvio) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
         <IndicadorDeCarregamento />
-    ) : (
-        <form
-            className="row cadastroApresentacao"
-            onSubmit={handleSubmit(aoEnviar, aoErro)}>
-            <div className="modal-title">
-                <h3 className="d-flex fw-bold text-center justify-content-center mb-4">
-                    {tituloModal}
-                </h3>
-            </div>
-
-            {user?.level !== "Default" && (
-                <div className="col-12 mb-1">
-                    <label className="form-label form-title">
-                        Selecionar apresentador
-                        <span className="text-danger ms-1">*</span>
-                    </label>
-                    <select
-                        id="apresentador-select"
-                        className="form-control input-title"
-                        {...register("apresentador")}
-                        disabled={loadingUserList}
-                    >
-                        <option value="">Selecione um apresentador</option>
-                        {opcoesApresentadoresSelect.length === 0 && !loadingUserList ? (
-                            <option value="" disabled>
-                                Nenhum apresentador encontrado
-                            </option>
-                        ) : (
-                            opcoesApresentadoresSelect.map((apresentador) => (
-                                <option key={apresentador.id} value={apresentador.id}>
-                                    {apresentador.displayLabel}
-                                </option>
-                            ))
-                        )}
-                    </select>
-                </div>
-            )}
-
-            <div className="col-12 mb-1">
-                <label className="form-label form-title">
-                    Título da pesquisa
-                    <span className="text-danger ms-1">*</span>
-                </label>
-                <input
-                    type="text"
-                    className="form-control input-title"
-                    placeholder="Insira o título da pesquisa"
-                    {...register("titulo")}
-                />
-                <p className="text-danger error-message">
-                    {errors.titulo?.message}
-                </p>
-            </div>
-
-            <div className="col-12 mb-1">
-                <label className="form-label form-title">
-                    Resumo<span className="text-danger ms-1">*</span>
-                </label>
-                <textarea
-                    className="form-control input-title overflow-y-hidden"
-                    placeholder="Insira o resumo da pesquisa"
-                    {...register("resumo")}
-                    onInput={aoMudarTextarea}
-                />
-                <p className="text-danger error-message">
-                    {errors.resumo?.message}
-                </p>
-            </div>
-
-            <div className="col-12 mb-1">
-                <label className="form-label form-title">
-                    Nome do orientador
-                    <span className="text-danger ms-1">*</span>
-                </label>
-                <select
-                    id="orientador-select"
-                    className="form-control input-title"
-                    {...register("orientador")}>
-                    <option value="">Selecione o nome do orientador</option>
-                    {advisors.map((orientador) => (
-                        <option key={orientador.id} value={orientador.id}>
-                            {orientador.name}
-                        </option>
-                    ))}
-                </select>
-                <p className="text-danger error-message">
-                    {errors.orientador?.message}
-                </p>
-            </div>
-
-            <div className="col-12 mb-1">
-                <label className="form-label form-title">
-                    Nome do coorientador
-                </label>
-                <input
-                    type="text"
-                    className="form-control input-title"
-                    placeholder="Insira o nome do coorientador"
-                    {...register("coorientador")}
-                />
-            </div>
-
-            <div className="col-12 mb-1">
-                <label className="form-label form-title">
-                    Link da apresentação <span className="txt-min">(Google Drive)</span>
-                </label>
-                <input
-                    type="text"
-                    className="form-control input-title"
-                    placeholder="Link da apresentação no Drive/Dropbox/etc..."
-                    {...register("linkApresentacao")}
-                />
-            </div>
-            <p className="text-danger error-message">
-                {errors.linkApresentacao?.message}
-            </p>
-
-            <div className="col-12 mb-1">
-                <label className="form-label form-title">
-                    Slide da apresentação <span className="txt-min">(PDF)</span>
-                    <span className="text-danger ms-1">*</span>
-                </label>
-                <input
-                    type="file"
-                    className="form-control input-title"
-                    accept=".pdf"
-                    onChange={aoMudarArquivo}
-                />
-                {submission && submission.id
-                    ? nomeArquivo && (
-                        <p className="file-name">
-                            Arquivo selecionado:{" "}
-                            <a
-                                href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${nomeArquivo}`}
-                                download
-                                target="_blank">
-                                {nomeArquivo}
-                            </a>
-                        </p>
-                    )
-                    : nomeArquivo && (
-                        <p className="file-name">
-                            Arquivo selecionado: {nomeArquivo}
-                        </p>
-                    )}
-                <p className="text-danger error-message">
-                    {errors.slide?.message}
-                </p>
-            </div>
-
-            <div className="col-12 mb-1
-">
-                <label className="form-label form-title">
-                    Celular{" "}
-                    <span className="txt-min">(preferência WhatsApp)</span>
-                    <span className="text-danger ms-1">*</span>
-                </label>
-                <Controller
-                    name="celular"
-                    control={control}
-                    render={({ field: { onChange, onBlur, value, ref } }) => (
-                        <InputMask
-                            mask="(99) 99999-9999"
-                            value={value || ""}
-                            onChange={onChange}
-                            onBlur={onBlur}
-                            maskChar=" ">
-                            {(inputProps) => (
-                                <input
-                                    {...inputProps}
-                                    ref={ref}
-                                    className="form-control input-title"
-                                    placeholder="(XX) XXXXX-XXXX"
-                                />
-                            )}
-                        </InputMask>
-                    )}
-                />
-                <p className="text-danger error-message">
-                    {errors.celular?.message}
-                </p>
-            </div>
-
-            <br />
-            <br />
-
-            <div className="d-grid gap-2 col-3 mx-auto">
-                <button
-                    data-bs-target="#collapse"
-                    type="submit"
-                    data-bs-toggle="collapse"
-                    className="btn text-white fs-5 submit-button"
-                    disabled={!Edicao?.isActive}>
-                    {submission && submission?.id ? "Alterar" : "Cadastrar"}
-                </button>
-            </div>
-        </form>
+        <p className="mt-4 text-sm font-semibold text-muted">Processando submissão e enviando arquivos...</p>
+      </div>
     );
+  }
+
+  return (
+    <form className="space-y-8 w-full" onSubmit={onSubmit}>
+      {/* Seção 1: Dados do Trabalho */}
+      <div className="space-y-5">
+        <div className="flex items-center gap-2 border-b border-line pb-2">
+          <Sparkles className="h-5 w-5 text-brand-orange" />
+          <h2 className="text-base font-bold text-foreground">
+            Dados da Pesquisa
+          </h2>
+        </div>
+
+        {user?.level !== "Default" && (
+          <Campo
+            label={
+              <span className="text-sm font-semibold text-foreground">
+                {labelObrigatorio("Selecionar Apresentador")}
+              </span>
+            }
+            htmlFor="apresentador-select"
+          >
+            <div className="relative">
+              <select
+                id="apresentador-select"
+                className={selectClasse}
+                {...register("apresentador")}
+                disabled={loadingUserList}
+              >
+                <option value="">Selecione um autor/apresentador</option>
+                {opcoesApresentadoresSelect.length === 0 && !loadingUserList ? (
+                  <option value="" disabled>
+                    Nenhum apresentador encontrado
+                  </option>
+                ) : (
+                  opcoesApresentadoresSelect.map((apresentador) => (
+                    <option key={apresentador.id} value={apresentador.id}>
+                      {apresentador.displayLabel}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+          </Campo>
+        )}
+
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              {labelObrigatorio("Título da Pesquisa")}
+            </span>
+          }
+          htmlFor="titulo"
+          erro={errors.titulo?.message}
+        >
+          <Input
+            type="text"
+            id="titulo"
+            placeholder="Ex.: Aplicação de Aprendizado Profundo no Diagnóstico Médico"
+            className="text-sm rounded-lg"
+            {...register("titulo")}
+          />
+        </Campo>
+
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              {labelObrigatorio("Resumo")}
+            </span>
+          }
+          htmlFor="resumo"
+          erro={errors.resumo?.message}
+        >
+          <Textarea
+            id="resumo"
+            rows={5}
+            placeholder="Descreva o contexto, objetivos, metodologia e resultados esperados da sua pesquisa..."
+            className={cn("text-sm rounded-lg leading-relaxed")}
+            {...register("resumo")}
+            onInput={aoMudarTextarea}
+          />
+        </Campo>
+      </div>
+
+      {/* Seção 2: Orientação e Contato */}
+      <div className="space-y-5">
+        <div className="flex items-center gap-2 border-b border-line pb-2">
+          <UserCheck className="h-5 w-5 text-brand-blue" />
+          <h2 className="text-base font-bold text-foreground">
+            Orientação e Contato
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Campo
+            label={
+              <span className="text-sm font-semibold text-foreground">
+                {labelObrigatorio("Professor Orientador")}
+              </span>
+            }
+            htmlFor="orientador-select"
+            erro={errors.orientador?.message}
+          >
+            <select
+              id="orientador-select"
+              className={selectClasse}
+              {...register("orientador")}
+            >
+              <option value="">Selecione o orientador</option>
+              {advisors.map((orientador) => (
+                <option key={orientador.id} value={orientador.id}>
+                  {orientador.name}
+                </option>
+              ))}
+            </select>
+          </Campo>
+
+          <Campo
+            label={
+              <span className="text-sm font-semibold text-foreground">
+                Coorientador <span className="text-xs font-normal text-muted">(opcional)</span>
+              </span>
+            }
+            htmlFor="coorientador"
+          >
+            <Input
+              type="text"
+              id="coorientador"
+              placeholder="Nome do coorientador"
+              className="text-sm rounded-lg"
+              {...register("coorientador")}
+            />
+          </Campo>
+        </div>
+
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              {labelObrigatorio("Celular para Contato / WhatsApp")}
+            </span>
+          }
+          htmlFor="celular"
+          erro={errors.celular?.message}
+        >
+          <div className="relative">
+            <Controller
+              name="celular"
+              control={control}
+              render={({ field: { onChange, onBlur, value, ref } }) => (
+                <InputMask
+                  component={Input}
+                  ref={ref}
+                  id="celular"
+                  placeholder="(71) 99999-9999"
+                  className="text-sm rounded-lg"
+                  mask="(__) _____-____"
+                  replacement={{ _: /\d/ }}
+                  value={value ? maskPhone(value) : ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+                  onBlur={onBlur}
+                />
+              )}
+            />
+          </div>
+        </Campo>
+      </div>
+
+      {/* Seção 3: Slides e Links */}
+      <div className="space-y-5">
+        <div className="flex items-center gap-2 border-b border-line pb-2">
+          <FileUp className="h-5 w-5 text-brand-orange" />
+          <h2 className="text-base font-bold text-foreground">
+            Arquivos e Material de Apresentação
+          </h2>
+        </div>
+
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              Link de Apoio / Hospedagem <span className="text-xs font-normal text-muted">(Google Drive, OneDrive, etc. - opcional)</span>
+            </span>
+          }
+          htmlFor="linkApresentacao"
+          erro={errors.linkApresentacao?.message}
+        >
+          <Input
+            type="text"
+            id="linkApresentacao"
+            placeholder="https://drive.google.com/..."
+            className="text-sm rounded-lg"
+            {...register("linkApresentacao")}
+          />
+        </Campo>
+
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              {labelObrigatorio("Slide da Apresentação em PDF")}
+            </span>
+          }
+          htmlFor="slide"
+          erro={errors.slide?.message}
+        >
+          <div className="rounded-xl border-2 border-dashed border-line bg-muted-light/20 p-5 transition-colors duration-200 hover:border-brand-blue/60">
+            <input
+              type="file"
+              id="slide"
+              accept=".pdf"
+              className="block w-full text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-brand-blue/10 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-blue hover:file:bg-brand-blue/20 cursor-pointer"
+              onChange={aoMudarArquivo}
+            />
+
+            {nomeArquivo && (
+              <div className="mt-3 flex items-center gap-2 rounded-lg bg-card p-3 border border-line text-sm text-foreground">
+                <FileUp className="h-4 w-4 text-brand-orange shrink-0" />
+                <span className="truncate">
+                  Arquivo selecionado: <strong>{nomeArquivo}</strong>
+                </span>
+                {submission?.id && (
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${nomeArquivo}`}
+                    download
+                    target="_blank"
+                    className="ml-auto text-xs font-semibold text-brand-blue hover:underline"
+                  >
+                    Baixar atual
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        </Campo>
+      </div>
+
+      {/* Botões de Ação */}
+      <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
+        <button
+          type="submit"
+          disabled={!edicaoAtiva}
+          className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-orange px-8 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Save className="h-5 w-5" />
+          <span>{submission && submission?.id ? "Salvar Alterações" : "Concluir Submissão"}</span>
+        </button>
+      </div>
+    </form>
+  );
 }

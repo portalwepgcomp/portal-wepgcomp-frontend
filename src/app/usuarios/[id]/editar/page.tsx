@@ -2,16 +2,18 @@
 
 import InfoBox from "@/components/InfoBox/InfoBox";
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
+import Banner from "@/components/UI/Banner";
+import Button from "@/components/UI/Button";
+import { Campo, Input } from "@/components/UI/Input";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useUsers } from "@/hooks/useUsers";
 import { UpdateUserRequest } from "@/models/update-user";
+import { User } from "@/models/user";
 import { maskCPF, unmask } from "@/utils/masks";
+import { cn } from "@/utils/cn";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-
-import InputMask from "react-input-mask";
-import Banner from "@/components/UI/Banner";
 
 const updateUserSchema = z
   .object({
@@ -55,6 +57,14 @@ const updateUserSchema = z
       }
     }
   });
+
+const labelObrigatorio = (texto: string) => (
+  <>
+    {texto} <span className="text-error">*</span>
+  </>
+);
+
+const radioLabel = "flex items-center gap-2 text-sm font-medium";
 
 const EditarUsuario = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
@@ -115,7 +125,7 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
 
     const formData = new FormData(event.currentTarget);
 
-    const dataToValidate: any = {
+    const dataToValidate: Record<string, unknown> = {
       name: formData.get("nomeCompleto"),
       email: formData.get("email"),
       profile: formData.get("perfil"),
@@ -160,16 +170,19 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
     }
   };
 
+  // Atualiza o documento aplicando máscara de CPF para ouvintes ou limitando dígitos de matrícula
   const handleDocumentNumberChange = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    let { value } = e.target;
+    const { value } = e.target;
 
     if (selectedProfile === "Listener") {
-      setCpf(value);
+      // Aplica formatação automática de CPF (000.000.000-00)
+      setCpf(maskCPF(value));
     } else {
-      value = value.replace(/\D/g, "");
-      setMatricula(value);
+      // Matrícula acadêmica aceita apenas números (limite de 13 dígitos)
+      const digitsOnly = value.replace(/\D/g, "").slice(0, 13);
+      setMatricula(digitsOnly);
     }
   };
 
@@ -179,129 +192,111 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
   };
 
   if (isLoading) {
-    return <p>Carregando...</p>;
+    return (
+      <ProtectedLayout>
+        <p className="p-6 text-center text-muted">Carregando...</p>
+      </ProtectedLayout>
+    );
   }
 
   if (!user || !selectedProfile) {
-    return <p>Usuário não encontrado.</p>;
+    return (
+      <ProtectedLayout>
+        <p className="p-6 text-center text-muted">Usuário não encontrado.</p>
+      </ProtectedLayout>
+    );
   }
 
   return (
     <ProtectedLayout>
-      <div className="d-flex flex-column" style={{ gap: "30px" }}>
+      <div className="flex flex-col gap-[30px]">
         <Banner title="Editar Usuário" />
-        <div className="align-self-center">
+        <div className="self-center">
           <InfoBox
             title="Informação importante"
             message="Apenas os campos que você modificar serão atualizados no sistema. Os campos não alterados permanecerão com seus valores originais."
           />
-          <div
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "2rem",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-              border: "1px solid #e9ecef",
-              textAlign: "center",
-              margin: "30px 0",
-            }}
-          >
+          <div className="my-[30px] rounded-xl border border-line bg-card p-8 text-center shadow-sm">
             <form className="text-start" onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="nomeCompleto" className="form-label fw-bold">
-                  Nome completo <span className="text-danger">*</span>
-                </label>
-                <input
+              <Campo
+                label={labelObrigatorio("Nome completo")}
+                htmlFor="nomeCompleto"
+                className="mb-3"
+              >
+                <Input
                   type="text"
-                  className="form-control"
                   id="nomeCompleto"
                   name="nomeCompleto"
                   defaultValue={user.name}
                 />
-              </div>
+              </Campo>
 
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label fw-bold">
-                  E-mail {selectedProfile === "Listener" ? "" : "Institucional"}{" "}
-                  <span className="text-danger">*</span>
-                </label>
-                <input
+              <Campo
+                label={labelObrigatorio(
+                  `E-mail ${selectedProfile === "Listener" ? "" : "Institucional"}`.trim(),
+                )}
+                htmlFor="email"
+                className="mb-3"
+              >
+                <Input
                   type="email"
-                  className="form-control"
                   id="email"
                   name="email"
                   defaultValue={user.email}
                 />
-              </div>
+              </Campo>
 
-              <div className="mb-3">
-                <label className="form-label d-block fw-bold">
-                  Perfil <span className="text-danger">*</span>
-                </label>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="perfil"
-                    id="perfilApresentador"
-                    value="Presenter"
-                    checked={selectedProfile === "Presenter"}
-                    onChange={handleProfileChange}
-                  />
-                  <label
-                    className="form-check-label"
-                    htmlFor="perfilApresentador"
-                  >
-                    Apresentador (PGCOMP)
-                  </label>
+              <Campo label={labelObrigatorio("Perfil")} className="mb-3">
+                <div className="flex flex-col gap-2">
+                  {[
+                    {
+                      id: "perfilApresentador",
+                      value: "Presenter",
+                      label: "Apresentador (PGCOMP)",
+                    },
+                    {
+                      id: "perfilProfessor",
+                      value: "Professor",
+                      label: "Professor (PGCOMP)",
+                    },
+                    {
+                      id: "perfilOuvinte",
+                      value: "Listener",
+                      label: "Ouvinte",
+                    },
+                  ].map((opcao) => (
+                    <label
+                      key={opcao.id}
+                      className={radioLabel}
+                      htmlFor={opcao.id}
+                    >
+                      <input
+                        className="h-4 w-4 accent-brand-orange"
+                        type="radio"
+                        name="perfil"
+                        id={opcao.id}
+                        value={opcao.value}
+                        checked={selectedProfile === opcao.value}
+                        onChange={handleProfileChange}
+                      />
+                      {opcao.label}
+                    </label>
+                  ))}
                 </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="perfil"
-                    id="perfilProfessor"
-                    value="Professor"
-                    checked={selectedProfile === "Professor"}
-                    onChange={handleProfileChange}
-                  />
-                  <label className="form-check-label" htmlFor="perfilProfessor">
-                    Professor (PGCOMP)
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="perfil"
-                    id="perfilOuvinte"
-                    value="Listener"
-                    checked={selectedProfile === "Listener"}
-                    onChange={handleProfileChange}
-                  />
-                  <label className="form-check-label" htmlFor="perfilOuvinte">
-                    Ouvinte
-                  </label>
-                </div>
-              </div>
+              </Campo>
 
-              <div className="mb-3">
-                <label htmlFor="documentoNumero" className="form-label fw-bold">
-                  {selectedProfile === "Listener"
+              {/* Campo de Documento: Máscara dinâmica conforme o perfil selecionado */}
+              <Campo
+                label={labelObrigatorio(
+                  selectedProfile === "Listener"
                     ? "CPF"
-                    : "Número de Matrícula"}{" "}
-                  <span className="text-danger">*</span>
-                </label>
-
-                <InputMask
-                  mask={
-                    selectedProfile === "Listener"
-                      ? "999.999.999-99"
-                      : undefined
-                  }
-                  maskChar={null}
+                    : "Número de Matrícula",
+                )}
+                htmlFor="documentoNumero"
+                className="mb-3"
+              >
+                <Input
                   type="text"
-                  className="form-control"
                   id="documentoNumero"
                   name="registrationNumber"
                   value={selectedProfile === "Listener" ? cpf : matricula}
@@ -311,29 +306,34 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                       ? "000.000.000-00"
                       : "Digite a Matrícula (13 dígitos)"
                   }
-                  maxLength={selectedProfile === "Listener" ? undefined : 13}
+                  maxLength={selectedProfile === "Listener" ? 14 : 13}
+                  className={cn(
+                    "w-full rounded-md border border-line px-3 py-2.5 text-sm outline-none",
+                    "focus:border-brand-blue focus:ring-1 focus:ring-brand-blue",
+                  )}
                 />
-              </div>
+              </Campo>
 
-              <div className="mb-3">
-                <label htmlFor="linkLattes" className="form-label fw-bold">
-                  Link Lattes
-                </label>
-                <input
+              <Campo
+                label="Link Lattes"
+                htmlFor="linkLattes"
+                className="mb-3"
+              >
+                <Input
                   type="text"
-                  className="form-control"
                   id="linkLattes"
                   name="linkLattes"
                   defaultValue={user.linkLattes}
                 />
-              </div>
+              </Campo>
 
-              <div className="mb-3">
-                <label htmlFor="permissao" className="form-label fw-bold">
-                  Nível de Permissão <span className="text-danger">*</span>
-                </label>
+              <Campo
+                label={labelObrigatorio("Nível de Permissão")}
+                htmlFor="permissao"
+                className="mb-3"
+              >
                 <select
-                  className="form-select"
+                  className="w-full rounded-md border border-line px-3 py-2.5 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                   id="permissao"
                   name="permissao"
                   defaultValue={user.level}
@@ -342,29 +342,20 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                   <option value="Admin">Administrador</option>
                   <option value="Superadmin">Super Administrador</option>
                 </select>
-              </div>
+              </Campo>
 
-              <div
-                className="d-flex justify-content-end mt-4"
-                style={{ gap: "10px" }}
-              >
-                <button
+              <div className="mt-4 flex justify-end gap-2.5">
+                <Button
                   type="button"
-                  onClick={() => {
-                    router.push("/usuarios");
-                  }}
-                  className="btn btn-outline-secondary"
+                  variante="ghost"
+                  onClick={() => router.push("/usuarios")}
                   disabled={isSubmitting}
                 >
                   Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={isSubmitting}
-                >
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Salvando..." : "Salvar Alterações"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

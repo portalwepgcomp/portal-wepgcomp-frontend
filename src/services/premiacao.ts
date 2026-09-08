@@ -1,5 +1,6 @@
 "use client"
-import  axiosInstance  from '@/utils/api';
+import axiosInstance from '@/utils/api';
+import { AvaliadorParams } from '@/models/premiacao';
 
 const baseUrlAwardedPresenters = "/awarded-presenters";
 const baseUrlAwardedPanelists = "/panelist-awards";

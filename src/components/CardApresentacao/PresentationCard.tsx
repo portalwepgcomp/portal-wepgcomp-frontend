@@ -2,12 +2,12 @@
 
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useContext, useEffect, useState } from "react";
-import "./style.scss";
 
 import Star from "@/components/UI/Star";
 import { usePresentation } from "@/hooks/usePresentation";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
+import { PresentationBookmark } from "@/models/presentation";
 
 interface PresentationCardProps {
   key?: string;
@@ -50,12 +50,12 @@ export default function PresentationCard({
   const router = useRouter();
 
   useEffect(() => {
-    if (signed) {
-      getPresentationBookmark(presentationBookmarkData).then(
-        setpresentationBookmark
+    if (signed && id) {
+      getPresentationBookmark({ presentationId: id }).then(
+        setpresentationBookmark,
       );
     }
-  }, []);
+  }, [signed, id, getPresentationBookmark]);
 
   function handleFavorite() {
     if (!signed) {
@@ -79,88 +79,80 @@ export default function PresentationCard({
     router.push(`/avaliacao/${id}`);
   };
 
-  const presentationDate = moment(presentationData).format("DD/MM");
-  const presentationTime = moment(presentationData).format("HH:mm");
+  const presentationDate = presentationData
+    ? dayjs(presentationData).format("DD/MM")
+    : "";
+  const presentationTime = presentationData
+    ? dayjs(presentationData).format("HH:mm")
+    : "";
 
   return (
     <div
-      className="presentation-card"
-      style={{
-        backgroundColor: cardColor ? cardColor : undefined,
-      }}
+      className="flex flex-col items-start gap-2.5 rounded-[10px] p-6 text-black max-[550px]:items-center max-[550px]:p-4"
+      style={{ backgroundColor: cardColor ?? undefined }}
       key={key}
     >
-      <div
-        className="d-flex align-items-center w-100"
-        style={{
-          gap: "15px",
-          borderBottom: "1px solid #000000",
-          paddingBottom: "15px",
-        }}
-      >
-        <h3
-          className="fw-semibold text-start"
-          style={{ fontSize: "18px", lineHeight: "27px" }}
-        >
+      <div className="flex w-full items-center gap-[15px] border-b border-black pb-[15px]">
+        <h3 className="text-start text-lg font-semibold leading-[27px]">
           {title}
         </h3>
       </div>
-      <div className="info">
-        <div className="info-info">
-          <div className="info-presentation">
+
+      <div className="flex w-full justify-between max-[550px]:flex-col max-[550px]:items-center">
+        <div className="flex flex-col items-start gap-1.5 text-start text-[15px] font-normal max-[550px]:items-center max-[550px]:text-center">
+          <div className="flex flex-row items-start gap-2.5 max-[550px]:flex-col max-[550px]:items-center">
             <strong>{name}</strong>
-            <div className="info-barra"> | </div>
+            <div className="max-[550px]:hidden">|</div>
             <div>{email}</div>
           </div>
-          <h4 className="info-orientador">Orientador(a): {advisorName}</h4>
+          <h4 className="text-start text-[15px] font-normal max-[550px]:text-center">
+            Orientador(a): {advisorName}
+          </h4>
         </div>
         {!!signed && (
           <div>
-            <button className="avaliar-button" onClick={handleEvaluateClick}>
+            <button
+              type="button"
+              className="rounded-[20px] border-0 bg-white px-5 py-0.5 text-brand-orange transition hover:bg-brand-orange hover:text-white"
+              onClick={handleEvaluateClick}
+            >
               Avaliar
             </button>
           </div>
         )}
       </div>
-      <div className="interact">
-        <em
-          className="m-0 text-white"
-          style={{
-            backgroundColor: "#F17F0C",
-            borderRadius: "5px",
-            padding: "4px 10px",
-            fontSize: "15px",
-          }}
-        >
-          {presentationDate} - {presentationTime}
-        </em>
+
+      <div className="flex gap-2.5 max-[550px]:flex-col max-[550px]:items-center">
+        {presentationData && (
+          <em className="m-0 rounded-[5px] bg-brand-accent px-2.5 py-1 text-[15px] not-italic text-white">
+            {presentationDate} - {presentationTime}
+          </em>
+        )}
         {!!signed && (
-          <div onClick={handleFavorite} style={{ cursor: "pointer" }}>
+          <div onClick={handleFavorite} className="cursor-pointer">
             {presentationBookmark && (
               <Star
-                color={presentationBookmark.bookmarked ? "#F17F0C" : "#D9D9D9"}
+                color={
+                  presentationBookmark.bookmarked ? "#F17F0C" : "#D9D9D9"
+                }
               />
             )}
           </div>
         )}
-        <div className="d-flex align-items-center">
-            <a
-            className="fw-semibold bg-white"
-            style={{
-              border: "none",
-              borderRadius: "20px",
-              color: "#FFA90F",
-              padding: "3px 20px",
-            }}
+        <div className="flex items-center">
+          <a
+            className="rounded-[20px] bg-white px-5 py-0.5 font-semibold text-brand-orange no-underline"
             href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${pdfFile}`}
             download
             target="_blank"
-            >
+            rel="noopener noreferrer"
+          >
             Baixar apresentação
-            </a>
+          </a>
         </div>
       </div>
-      <div style={{ textAlign: "justify" }}>
+
+      <div className="text-justify">
         <strong>Abstract: </strong>
         {subtitle}
       </div>

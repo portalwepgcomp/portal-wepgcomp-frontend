@@ -1,9 +1,16 @@
-import { useContext } from "react";
-
-import { createContext, ReactNode, useState } from "react";
+import {
+  useContext,
+  createContext,
+  ReactNode,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 
 import { useSweetAlert } from "@/hooks/useAlert";
 import { orientacoesApi } from "@/services/orientacoes";
+import { Orientacao, OrientacaoParams } from "@/models/orientacoes";
+import { getErrorMessage } from "@/utils/error";
 
 interface OrientacaoProps {
   children: ReactNode;
@@ -14,11 +21,11 @@ interface OrientacaoProviderData {
   loadingOrientacao: boolean;
   orientacoes: Orientacao | null;
   orientacao: Orientacao | null;
-  getOrientacoes: () => void;
-  getOrientacaoById: (idOrientacao: string) => void;
-  postOrientacao: (body: OrientacaoParams) => void;
-  putOrientacao: (idOrientacao: string, body: OrientacaoParams) => void;
-  deleteOrientacao: (idOrientacao: string) => void;
+  getOrientacoes: () => Promise<void>;
+  getOrientacaoById: (idOrientacao: string) => Promise<void>;
+  postOrientacao: (body: OrientacaoParams) => Promise<void>;
+  putOrientacao: (idOrientacao: string, body: OrientacaoParams) => Promise<void>;
+  deleteOrientacao: (idOrientacao: string) => Promise<void>;
 }
 
 export const OrientacaoContext = createContext<OrientacaoProviderData>(
@@ -35,42 +42,35 @@ export const OrientacaoProvider = ({ children }: OrientacaoProps) => {
 
   const { showAlert } = useSweetAlert();
 
-  const getOrientacoes = async () => {
+  const getOrientacoes = useCallback(async () => {
     setLoadingOrientacoes(true);
-    orientacoesApi
-      .getOrientacoes()
-      .then((response) => {
-        setOrientacoes(response);
-      })
-      .catch(() => {
-        setOrientacoes(null);
-      })
-      .finally(() => {
-        setLoadingOrientacoes(false);
-      });
-  };
+    try {
+      const response = await orientacoesApi.getOrientacoes();
+      setOrientacoes(response);
+    } catch {
+      setOrientacoes(null);
+    } finally {
+      setLoadingOrientacoes(false);
+    }
+  }, []);
 
-  const getOrientacaoById = async (idOrientacao: string) => {
+  const getOrientacaoById = useCallback(async (idOrientacao: string) => {
     setLoadingOrientacoes(true);
-    orientacoesApi
-      .getOrientacaoById(idOrientacao)
-      .then((response) => {
-        setOrientacao(response);
-      })
-      .catch(() => {
-        setOrientacao(null);
-      })
-      .finally(() => {
-        setLoadingOrientacoes(false);
-      });
-  };
+    try {
+      const response = await orientacoesApi.getOrientacaoById(idOrientacao);
+      setOrientacao(response);
+    } catch {
+      setOrientacao(null);
+    } finally {
+      setLoadingOrientacoes(false);
+    }
+  }, []);
 
-  const postOrientacao = async (body: OrientacaoParams) => {
-    setLoadingOrientacao(true);
-
-    orientacoesApi
-      .postOrientacao(body)
-      .then((response) => {
+  const postOrientacao = useCallback(
+    async (body: OrientacaoParams) => {
+      setLoadingOrientacao(true);
+      try {
+        const response = await orientacoesApi.postOrientacao(body);
         setOrientacao(response);
         showAlert({
           icon: "success",
@@ -78,32 +78,29 @@ export const OrientacaoProvider = ({ children }: OrientacaoProps) => {
           timer: 3000,
           showConfirmButton: false,
         });
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         setOrientacao(null);
         showAlert({
           icon: "error",
           title: "Erro ao cadastrar orientação",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
+          text: getErrorMessage(
+            err,
             "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
+          ),
           confirmButtonText: "Retornar",
         });
-      })
-      .finally(() => {
+      } finally {
         setLoadingOrientacao(false);
-      });
-  };
+      }
+    },
+    [showAlert]
+  );
 
-  const putOrientacao = async (
-    idOrientacao: string,
-    body: OrientacaoParams
-  ) => {
-    setLoadingOrientacao(true);
-    orientacoesApi
-      .putOrientacao(idOrientacao, body)
-      .then((response) => {
+  const putOrientacao = useCallback(
+    async (idOrientacao: string, body: OrientacaoParams) => {
+      setLoadingOrientacao(true);
+      try {
+        const response = await orientacoesApi.putOrientacao(idOrientacao, body);
         setOrientacao(response);
         showAlert({
           icon: "success",
@@ -111,69 +108,80 @@ export const OrientacaoProvider = ({ children }: OrientacaoProps) => {
           timer: 3000,
           showConfirmButton: false,
         });
-      })
-      .catch((err) => {
-        setOrientacao(null);
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao atualizar orientação",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
+          text: getErrorMessage(
+            err,
             "Ocorreu um erro durante a atualização. Tente novamente mais tarde!",
+          ),
           confirmButtonText: "Retornar",
         });
-      })
-      .finally(() => {
+      } finally {
         setLoadingOrientacao(false);
-      });
-  };
+      }
+    },
+    [showAlert]
+  );
 
-  const deleteOrientacao = async (idOrientacao: string) => {
-    setLoadingOrientacao(true);
-    orientacoesApi
-      .deleteOrientacaoById(idOrientacao)
-      .then(() => {
+  const deleteOrientacao = useCallback(
+    async (idOrientacao: string) => {
+      setLoadingOrientacao(true);
+      try {
+        await orientacoesApi.deleteOrientacaoById(idOrientacao);
         showAlert({
           icon: "success",
           title: "Orientação deletada com sucesso!",
           timer: 3000,
           showConfirmButton: false,
         });
-
-        getOrientacoes();
-      })
-      .catch((err) => {
+        await getOrientacoes();
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao deletar orientação",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
+          text: getErrorMessage(
+            err,
             "Ocorreu um erro durante a deleção. Tente novamente mais tarde!",
+          ),
           confirmButtonText: "Retornar",
         });
-      })
-      .finally(() => {
+      } finally {
         setOrientacao(null);
         setLoadingOrientacao(false);
-      });
-  };
+      }
+    },
+    [getOrientacoes, showAlert]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      loadingOrientacao,
+      loadingOrientacoes,
+      orientacoes,
+      orientacao,
+      getOrientacoes,
+      getOrientacaoById,
+      postOrientacao,
+      putOrientacao,
+      deleteOrientacao,
+    }),
+    [
+      loadingOrientacao,
+      loadingOrientacoes,
+      orientacoes,
+      orientacao,
+      getOrientacoes,
+      getOrientacaoById,
+      postOrientacao,
+      putOrientacao,
+      deleteOrientacao,
+    ]
+  );
 
   return (
-    <OrientacaoContext.Provider
-      value={{
-        loadingOrientacao,
-        loadingOrientacoes,
-        orientacoes,
-        orientacao,
-        getOrientacoes,
-        getOrientacaoById,
-        postOrientacao,
-        putOrientacao,
-        deleteOrientacao,
-      }}
-    >
+    <OrientacaoContext.Provider value={contextValue}>
       {children}
     </OrientacaoContext.Provider>
   );

@@ -1,9 +1,15 @@
-'use client'
-export default function PasswordEye({ color }: {color: string}){
-  return(
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill={color} viewBox="0 0 16 16">
-    <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/>
-    <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
-    </svg>
-  );
-};
+"use client";
+
+import { Eye, EyeOff } from "lucide-react";
+
+interface PasswordEyeProps {
+  color?: string;
+  isOff?: boolean;
+}
+
+export default function PasswordEye({ color = "currentColor", isOff = false }: Readonly<PasswordEyeProps>) {
+  if (isOff) {
+    return <EyeOff className="h-5 w-5" style={{ color }} aria-hidden="true" />;
+  }
+  return <Eye className="h-5 w-5" style={{ color }} aria-hidden="true" />;
+}

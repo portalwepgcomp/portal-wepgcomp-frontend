@@ -1,4 +1,4 @@
-import moment from "moment";
+import dayjs from "dayjs";
 
 export const getInitials = (name: string) => {
     return name
@@ -10,9 +10,9 @@ export const getInitials = (name: string) => {
 };
 
 export const formatDate = (dateString: string) => {
-  return moment(dateString).format("DD/MM/YYYY");
+  return dayjs(dateString).format("DD/MM/YYYY");
 };
 
 export const formatOnlyTime = (dateString: string) => {
-  return moment(dateString).format("HH:mm");
+  return dayjs(dateString).format("HH:mm");
 };

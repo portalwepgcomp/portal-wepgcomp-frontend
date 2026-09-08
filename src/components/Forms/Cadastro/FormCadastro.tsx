@@ -6,10 +6,14 @@ import { z } from "zod";
 
 import { useUsers } from "@/hooks/useUsers";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ProfileType, SubprofileType, RegisterUserParams } from "@/models/user";
 
 import Loading from "@/components/LoadingPage";
-import "./style.scss";
-import PasswordEye from "@/components/UI/PasswordEye";
+import Button from "@/components/UI/Button";
+import { Campo, Input, PasswordInput } from "@/components/UI/Input";
+import { Info, ShieldCheck, ShieldX } from "lucide-react";
+import { cn } from "@/utils/cn";
+import { maskCPF } from "@/lib/masks";
 
 const formCadastroSchema = z
   .object({
@@ -100,13 +104,22 @@ const formCadastroSchema = z
     path: ["confirmaSenha"],
   });
 
-type FormCadastroSchema = z.infer<typeof formCadastroSchema>; // movido para fora da função
+type FormCadastroSchema = z.infer<typeof formCadastroSchema>;
 
 interface FormCadastroProps {
   loadingCreateUser: boolean;
 }
 
-export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
+const labelObrigatorio = (texto: string) => (
+  <>
+    {texto} <span className="text-error">*</span>
+  </>
+);
+
+const radioLabel =
+  "flex cursor-pointer items-center gap-2 text-sm font-bold text-foreground";
+
+export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>) {
   const { registerUser } = useUsers();
   const {
     register,
@@ -122,29 +135,17 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
     },
   });
 
-  const [senha, setSenha] = useState("");
   const [requisitos, setRequisitos] = useState({
     minLength: false,
     hasLetter: false,
     number: false,
   });
 
-  const aplicarMascaraCpf = (value: string): string => {
-    const digits = value.replace(/\D/g, "");
-
-    return digits
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-      .replace(/(-\d{2})\d+?$/, "$1");
-  };
-
   const handleMudancaMatricula = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     if (perfil === "ouvinte" && watch("subperfil") === "outro") {
-      const maskedValue = aplicarMascaraCpf(value);
-      setValue("matricula", maskedValue);
+      setValue("matricula", maskCPF(value));
     } else {
       const numbersOnly = value.replace(/\D/g, "");
       setValue("matricula", numbersOnly);
@@ -160,7 +161,7 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
       matricula = "",
       subperfil,
       linkLattes,
-    } = data; // default assegura string
+    } = data;
 
     const profileFormated: Record<string, ProfileType> = {
       apresentador: "Presenter",
@@ -198,9 +199,11 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
     registerUser(body as RegisterUserParams);
   };
 
+  const { onChange: onSenhaChange, ...senhaRegisterProps } = register("senha");
+
   const handleChangeSenha = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSenhaChange(e);
     const value = e.target.value;
-    setSenha(value);
     setRequisitos({
       minLength: value.length >= 8,
       hasLetter: /[a-zA-Z]/.test(value),
@@ -215,305 +218,239 @@ export function FormCadastro({ loadingCreateUser }: FormCadastroProps) {
   };
 
   const perfil = watch("perfil");
-
-  const [eye1, setEye1] = useState(false);
-  const [eye2, setEye2] = useState(false);
+  const subperfil = watch("subperfil");
 
   useEffect(() => {
     setValue("matricula", "");
   }, [perfil, setValue]);
 
+  if (loadingCreateUser) {
+    return <Loading />;
+  }
+
   return (
-    <>
-      {!loadingCreateUser ? (
-        <form className="row" onSubmit={handleSubmit(handleFormCadastro)}>
-          <div className="col-12 mb-1">
-            <label className="form-label fs-5 fw-bold">
-              Nome completo
-              <span className="text-danger ms-1 fs-5">*</span>
-            </label>
-            <input
-              type="text"
-              className="form-control input-title"
-              id="nome"
-              placeholder="Insira seu nome"
-              {...register("nome")}
-              onChange={handleAoMudarDeNome}
-            />
-            <p className="text-danger error-message">{errors.nome?.message}</p>
-          </div>
+    <form className="w-full max-w-[540px]" onSubmit={handleSubmit(handleFormCadastro)}>
+      <Campo
+        label={labelObrigatorio("Nome completo")}
+        htmlFor="nome"
+        erro={errors.nome?.message}
+        className="mb-1"
+      >
+        <Input
+          type="text"
+          id="nome"
+          placeholder="Insira seu nome"
+          className="text-sm"
+          {...register("nome")}
+          onChange={handleAoMudarDeNome}
+        />
+      </Campo>
 
-          <div className="col-12 mb-1">
-            <label className="form-label fw-bold fs-5">
-              Perfil
-              <span className="text-danger ms-1 fs-5">*</span>
-            </label>
-            <div className="d-flex">
-              <div className="form-check me-3">
-                <input
-                  type="radio"
-                  className="form-check-input"
-                  id="radio1"
-                  {...register("perfil")}
-                  value="apresentador"
-                />
-                <label
-                  className="form-check-label fw-bold input-title"
-                  htmlFor="radio1"
-                >
-                  Apresentador (PGCOMP)
-                  <i
-                    className="bi bi-info-circle ms-2"
-                    data-bs-toggle="tooltip"
-                    title="Aluno do PGCOMP que irá apresentar projetos no workshop."
-                  ></i>
-                </label>
-              </div>
-              <div className="form-check me-3">
-                <input
-                  type="radio"
-                  className="form-check-input"
-                  id="radio2"
-                  {...register("perfil")}
-                  value="professor"
-                />
-                <label
-                  className="form-check-label fw-bold input-title"
-                  htmlFor="radio2"
-                >
-                  Professor (PGCOMP)
-                  <i
-                    className="bi bi-info-circle ms-2"
-                    data-bs-toggle="tooltip"
-                    title=" Professor do PGCOMP que poderá assistir e avaliar os projetos apresentados no workshop."
-                  ></i>
-                </label>
-              </div>
-              <div className="form-check">
-                <input
-                  type="radio"
-                  className="form-check-input"
-                  id="radio3"
-                  {...register("perfil")}
-                  value="ouvinte"
-                />
-                <label
-                  className="form-check-label fw-bold input-title"
-                  htmlFor="radio3"
-                >
-                  Ouvinte
-                  <i
-                    className="bi bi-info-circle ms-2"
-                    data-bs-toggle="tooltip"
-                    title="Participantes que irão assistir ou expor no workshop."
-                  ></i>
-                </label>
-              </div>
-            </div>
-            <p className="text-danger error-message">
-              {errors.perfil?.message}
-            </p>
-          </div>
-
-          {perfil === "ouvinte" && (
-            <div className="col-12 mb-1">
-              <label className="form-label fw-bold fs-5">
-                Tipo de ouvinte
-                <span className="text-danger ms-1 fs-5">*</span>
-              </label>
-              <div className="d-flex flex-wrap">
-                {["doutorando", "mestrando", "graduando", "outro"].map(
-                  (tipo) => (
-                    <div key={tipo} className="form-check me-3">
-                      <input
-                        type="radio"
-                        className="form-check-input"
-                        id={`sub-${tipo}`}
-                        value={tipo}
-                        {...register("subperfil")}
-                      />
-                      <label
-                        className="form-check-label fw-bold input-title"
-                        htmlFor={`sub-${tipo}`}
-                      >
-                        {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
-                      </label>
-                    </div>
-                  ),
-                )}
-              </div>
-              <p className="text-danger error-message">
-                {errors.subperfil?.message}
-              </p>
-            </div>
-          )}
-
-          <div className="col-12 mb-1">
-            <label className="form-label fw-bold fs-5">
-              {perfil === "ouvinte" &&
-              ["outro"].includes(watch("subperfil") ?? "")
-                ? "CPF"
-                : perfil === "professor"
-                  ? "Matrícula SIAPE"
-                  : "Matrícula"}
-              <span className="text-danger ms-1 fs-5">*</span>
-            </label>
-            <input
-              type="text"
-              className="form-control input-title"
-              id="matricula"
-              placeholder={
-                perfil === "ouvinte"
-                  ? "000.000.000-00"
-                  : perfil === "professor"
-                    ? "Insira sua matrícula SIAPE"
-                    : "Insira sua matrícula"
-              }
-              {...register("matricula")}
-              onChange={handleMudancaMatricula}
-              maxLength={
-                perfil === "professor"
-                  ? 19
-                  : perfil === "ouvinte" &&
-                      ["outro"].includes(watch("subperfil") ?? "")
-                    ? 14
-                    : undefined
-              }
-            />
-            <p className="text-danger error-message">
-              {errors.matricula?.message}
-            </p>
-          </div>
-
-          <div className="col-12 mb-1">
-            <label className="form-label fw-bold fs-5">Link Lattes</label>
-            <input
-              type="string"
-              className="form-control input-title"
-              id="linkLattes"
-              placeholder="Insira seu link do perfil Lattes"
-              {...register("linkLattes")}
-              maxLength={50}
-            />
-            <p className="text-danger error-message">
-              {errors.linkLattes?.message}
-            </p>
-          </div>
-
-          <div className="col-12 mb-1">
-            <label className="form-label fw-bold fs-5">
-              E-mail {perfil !== "ouvinte" && "UFBA"}
-              <span className="text-danger ms-1 fs-5">*</span>
-            </label>
-            <input
-              type="email"
-              className="form-control input-title"
-              id="email"
-              placeholder="Insira seu e-mail"
-              {...register("email")}
-            />
-            <p className="text-danger error-message">{errors.email?.message}</p>
-          </div>
-
-          <div className="col-12 mb-1">
-            <label className="form-label fw-bold fs-5">
-              Senha
-              <span className="text-danger ms-1 fs-5">*</span>
-            </label>
-            <div className="password-input">
-              <input
-                type={eye1 ? "text" : "password"}
-                className="form-control input-title password"
-                id="senha"
-                placeholder="Insira sua senha"
-                {...register("senha")}
-                value={senha}
-                onChange={handleChangeSenha}
-              />
-              <div className="eye" onClick={() => setEye1(!eye1)}>
-                <PasswordEye color={!eye1 ? "black" : "blue"} />
-              </div>
-            </div>
-            <p className="text-danger error-message">{errors.senha?.message}</p>
-            <div className="mt-3">
-              <p className="mb-1 fw-semibold paragraph-title">
-                A senha deve possuir pelo menos:
-              </p>
-              <ul className="mb-0">
-                <li
-                  className={`fw-semibold list-title ${
-                    requisitos.minLength ? "text-success" : "text-danger"
-                  }`}
-                >
-                  {requisitos.minLength ? (
-                    <i className="bi bi-shield-fill-check" />
-                  ) : (
-                    <i className="bi bi-shield-fill-x" />
-                  )}{" "}
-                  8 dígitos
-                </li>
-                <li
-                  className={`fw-semibold list-title ${
-                    requisitos.hasLetter ? "text-success" : "text-danger"
-                  }`}
-                >
-                  {requisitos.hasLetter ? (
-                    <i className="bi bi-shield-fill-check" />
-                  ) : (
-                    <i className="bi bi-shield-fill-x" />
-                  )}{" "}
-                  1 letra
-                </li>
-                <li
-                  className={`fw-semibold list-title ${
-                    requisitos.number ? "text-success" : "text-danger"
-                  }`}
-                >
-                  {requisitos.number ? (
-                    <i className="bi bi-shield-fill-check" />
-                  ) : (
-                    <i className="bi bi-shield-fill-x" />
-                  )}{" "}
-                  1 número
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="col-12 mb-4">
-            <label className="form-label fw-bold fs-5">
-              Confirmação de senha
-              <span className="text-danger ms-1 fs-5">*</span>
-            </label>
-            <div className="password-input">
-              <input
-                type={eye2 ? "text" : "password"}
-                className="form-control input-title password"
-                id="confirmaSenha"
-                placeholder="Insira sua senha novamente"
-                {...register("confirmaSenha")}
-              />
-              <div className="eye" onClick={() => setEye2(!eye2)}>
-                <PasswordEye color={!eye2 ? "black" : "blue"} />
-              </div>
-            </div>
-            <p className="text-danger error-message">
-              {errors.confirmaSenha?.message}
-            </p>
-          </div>
-
-          <div className="gap-2 col-3 mx-auto">
-            <button
-              type="submit"
-              className="btn fw-bold fs-5 text-white submit-button"
+      <Campo
+        label={labelObrigatorio("Perfil")}
+        erro={errors.perfil?.message}
+        className="mb-1"
+      >
+        <div className="flex flex-wrap gap-4">
+          {[
+            {
+              id: "radio1",
+              value: "apresentador",
+              label: "Apresentador (PGCOMP)",
+              tooltip:
+                "Aluno do PGCOMP que irá apresentar projetos no workshop.",
+            },
+            {
+              id: "radio2",
+              value: "professor",
+              label: "Professor (PGCOMP)",
+              tooltip:
+                "Professor do PGCOMP que poderá assistir e avaliar os projetos apresentados no workshop.",
+            },
+            {
+              id: "radio3",
+              value: "ouvinte",
+              label: "Ouvinte",
+              tooltip:
+                "Participantes que irão assistir ou expor no workshop.",
+            },
+          ].map((opcao) => (
+            <label
+              key={opcao.id}
+              className={cn(
+                radioLabel,
+                "inline-flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700 hover:text-slate-900",
+              )}
+              htmlFor={opcao.id}
             >
-              Cadastrar
-            </button>
+              <input
+                type="radio"
+                className="h-4 w-4 accent-brand-orange cursor-pointer"
+                id={opcao.id}
+                {...register("perfil")}
+                value={opcao.value}
+              />
+              <span>{opcao.label}</span>
+              <span title={opcao.tooltip} className="inline-flex items-center">
+                <Info
+                  className="h-4 w-4 cursor-pointer text-slate-400 transition hover:text-slate-600"
+                  aria-label={opcao.tooltip}
+                />
+              </span>
+            </label>
+          ))}
+        </div>
+      </Campo>
+
+      {perfil === "ouvinte" && (
+        <Campo
+          label={labelObrigatorio("Tipo de ouvinte")}
+          erro={errors.subperfil?.message}
+          className="mb-1"
+        >
+          <div className="flex flex-wrap gap-4">
+            {(["doutorando", "mestrando", "graduando", "outro"] as const).map(
+              (tipo) => (
+                <label key={tipo} className={radioLabel} htmlFor={`sub-${tipo}`}>
+                  <input
+                    type="radio"
+                    className="h-4 w-4 accent-brand-orange"
+                    id={`sub-${tipo}`}
+                    value={tipo}
+                    {...register("subperfil")}
+                  />
+                  {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+                </label>
+              ),
+            )}
           </div>
-        </form>
-      ) : (
-        <Loading />
+        </Campo>
       )}
-    </>
+
+      <Campo
+        label={labelObrigatorio(
+          perfil === "ouvinte" && subperfil === "outro"
+            ? "CPF"
+            : perfil === "professor"
+              ? "Matrícula SIAPE"
+              : "Matrícula",
+        )}
+        htmlFor="matricula"
+        erro={errors.matricula?.message}
+        className="mb-1"
+      >
+        <Input
+          type="text"
+          id="matricula"
+          placeholder={
+            perfil === "ouvinte"
+              ? "000.000.000-00"
+              : perfil === "professor"
+                ? "Insira sua matrícula SIAPE"
+                : "Insira sua matrícula"
+          }
+          className="text-sm"
+          {...register("matricula")}
+          onChange={handleMudancaMatricula}
+          maxLength={
+            perfil === "professor"
+              ? 19
+              : perfil === "ouvinte" && subperfil === "outro"
+                ? 14
+                : undefined
+          }
+        />
+      </Campo>
+
+      <Campo label="Link Lattes" htmlFor="linkLattes" erro={errors.linkLattes?.message} className="mb-1">
+        <Input
+          type="text"
+          id="linkLattes"
+          placeholder="Insira seu link do perfil Lattes"
+          className="text-sm"
+          {...register("linkLattes")}
+          maxLength={50}
+        />
+      </Campo>
+
+      <Campo
+        label={labelObrigatorio(`E-mail ${perfil !== "ouvinte" ? "UFBA" : ""}`.trim())}
+        htmlFor="email"
+        erro={errors.email?.message}
+        className="mb-1"
+      >
+        <Input
+          type="email"
+          id="email"
+          placeholder="Insira seu e-mail"
+          className="text-sm"
+          {...register("email")}
+        />
+      </Campo>
+
+      <Campo
+        label={labelObrigatorio("Senha")}
+        htmlFor="senha"
+        erro={errors.senha?.message}
+        className="mb-1"
+      >
+        <PasswordInput
+          id="senha"
+          placeholder="Insira sua senha"
+          {...senhaRegisterProps}
+          onChange={handleChangeSenha}
+        />
+      </Campo>
+
+      <div className="mb-1 mt-3">
+        <p className="mb-1 text-xs font-semibold text-[#555555]">
+          A senha deve possuir pelo menos:
+        </p>
+        <ul className="mb-0 list-none pl-0">
+          {[
+            { ok: requisitos.minLength, text: "8 dígitos" },
+            { ok: requisitos.hasLetter, text: "1 letra" },
+            { ok: requisitos.number, text: "1 número" },
+          ].map((req) => (
+            <li
+              key={req.text}
+              className={cn(
+                "text-xs font-semibold",
+                req.ok ? "text-success" : "text-error",
+              )}
+            >
+              {req.ok ? (
+                <ShieldCheck className="h-3.5 w-3.5 inline mr-1 text-success" aria-hidden="true" />
+              ) : (
+                <ShieldX className="h-3.5 w-3.5 inline mr-1 text-error" aria-hidden="true" />
+              )}
+              {req.text}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <Campo
+        label={labelObrigatorio("Confirmação de senha")}
+        htmlFor="confirmaSenha"
+        erro={errors.confirmaSenha?.message}
+        className="mb-1"
+      >
+        <PasswordInput
+          id="confirmaSenha"
+          placeholder="Insira sua senha novamente"
+          {...register("confirmaSenha")}
+        />
+      </Campo>
+
+      <div className="mx-auto mt-2 flex w-full max-[1000px]:justify-center">
+        <Button
+          type="submit"
+          className="w-full max-w-xs bg-brand-orange text-xl font-bold hover:bg-brand-orange max-[1000px]:mx-auto"
+        >
+          Cadastrar
+        </Button>
+      </div>
+    </form>
   );
 }

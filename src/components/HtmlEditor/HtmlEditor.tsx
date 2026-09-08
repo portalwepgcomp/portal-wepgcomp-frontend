@@ -7,7 +7,12 @@ import React from "react";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
-const HtmlEditor = ({ value, onChange }) => {
+interface HtmlEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const HtmlEditor = ({ value, onChange }: HtmlEditorProps) => {
   const config = {
     readonly: false,
     uploader: {
