@@ -1,8 +1,13 @@
-import { useContext } from "react";
-
-
+import {
+  createContext,
+  ReactNode,
+  useState,
+  useContext,
+  useCallback,
+  useMemo,
+} from "react";
 import { committerMembersApi } from "@/services/CommitteeMember";
-import { createContext, ReactNode, useState } from "react";
+import { Committer } from "@/models/committer";
 
 interface CommitterProps {
   children: ReactNode;
@@ -10,7 +15,7 @@ interface CommitterProps {
 
 interface CommitterProviderData {
   committerList: Committer[];
-  getCommitterAll: (eventEditionId?: string) => void;
+  getCommitterAll: (eventEditionId?: string) => Promise<Committer[]>;
 }
 
 export const CommitteerContext = createContext<CommitterProviderData>(
@@ -22,25 +27,31 @@ export const useCommittee = () => useContext(CommitteerContext);
 export const CommitterProvider = ({ children }: CommitterProps) => {
   const [committerList, setcommitterList] = useState<Committer[]>([]);
 
-  const getCommitterAll = async (eventEditionId?: string) => {
-    committerMembersApi
-      .getAllMembers(eventEditionId ?? "")
-      .then((response) => {
-        setcommitterList(response);
-      })
-      .catch(() => {
-        setcommitterList([]);
-      })
-      .finally(() => {});
-  };
+  const getCommitterAll = useCallback(async (eventEditionId?: string): Promise<Committer[]> => {
+    if (!eventEditionId) {
+      setcommitterList([]);
+      return [];
+    }
+    try {
+      const response = await committerMembersApi.getAllMembers(eventEditionId);
+      setcommitterList(response || []);
+      return response || [];
+    } catch {
+      setcommitterList([]);
+      return [];
+    }
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      committerList,
+      getCommitterAll,
+    }),
+    [committerList, getCommitterAll]
+  );
 
   return (
-    <CommitteerContext.Provider
-      value={{
-        committerList,
-        getCommitterAll,
-      }}
-    >
+    <CommitteerContext.Provider value={contextValue}>
       {children}
     </CommitteerContext.Provider>
   );

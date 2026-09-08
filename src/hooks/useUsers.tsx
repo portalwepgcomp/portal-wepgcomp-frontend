@@ -4,23 +4,31 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useMemo,
+  useRef,
   useState,
 } from "react";
 
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { UpdateUserRequest } from "@/models/update-user";
+import {
+  User,
+  GetUserParams,
+  RegisterUserParams,
+  CreateProfessorBySuperadminParams,
+  ResetPasswordSendEmailParams,
+  ResetPasswordParams,
+  RoleType,
+} from "@/models/user";
+import { unwrapPaginatedList } from "@/types/api";
 import { userApi } from "@/services/user";
+import { registrarErro } from "@/utils/logError";
+import { getErrorMessage } from "@/utils/error";
 
 interface UserProps {
   children: ReactNode;
 }
-
-import axiosInstance from "@/utils/api";
-
-const baseUrl = "/users";
-const authBaseUrl = "/auth";
-const instance = axiosInstance;
 
 interface UserProviderData {
   loadingCreateUser: boolean;
@@ -36,11 +44,11 @@ interface UserProviderData {
   userList: User[];
   advisors: User[];
   admins: User[];
-  getUsers: (params: GetUserParams) => void;
+  getUsers: (params: GetUserParams) => Promise<void>;
   registerUser: (body: RegisterUserParams) => Promise<void>;
   createProfessorBySuperadmin: (
     body: CreateProfessorBySuperadminParams,
-  ) => Promise<void>;
+  ) => Promise<User | undefined>;
   resetPasswordSendEmail: (body: ResetPasswordSendEmailParams) => Promise<void>;
   resetPassword: (body: ResetPasswordParams) => Promise<void>;
   getAdvisors: () => Promise<void>;
@@ -55,7 +63,7 @@ interface UserProviderData {
   updateUser: (
     email: string,
     updateUserRequest: UpdateUserRequest,
-  ) => Promise<boolean |void>;
+  ) => Promise<boolean | void>;
   findUserById: (userId: string) => Promise<User | undefined>;
 }
 
@@ -78,9 +86,11 @@ export const UserProvider = ({ children }: UserProps) => {
   const [loadingSwitchActive, setLoadingSwitchActive] =
     useState<boolean>(false);
   const [loadingRoleAction, setLoadingRoleAction] = useState<boolean>(false);
-  const [loadingUser, setLoadingUser] = useState<boolean>(false);
+  const [_loadingUser, setLoadingUser] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [userList, setUserList] = useState<User[]>([]);
+  const userListRef = useRef<User[]>([]);
+  userListRef.current = userList;
   const [advisors, setAdvisors] = useState<User[]>([]);
   const [admins, setAdmins] = useState<User[]>([]);
   const { user: authUser } = useContext(AuthContext);
@@ -93,171 +103,172 @@ export const UserProvider = ({ children }: UserProps) => {
       setLoadingUserList(true);
 
       if (authUser) {
-        userApi
-          .getUsers(params)
-          .then((response) => {
-            setUserList(response);
-          })
-          .catch((err) => {
-            setUserList([]);
-
-            showAlert({
-              icon: "error",
-              title: "Erro ao listar usuários",
-              text:
-                err.response?.data?.message?.message ||
-                err.response?.data?.message ||
-                "Ocorreu um erro durante a busca.",
-              confirmButtonText: "Retornar",
-            });
-          })
-          .finally(() => {
-            setLoadingUserList(false);
+        try {
+          const response = await userApi.getUsers(params);
+          setUserList(unwrapPaginatedList(response) as User[]);
+        } catch (err: unknown) {
+          setUserList([]);
+          showAlert({
+            icon: "error",
+            title: "Erro ao listar usuários",
+            text: getErrorMessage(err, "Ocorreu um erro durante a busca."),
+            confirmButtonText: "Retornar",
           });
+        } finally {
+          setLoadingUserList(false);
+        }
+      } else {
+        setLoadingUserList(false);
       }
     },
     [authUser, showAlert],
   );
 
-  const registerUser = async (body: RegisterUserParams) => {
-    setLoadingCreateUser(true);
+  const registerUser = useCallback(
+    async (body: RegisterUserParams) => {
+      setLoadingCreateUser(true);
 
-    try {
-      const response = await userApi.registerUser(body);
-      setUser(response);
+      try {
+        const response = await userApi.registerUser(body);
+        setUser(response);
 
-      showAlert({
-        icon: "success",
-        title: "Cadastro realizado com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
+        showAlert({
+          icon: "success",
+          title: "Cadastro realizado com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
 
-      router.push("/login");
-    } catch (err: any) {
-      setUser(null);
+        router.push("/login");
+      } catch (err: unknown) {
+        setUser(null);
 
-      showAlert({
-        icon: "error",
-        title: "Erro ao cadastrar usuário",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingCreateUser(false);
-    }
-  };
+        showAlert({
+          icon: "error",
+          title: "Erro ao cadastrar usuário",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingCreateUser(false);
+      }
+    },
+    [router, showAlert],
+  );
 
-  const createProfessorBySuperadmin = async (
-    body: CreateProfessorBySuperadminParams,
-  ) => {
-    setLoadingCreateProfessor(true);
+  const createProfessorBySuperadmin = useCallback(
+    async (body: CreateProfessorBySuperadminParams) => {
+      setLoadingCreateProfessor(true);
 
-    try {
-      const response = await userApi.createProfessorBySuperadmin(body);
+      try {
+        const response = await userApi.createProfessorBySuperadmin(body);
 
-      showAlert({
-        icon: "success",
-        title: "Professor cadastrado com sucesso!",
-        text: "O professor foi cadastrado e receberá um email com as credenciais de acesso.",
-        timer: 3000,
-        showConfirmButton: false,
-      });
+        showAlert({
+          icon: "success",
+          title: "Professor cadastrado com sucesso!",
+          text: "O professor foi cadastrado e receberá um email com as credenciais de acesso.",
+          timer: 3000,
+          showConfirmButton: false,
+        });
 
-      // Refresh user list
-      getUsers({});
+        getUsers({});
 
-      return response;
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao cadastrar professor",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
-        confirmButtonText: "Retornar",
-      });
-      throw err;
-    } finally {
-      setLoadingCreateProfessor(false);
-    }
-  };
+        return response;
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao cadastrar professor",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+        throw err;
+      } finally {
+        setLoadingCreateProfessor(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
 
-  const resetPasswordSendEmail = async (body: ResetPasswordSendEmailParams) => {
-    setLoadingSendEmail(true);
+  const resetPasswordSendEmail = useCallback(
+    async (body: ResetPasswordSendEmailParams) => {
+      setLoadingSendEmail(true);
 
-    try {
-      const response = await userApi.resetPasswordSendEmail(body);
-      setUser(response);
+      try {
+        const response = await userApi.resetPasswordSendEmail(body);
+        setUser(response);
 
-      showAlert({
-        icon: "success",
-        title: "E-mail enviado com sucesso!",
-        text: "Confira o e-mail cadastrado para redefinir a senha.",
-        timer: 3000,
-        showConfirmButton: false,
-      });
+        showAlert({
+          icon: "success",
+          title: "E-mail enviado com sucesso!",
+          text: "Confira o e-mail cadastrado para redefinir a senha.",
+          timer: 3000,
+          showConfirmButton: false,
+        });
 
-      router.push("/login");
-    } catch (err: any) {
-      setUser(null);
+        router.push("/login");
+      } catch (err: unknown) {
+        setUser(null);
 
-      showAlert({
-        icon: "error",
-        title: "Erro ao enviar e-mail",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro ao enviar o e-mail.",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingSendEmail(false);
-    }
-  };
+        showAlert({
+          icon: "error",
+          title: "Erro ao enviar e-mail",
+          text: getErrorMessage(err, "Ocorreu um erro ao enviar o e-mail."),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingSendEmail(false);
+      }
+    },
+    [router, showAlert],
+  );
 
-  const resetPassword = async (body: ResetPasswordParams) => {
-    setLoadingResetPassword(true);
+  const resetPassword = useCallback(
+    async (body: ResetPasswordParams) => {
+      setLoadingResetPassword(true);
 
-    try {
-      const response = await userApi.resetPassword(body);
-      setUser(response);
+      try {
+        const response = await userApi.resetPassword(body);
+        setUser(response);
 
-      showAlert({
-        icon: "success",
-        title: "Senha alterada com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
+        showAlert({
+          icon: "success",
+          title: "Senha alterada com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
 
-      router.push("/login");
-    } catch (err: any) {
-      setUser(null);
+        router.push("/login");
+      } catch (err: unknown) {
+        setUser(null);
 
-      showAlert({
-        icon: "error",
-        title: "Erro ao alterar senha",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro ao tentar alterar sua senha. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingResetPassword(false);
-    }
-  };
+        showAlert({
+          icon: "error",
+          title: "Erro ao alterar senha",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar alterar sua senha. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingResetPassword(false);
+      }
+    },
+    [router, showAlert],
+  );
 
-  const switchActiveUser = async (userId: string, activate: boolean) => {
-    setLoadingSwitchActive(true);
+  const switchActiveUser = useCallback(
+    async (userId: string, activate: boolean) => {
+      setLoadingSwitchActive(true);
 
-    userApi
-      .switchActiveUser(userId, activate)
-      .then(() => {
+      try {
+        await userApi.switchActiveUser(userId, activate);
         showAlert({
           icon: "success",
           title: "Status de ativação alterado com sucesso!",
@@ -265,350 +276,399 @@ export const UserProvider = ({ children }: UserProps) => {
           showConfirmButton: false,
         });
         getUsers({});
-      })
-      .catch((err) => {
+      } catch (err: unknown) {
         showAlert({
           icon: "error",
           title: "Erro ao trocar status",
-          text:
-            err.response?.data?.message?.message ||
-            err.response?.data?.message ||
+          text: getErrorMessage(
+            err,
             "Ocorreu um erro ao tentar alterar status. Tente novamente!",
+          ),
           confirmButtonText: "Retornar",
         });
-      })
-      .finally(() => setLoadingSwitchActive(false));
-  };
+      } finally {
+        setLoadingSwitchActive(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
 
-  const getAdvisors = async () => {
+  const getAdvisors = useCallback(async () => {
     setLoadingAdvisors(true);
 
     try {
       const response = await userApi.getAdvisors();
       setAdvisors(response);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      registrarErro("Erro na requisição de usuários", err);
       setAdvisors([]);
 
       showAlert({
         icon: "error",
         title: "Erro ao buscar orientadores",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro ao buscar orientadores.",
+        text: getErrorMessage(err, "Ocorreu um erro ao buscar orientadores."),
         confirmButtonText: "Retornar",
       });
     } finally {
       setLoadingAdvisors(false);
     }
-  };
+  }, [showAlert]);
 
-  const getAdmins = async () => {
+  const getAdmins = useCallback(async () => {
     setLoadingAdmins(true);
 
     try {
       const response = await userApi.getAdmins();
       setAdmins(response);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      registrarErro("Erro na requisição de usuários", err);
       setAdmins([]);
 
       showAlert({
         icon: "error",
-        title: "Erro ao buscar orientadores",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro ao buscar orientadores.",
+        title: "Erro ao buscar administradores",
+        text: getErrorMessage(
+          err,
+          "Ocorreu um erro ao buscar administradores.",
+        ),
         confirmButtonText: "Retornar",
       });
     } finally {
       setLoadingAdmins(false);
     }
-  };
+  }, [showAlert]);
 
-  const approveTeacher = async (userId: string) => {
-    setLoadingRoleAction(true);
+  const approveTeacher = useCallback(
+    async (userId: string) => {
+      setLoadingRoleAction(true);
 
-    try {
-      await userApi.approveTeacher(userId);
-      showAlert({
-        icon: "success",
-        title: "Professor aprovado com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      getUsers({});
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao aprovar professor",
-        text:
-          err.response?.data?.message ||
-          "Ocorreu um erro ao tentar aprovar o professor. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingRoleAction(false);
-    }
-  };
-
-  const approvePresenter = async (userId: string) => {
-    setLoadingRoleAction(true);
-
-    try {
-      const result = await userApi.approvePresenter(userId);
-
-      // Optimistic update - immediately update the user in the local state
-      setUserList((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === userId ? { ...user, isPresenterActive: true } : user,
-        ),
-      );
-
-      showAlert({
-        icon: "success",
-        title: "Apresentador aprovado com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-
-      await getUsers({});
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao aprovar apresentador",
-        text:
-          err.response?.data?.message ||
-          "Ocorreu um erro ao tentar aprovar o apresentador. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingRoleAction(false);
-    }
-  };
-
-  const promoteToAdmin = async (userId: string) => {
-    setLoadingRoleAction(true);
-
-    try {
-      const user = userList.find((u) => u.id === userId);
-      if (!user) {
-        throw new Error("Usuário não encontrado");
-      }
-
-      await userApi.updateUser(user.email, { level: "Admin" });
-      showAlert({
-        icon: "success",
-        title: "Usuário promovido a Administrador!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      getUsers({});
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao promover usuário",
-        text:
-          err.response?.data?.message ||
-          err.message ||
-          "Ocorreu um erro ao tentar promover o usuário. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingRoleAction(false);
-    }
-  };
-
-  const promoteToSuperadmin = async (userId: string) => {
-    setLoadingRoleAction(true);
-
-    try {
-      const user = userList.find((u) => u.id === userId);
-      if (!user) {
-        throw new Error("Usuário não encontrado");
-      }
-
-      await userApi.updateUser(user.email, { level: "Superadmin" });
-      showAlert({
-        icon: "success",
-        title: "Usuário promovido a Superadministrador!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      getUsers({});
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao promover usuário",
-        text:
-          err.response?.data?.message ||
-          err.message ||
-          "Ocorreu um erro ao tentar promover o usuário. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingRoleAction(false);
-    }
-  };
-
-  const demoteUser = async (userId: string) => {
-    setLoadingRoleAction(true);
-
-    try {
-      const user = userList.find((u) => u.id === userId);
-      if (!user) {
-        throw new Error("Usuário não encontrado");
-      }
-
-      // Determine target level based on current level
-      let targetLevel: RoleType = "Default";
-      if (user.isSuperadmin) {
-        targetLevel = "Admin";
-      } else if (user.isAdmin) {
-        targetLevel = "Default";
-      }
-
-      await userApi.updateUser(user.email, { level: targetLevel });
-      showAlert({
-        icon: "success",
-        title: "Usuário rebaixado com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      getUsers({});
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao rebaixar usuário",
-        text:
-          err.response?.data?.message ||
-          err.message ||
-          "Ocorreu um erro ao tentar rebaixar o usuário. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingRoleAction(false);
-    }
-  };
-
-  const deleteUser = async (userId: string) => {
-    setLoadingRoleAction(true);
-
-    try {
-      await userApi.deleteUser(userId);
-      showAlert({
-        icon: "success",
-        title: "Usuário excluído com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      getUsers({});
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao excluir usuário",
-        text:
-          err.response?.data?.message ||
-          "Ocorreu um erro ao tentar excluir o usuário. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-    } finally {
-      setLoadingRoleAction(false);
-    }
-  };
-
-  const updateUser = async (
-    email: string,
-    updateUserRequest: UpdateUserRequest,
-  ) => {
-    try {
-      await instance.patch(`${baseUrl}/edit/${email}`, updateUserRequest);
-      showAlert({
-        icon: "success",
-        title: "Usuário editado com sucesso!",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-      getUsers({});
-      return true;
-    } catch (err: any) {
-      showAlert({
-        icon: "error",
-        title: "Erro ao editar usuário",
-        text:
-          Array.isArray(err.response?.data?.message?.message)
-              ? err.response.data.message.message[0]
-              : err.response?.data?.message?.message ||
-          "Ocorreu um erro ao tentar editar o usuário. Tente novamente!",
-        confirmButtonText: "Retornar",
-      });
-      return false;
-    } finally {
-      setLoadingRoleAction(false);
-    }
-  };
-
-  const findUserById = async (id: string) => {
-    setLoadingUser(true);
-    return instance.get(`${baseUrl}/${id}`)
-        .then(({ data }) => {
-          setUser(data);
-          return data
-        })
-        .catch((err) => {
-          setUser(null);
-          showAlert({
-            icon: "error",
-            title: "Erro ao encontrar o usuário",
-            text:
-                err.response?.data?.message?.message ||
-                err.response?.data?.message ||
-                "Ocorreu um erro durante a busca.",
-            confirmButtonText: "Retornar",
-          });
-          return undefined;
-        })
-        .finally(() => {
-          setLoadingUser(false);
+      try {
+        await userApi.approveTeacher(userId);
+        showAlert({
+          icon: "success",
+          title: "Professor aprovado com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
         });
-  }
+        getUsers({});
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao aprovar professor",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar aprovar o professor. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const approvePresenter = useCallback(
+    async (userId: string) => {
+      setLoadingRoleAction(true);
+
+      try {
+        await userApi.approvePresenter(userId);
+
+        // Optimistic update
+        setUserList((prevUsers) =>
+          prevUsers.map((u) =>
+            u.id === userId ? { ...u, isPresenterActive: true } : u,
+          ),
+        );
+
+        showAlert({
+          icon: "success",
+          title: "Apresentador aprovado com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+
+        await getUsers({});
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao aprovar apresentador",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar aprovar o apresentador. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const promoteToAdmin = useCallback(
+    async (userId: string) => {
+      setLoadingRoleAction(true);
+
+      try {
+        const targetUser = userListRef.current.find((u) => u.id === userId);
+        if (!targetUser) {
+          throw new Error("Usuário não encontrado");
+        }
+
+        await userApi.updateUser(targetUser.email, { level: "Admin" });
+        showAlert({
+          icon: "success",
+          title: "Usuário promovido a Administrador!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        getUsers({});
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao promover usuário",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar promover o usuário. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const promoteToSuperadmin = useCallback(
+    async (userId: string) => {
+      setLoadingRoleAction(true);
+
+      try {
+        const targetUser = userListRef.current.find((u) => u.id === userId);
+        if (!targetUser) {
+          throw new Error("Usuário não encontrado");
+        }
+
+        await userApi.updateUser(targetUser.email, { level: "Superadmin" });
+        showAlert({
+          icon: "success",
+          title: "Usuário promovido a Superadministrador!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        getUsers({});
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao promover usuário",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar promover o usuário. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const demoteUser = useCallback(
+    async (userId: string) => {
+      setLoadingRoleAction(true);
+
+      try {
+        const targetUser = userListRef.current.find((u) => u.id === userId);
+        if (!targetUser) {
+          throw new Error("Usuário não encontrado");
+        }
+
+        let targetLevel: RoleType = "Default";
+        if (targetUser.isSuperadmin) {
+          targetLevel = "Admin";
+        } else if (targetUser.isAdmin) {
+          targetLevel = "Default";
+        }
+
+        await userApi.updateUser(targetUser.email, { level: targetLevel });
+        showAlert({
+          icon: "success",
+          title: "Usuário rebaixado com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        getUsers({});
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao rebaixar usuário",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar rebaixar o usuário. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const deleteUser = useCallback(
+    async (userId: string) => {
+      setLoadingRoleAction(true);
+
+      try {
+        await userApi.deleteUser(userId);
+        showAlert({
+          icon: "success",
+          title: "Usuário excluído com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        getUsers({});
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao excluir usuário",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar excluir o usuário. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const updateUser = useCallback(
+    async (email: string, updateUserRequest: UpdateUserRequest) => {
+      try {
+        await userApi.updateUser(email, updateUserRequest);
+        showAlert({
+          icon: "success",
+          title: "Usuário editado com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        getUsers({});
+        return true;
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao editar usuário",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao tentar editar o usuário. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+        return false;
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const findUserById = useCallback(
+    async (id: string) => {
+      setLoadingUser(true);
+      try {
+        const data = await userApi.findUserById(id);
+        setUser(data);
+        return data;
+      } catch (err: unknown) {
+        setUser(null);
+        showAlert({
+          icon: "error",
+          title: "Erro ao encontrar o usuário",
+          text: getErrorMessage(err, "Ocorreu um erro durante a busca."),
+          confirmButtonText: "Retornar",
+        });
+        return undefined;
+      } finally {
+        setLoadingUser(false);
+      }
+    },
+    [showAlert],
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      loadingCreateUser,
+      loadingCreateProfessor,
+      loadingSendEmail,
+      loadingResetPassword,
+      loadingUserList,
+      loadingAdvisors,
+      loadingAdmins,
+      loadingSwitchActive,
+      loadingRoleAction,
+      user,
+      userList,
+      advisors,
+      admins,
+      getUsers,
+      registerUser,
+      createProfessorBySuperadmin,
+      resetPasswordSendEmail,
+      resetPassword,
+      getAdvisors,
+      getAdmins,
+      switchActiveUser,
+      approveTeacher,
+      approvePresenter,
+      promoteToAdmin,
+      promoteToSuperadmin,
+      demoteUser,
+      deleteUser,
+      updateUser,
+      findUserById,
+    }),
+    [
+      loadingCreateUser,
+      loadingCreateProfessor,
+      loadingSendEmail,
+      loadingResetPassword,
+      loadingUserList,
+      loadingAdvisors,
+      loadingAdmins,
+      loadingSwitchActive,
+      loadingRoleAction,
+      user,
+      userList,
+      advisors,
+      admins,
+      getUsers,
+      registerUser,
+      createProfessorBySuperadmin,
+      resetPasswordSendEmail,
+      resetPassword,
+      getAdvisors,
+      getAdmins,
+      switchActiveUser,
+      approveTeacher,
+      approvePresenter,
+      promoteToAdmin,
+      promoteToSuperadmin,
+      demoteUser,
+      deleteUser,
+      updateUser,
+      findUserById,
+    ],
+  );
 
   return (
-    <UserContext.Provider
-      value={{
-        loadingCreateUser,
-        loadingCreateProfessor,
-        loadingSendEmail,
-        loadingResetPassword,
-        loadingUserList,
-        loadingAdvisors,
-        loadingAdmins,
-        loadingSwitchActive,
-        loadingRoleAction,
-        user,
-        userList,
-        advisors,
-        admins,
-        getUsers,
-        registerUser,
-        createProfessorBySuperadmin,
-        resetPasswordSendEmail,
-        resetPassword,
-        getAdvisors,
-        getAdmins,
-        switchActiveUser,
-        approveTeacher,
-        approvePresenter,
-        promoteToAdmin,
-        promoteToSuperadmin,
-        demoteUser,
-        deleteUser,
-        updateUser,
-        findUserById
-      }}
-    >
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );

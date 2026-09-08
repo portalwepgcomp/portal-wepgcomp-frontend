@@ -1,5 +1,6 @@
 "use client"
 import axiosInstance from '@/utils/api';
+import { PresentationBlockParams, SwapMultiplePresentationsOnSession } from "@/models/session";
 
 const baseUrl = "/presentation-block";
 const baseUrlRoom = "/room";
@@ -19,13 +20,13 @@ export const sessionApi = {
         return data;
     },
 
-    createSession: async (body: SessaoParams) => {
+    createSession: async (body: PresentationBlockParams) => {
         const { data } = await instance.post(`${baseUrl}`, body);
 
         return data;
     },
 
-    updateSessionById: async (idSession: string, body: SessaoParams) => {
+    updateSessionById: async (idSession: string, body: PresentationBlockParams) => {
         const { data } = await instance.patch(`${baseUrl}/${idSession}`, body);
 
         return data;

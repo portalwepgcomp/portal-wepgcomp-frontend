@@ -1,9 +1,11 @@
 "use client";
 
-import LoadingPage from "@/components/LoadingPage";
 import { ReactNode, useEffect } from "react";
-
-import "./style.scss";
+import { X } from "lucide-react";
+import LoadingPage from "@/components/LoadingPage";
+import Button from "@/components/UI/Button";
+import { useModal } from "@/context/ModalProvider";
+import { cn } from "@/utils/cn";
 
 interface ModalComponentProps {
   id: string;
@@ -34,58 +36,88 @@ export default function ModalComponent({
   onClose,
   children,
 }: Readonly<ModalComponentProps>) {
+  const { isOpen, close } = useModal(id);
+
+  const handleClose = () => {
+    onClose?.();
+    close();
+  };
+
   useEffect(() => {
-    const backdrop = document.querySelector(".modal-backdrop");
-    if (backdrop) {
-      backdrop.parentNode?.removeChild(backdrop);
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
       document.body.style.overflow = "";
     }
-  }, [onClose]);
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
   return (
     <div
-      className={`modal fade ${
-        isShortModal ? "modal-sm" : "modal-lg"
-      } modal-component ${className || ""}`}
-      id={id}
-      tabIndex={-1}
-      onBlur={onClose}
+      className={cn(
+        "fixed inset-0 z-[2000] flex items-center justify-center p-4",
+        className?.includes("modal-above-header") && "z-[10001]",
+        className,
+      )}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={id}
     >
-      <div className="modal-dialog centered">
-        <div className="modal-content">
-          {loading && <LoadingPage />}
-          {!loading && (
-            <>
-              <div className="modal-header header-modal-component">
-                <button
-                  id={idCloseModal ?? "close-modal"}
-                  type="button"
-                  className="btn-close close-button"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
-              </div>
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+        onClick={handleClose}
+        aria-hidden
+      />
+      <div
+        className={cn(
+          "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl",
+          isShortModal ? "max-w-md" : "max-w-4xl",
+        )}
+      >
+        {loading ? (
+          <LoadingPage />
+        ) : (
+          <>
+            <div className="flex justify-end border-0 p-2">
+              <button
+                id={idCloseModal ?? "close-modal"}
+                type="button"
+                onClick={handleClose}
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted transition hover:bg-muted-light hover:text-foreground focus:outline-none"
+                aria-label="Fechar"
+              >
+                <X className="h-6 w-6" aria-hidden="true" />
+              </button>
+            </div>
 
-              <div className="modal-body content-modal-component">
-                {children}
-              </div>
+            <div className="flex flex-col items-start overflow-y-auto px-6 pb-4">
+              {children}
+            </div>
 
-              {onConfirm && labelConfirmButton && (
-                <div className={`modal-footer content-modal-component`}>
-                  <button
-                    type={formId ? "submit" : "button"}
-                    form={formId}
-                    className="btn btn-primary button-modal-component"
-                    disabled={disabledConfirmButton}
-                    style={{ backgroundColor: colorButtonConfirm }}
-                    onClick={onConfirm}
-                  >
-                    {labelConfirmButton}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            {onConfirm && labelConfirmButton && (
+              <div className="flex justify-center border-t border-line px-6 py-4">
+                <Button
+                  type={formId ? "submit" : "button"}
+                  form={formId}
+                  disabled={disabledConfirmButton}
+                  className="w-48 font-bold"
+                  style={
+                    colorButtonConfirm
+                      ? { backgroundColor: colorButtonConfirm }
+                      : undefined
+                  }
+                  onClick={onConfirm}
+                >
+                  {labelConfirmButton}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

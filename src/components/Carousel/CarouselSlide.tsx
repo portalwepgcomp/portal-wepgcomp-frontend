@@ -1,55 +1,34 @@
 "use client";
 
 import { ReactNode } from "react";
-import "./Carousel.scss";
+import { cn } from "@/utils/cn";
 
 interface CarouselSlideProps {
   imageUrl: string;
-  slideIndex: string;
-  children: ReactNode[] | ReactNode;
-  isActive?: boolean;
+  isActive: boolean;
+  children: ReactNode;
 }
 
 export default function CarouselSlide({
   imageUrl,
-  slideIndex,
   isActive,
   children,
 }: Readonly<CarouselSlideProps>) {
   return (
-    <div className={`carousel-item ${isActive ? "active" : ""} carousel-slide`}>
+    <div
+      className={cn(
+        "absolute inset-0 transition-opacity duration-700 ease-in-out",
+        isActive ? "z-10 opacity-100" : "pointer-events-none z-0 opacity-0",
+      )}
+      aria-hidden={!isActive}
+    >
       <div
-        className='carousel-slide-content'
-        style={{
-          backgroundImage: `url(${imageUrl})`,
-          backgroundSize: "cover",
-          backgroundPosition: "bottom",
-        }}
+        className="relative flex min-h-[460px] md:min-h-[500px] w-full flex-col items-center justify-center bg-cover bg-center px-4 py-12 pb-20 text-white"
+        style={{ backgroundImage: `url(${imageUrl})` }}
       >
-        {children}
-        <div className='carousel-indicators indicators-content'>
-          <button
-            type='button'
-            data-bs-target='#carousel-wepgcomp'
-            data-bs-slide-to='0'
-            className={`indicators-buttons ${slideIndex == '0' ? "active" : ""}`}
-            aria-current='true'
-            aria-label='Slide 1'
-          />
-          <button
-            type='button'
-            data-bs-target='#carousel-wepgcomp'
-            data-bs-slide-to='1'
-            className={`indicators-buttons ${slideIndex == '1' ? "active" : ""}`}
-            aria-label='Slide 2'
-          />
-          <button
-            type='button'
-            data-bs-target='#carousel-wepgcomp'
-            data-bs-slide-to='2'
-            className={`indicators-buttons ${slideIndex == '2' ? "active" : ""}`}
-            aria-label='Slide 3'
-          />
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="relative z-10 flex w-full max-w-4xl flex-col items-center justify-center gap-3 text-center">
+          {children}
         </div>
       </div>
     </div>

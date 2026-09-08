@@ -1,14 +1,18 @@
-import { useContext } from "react";
-
+import {
+  useContext,
+  createContext,
+  ReactNode,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { BookmarkedPresentations } from "@/models/presentatio-bookmarks";
 import { presentationApi } from "@/services/presentation";
-import { createContext, ReactNode, useState } from "react";
-
-
-import axiosInstance from "@/utils/api";
-
-const baseUrl = "/presentation";
-const instance = axiosInstance;
+import {
+  Presentation,
+  PresentationBookmark,
+  PresentationBookmarkRegister,
+} from "@/models/presentation";
 
 interface PresentationProps {
   children: ReactNode;
@@ -18,13 +22,20 @@ interface PresentationProviderData {
   presentationList: Presentation[];
   presentationBookmark: PresentationBookmark;
   presentationBookmarks: BookmarkedPresentations;
-  getPresentationAll: (eventEditionId: string) => void;
-  getPresentationBookmark: (presentationBookmark: PresentationBookmarkRegister) => Promise<any>;
-  getPresentationBookmarks: () => Promise<PresentationBookmark>;
-  postPresentationBookmark: (presentationBookmark: PresentationBookmarkRegister) => void;
-  deletePresentationBookmark: (presentationBookmark: PresentationBookmarkRegister) => void;
+  getPresentationAll: (eventEditionId: string) => Promise<void>;
+  getPresentationBookmark: (
+    presentationBookmark: PresentationBookmarkRegister
+  ) => Promise<PresentationBookmark>;
+  getPresentationBookmarks: () => Promise<
+    BookmarkedPresentations | { bookmarked: boolean }
+  >;
+  postPresentationBookmark: (
+    presentationBookmark: PresentationBookmarkRegister
+  ) => Promise<void>;
+  deletePresentationBookmark: (
+    presentationBookmark: PresentationBookmarkRegister
+  ) => Promise<void>;
   getPresentationById: (id: string) => Promise<Presentation>;
-
 }
 
 export const PresentationContext = createContext<PresentationProviderData>(
@@ -35,91 +46,108 @@ export const usePresentation = () => useContext(PresentationContext);
 
 export const PresentationProvider = ({ children }: PresentationProps) => {
   const [presentationList, setpresentationList] = useState<Presentation[]>([]);
-  const [presentationBookmark, setpresentationBookmark] = useState<PresentationBookmark>({ bookmarked: false });
-  const [presentationBookmarks, setPresentationbookmarks] = useState<BookmarkedPresentations>({
-    bookmarkedPresentations: [],
-  });
-
-  const getPresentationById = async (id: string): Promise<Presentation> => {
-    const { data } = await instance.get(`${baseUrl}/${id}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+  const [presentationBookmark, setpresentationBookmark] =
+    useState<PresentationBookmark>({ bookmarked: false });
+  const [presentationBookmarks, setPresentationbookmarks] =
+    useState<BookmarkedPresentations>({
+      bookmarkedPresentations: [],
     });
 
-    return data;
-  }
+  const getPresentationById = useCallback(
+    async (id: string): Promise<Presentation> => {
+      return presentationApi.getPresentationById(id);
+    },
+    []
+  );
 
-  const getPresentationAll = async (eventEditionId: string) => {
-        if (!eventEditionId) {
+  const getPresentationAll = useCallback(async (eventEditionId: string) => {
+    if (!eventEditionId) {
       setpresentationList([]);
       return;
     }
-    presentationApi
-      .getPresentations(eventEditionId)
-      .then((response) => {
-        setpresentationList(response);
-      })
-      .catch(() => {
-        setpresentationList([]);
-      })
-      .finally(() => { });
-  };
+    try {
+      const response = await presentationApi.getPresentations(eventEditionId);
+      setpresentationList(response || []);
+    } catch {
+      setpresentationList([]);
+    }
+  }, []);
 
-  const getPresentationBookmark = async (
-    presentationBookmark: PresentationBookmarkRegister
-  ) => {
-    return presentationApi
-      .getPresentationBookmark(presentationBookmark)
-      .then((response) => {
+  const getPresentationBookmark = useCallback(
+    async (presentationBookmark: PresentationBookmarkRegister) => {
+      try {
+        const response =
+          await presentationApi.getPresentationBookmark(presentationBookmark);
         setpresentationBookmark(response);
         return response;
-      })
-      .catch(() => {
-        setpresentationBookmark({ bookmarked: false });
-        return { bookmarked: false };
-      })
-      .finally(() => { });
-  };
+      } catch {
+        const fallback = { bookmarked: false };
+        setpresentationBookmark(fallback);
+        return fallback;
+      }
+    },
+    []
+  );
 
-  const getPresentationBookmarks = async () => {
+  const getPresentationBookmarks = useCallback(async () => {
     try {
       const response = await presentationApi.getPresentationBookmarks();
-
       setPresentationbookmarks(response);
       return response;
     } catch {
-      setpresentationBookmark({ bookmarked: false });
-      return { bookmarked: false };
+      const fallback = { bookmarked: false };
+      setpresentationBookmark(fallback);
+      return fallback;
     }
-  }
+  }, []);
 
-  const postPresentationBookmark = async (presentationBookmark: PresentationBookmarkRegister) => {
-    presentationApi.postPresentationBookmark(presentationBookmark)
-      .finally(() => { });
-  }
+  const postPresentationBookmark = useCallback(
+    async (presentationBookmark: PresentationBookmarkRegister) => {
+      try {
+        await presentationApi.postPresentationBookmark(presentationBookmark);
+      } catch {}
+    },
+    []
+  );
 
-  const deletePresentationBookmark = async (presentationBookmark: PresentationBookmarkRegister) => {
-    await presentationApi.deletePresentationBookmark(presentationBookmark)
+  const deletePresentationBookmark = useCallback(
+    async (presentationBookmark: PresentationBookmarkRegister) => {
+      try {
+        await presentationApi.deletePresentationBookmark(presentationBookmark);
+        await getPresentationBookmarks();
+      } catch {}
+    },
+    [getPresentationBookmarks]
+  );
 
-    await getPresentationBookmarks();
-  };
+  const contextValue = useMemo(
+    () => ({
+      presentationList,
+      presentationBookmark,
+      presentationBookmarks,
+      getPresentationAll,
+      postPresentationBookmark,
+      deletePresentationBookmark,
+      getPresentationBookmark,
+      getPresentationBookmarks,
+      getPresentationById,
+    }),
+    [
+      presentationList,
+      presentationBookmark,
+      presentationBookmarks,
+      getPresentationAll,
+      postPresentationBookmark,
+      deletePresentationBookmark,
+      getPresentationBookmark,
+      getPresentationBookmarks,
+      getPresentationById,
+    ]
+  );
 
   return (
-    <PresentationContext.Provider
-      value={{
-        presentationList,
-        presentationBookmark,
-        presentationBookmarks,
-        getPresentationAll,
-        postPresentationBookmark,
-        deletePresentationBookmark,
-        getPresentationBookmark,
-        getPresentationBookmarks,
-        getPresentationById
-      }}
-    >
+    <PresentationContext.Provider value={contextValue}>
       {children}
     </PresentationContext.Provider>
-  )
-}
+  );
+};

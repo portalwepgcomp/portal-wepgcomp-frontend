@@ -1,13 +1,12 @@
 "use client"
 import axiosInstance from '@/utils/api';
+import { OrientacaoParams } from '@/models/orientacoes';
 
 const baseUrl = "/guidance";
 
 export const orientacoesApi = {
     getOrientacoes: async () => {
-        const instance = axiosInstance;
-
-        const { data } = await instance.get(`${baseUrl}`).then(res => res).catch(err => err);
+        const { data } = await axiosInstance.get(`${baseUrl}`);
         return data;
     },
 

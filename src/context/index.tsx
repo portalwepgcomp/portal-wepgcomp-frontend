@@ -1,5 +1,6 @@
 "use client";
 import { ComposeProviders } from "@/components/ComposeProviders";
+import { ReactQueryProvider } from "@/lib/react-query";
 import { EmailProvider } from "@/hooks/useEmail";
 import { ActiveEditionProvider } from "../hooks/useActiveEdition";
 import { CommitterProvider } from "../hooks/useCommittee";
@@ -33,6 +34,9 @@ const Providers = ({ children }: ProvidersProps) => {
         SubmissionFileProvider,
         PremiacaoProvider,
         EmailProvider,
+        // Outermost (último no array = mais externo): envolve todos os demais,
+        // então qualquer provider ou página pode usar React Query.
+        ReactQueryProvider,
       ]}
     >
       {children}

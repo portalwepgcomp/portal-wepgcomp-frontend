@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { zodResolver } from "@hookform/resolvers/zod";
+"use client";
+
+import { useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-
-import "./style.scss";
-import PasswordEye from "@/components/UI/PasswordEye";
+import { AuthContext } from "@/context/AuthProvider/authProvider";
+import Button from "@/components/UI/Button";
+import { Campo, Input, PasswordInput } from "@/components/UI/Input";
+import { UserLogin } from "@/models/user";
 
 const formLoginSchema = z.object({
   email: z
@@ -42,8 +43,6 @@ export function FormLogin() {
   const { singIn, signed } = useContext(AuthContext);
   const router = useRouter();
 
-  const [eye, setEye] = useState(false);
-
   useEffect(() => {
     if (signed) {
       router.push("/home");
@@ -52,12 +51,13 @@ export function FormLogin() {
 
   async function handleLogin(data: UserLogin) {
     const { email, password } = data;
-
     const usuario: UserLogin = { email, password };
 
     try {
       await singIn(usuario);
-    } catch (error) {}
+    } catch {
+      /* Erro de autenticação já é tratado no AuthProvider */
+    }
   }
 
   if (signed) {
@@ -65,62 +65,63 @@ export function FormLogin() {
   }
 
   return (
-    <form className='row login' onSubmit={handleSubmit(handleLogin)}>
-      <div className='col-12 mb-3'>
-        <label className='form-label fw-bold form-title'>
-          E-mail
-          <span className='text-danger ms-1'>*</span>
-        </label>
-        <input
-          type='email'
-          className='form-control input-title'
-          id='email'
-          placeholder='exemplo@ufba.br'
+    <form className="w-full max-w-[583px]" onSubmit={handleSubmit(handleLogin)}>
+      <Campo
+        label={
+          <>
+            E-mail <span className="text-error">*</span>
+          </>
+        }
+        htmlFor="email"
+        erro={errors.email?.message}
+        className="mb-3"
+      >
+        <Input
+          type="email"
+          id="email"
+          placeholder="exemplo@ufba.br"
+          className="text-sm"
           {...register("email")}
         />
-        <p className='text-danger error-message'>{errors.email?.message}</p>
-      </div>
-      <div className='col-12 mb-3'>
-        <label className='form-label fw-bold form-title'>
-          Senha
-          <span className='text-danger ms-1'>*</span>
-        </label>
-        <div className='password-input'>
-          <input
-            type={eye ? "text" : "password"}
-            className='form-control input-title password'
-            id='password'
-            placeholder='digite sua senha'
-            {...register("password")}
-          />
-          <div className='eye' onClick={() => setEye(!eye)}>
-            <PasswordEye color={eye == false ? "black" : "blue"} />
-          </div>
-        </div>
-        <p className='text-danger error-message'>
-          {errors.password?.message}
-        </p>
+      </Campo>
 
-        <div className='text-end link'>
-          <button
-            data-bs-target='#alterarSenhaModal'
-            type='button'
-            data-bs-toggle='modal'
-            className='text-end link link-underline link-underline-opacity-0 button-password'
-          >
-            Esqueceu sua senha?
-          </button>
-        </div>
+      <Campo
+        label={
+          <>
+            Senha <span className="text-error">*</span>
+          </>
+        }
+        htmlFor="password"
+        erro={errors.password?.message}
+        className="mb-3"
+      >
+        <PasswordInput
+          id="password"
+          placeholder="digite sua senha"
+          {...register("password")}
+        />
+      </Campo>
+
+      <div className="mb-4 text-end">
+        <Link
+          href="/recuperar-senha"
+          className="mt-1 text-sm text-[#090DF0] no-underline underline-offset-2 hover:underline"
+        >
+          Esqueceu sua senha?
+        </Link>
       </div>
-      <div className='d-flex gap-2 mx-auto mb-4'>
-        <button
-          type='submit'
-          className='btn text-white fw-semibold fs-6 button-primary'
+
+      <div className="mx-auto mb-4 flex justify-center gap-2">
+        <Button
+          type="submit"
+          variante="brand"
+          className="h-[2.375rem] w-[7.938rem] text-sm font-semibold"
         >
           Entrar
-        </button>
+        </Button>
       </div>
-      <hr />
+
+      <hr className="border-[0.12rem] border-brand-orange" />
     </form>
   );
 }

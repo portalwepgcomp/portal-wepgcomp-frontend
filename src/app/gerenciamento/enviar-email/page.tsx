@@ -1,23 +1,17 @@
 "use client";
 
+import Button from "@/components/UI/Button";
+import Card from "@/components/UI/Card";
+import { Campo, Input, Textarea } from "@/components/UI/Input";
+import Spinner from "@/components/UI/Spinner";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useEmails } from "@/hooks/useEmail";
 import { useUsers } from "@/hooks/useUsers";
 import { ArrowLeft, Mail, Send, UserCircle, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/Select/Select";
-import "../../../components/UI/styles/button.scss";
-import "../../../components/UI/styles/card.scss";
-import "../../../components/UI/styles/header.scss";
-import "../../../components/UI/styles/input.scss";
-import "./styles.scss";
+import { ProfileType, RoleType, SubprofileType } from "@/models/user";
+import { getErrorMessage } from "@/utils/error";
 
 type GroupType = "professors" | "admins" | "superadmins" | "presenters" | "listeners" | "all";
 
@@ -66,7 +60,6 @@ const SendEmail = () => {
 
   const { sendGroupEmail } = useEmails();
 
-  // Buscar usuários quando o grupo mudar
   useEffect(() => {
     if (!selectedGroup) {
       return;
@@ -75,22 +68,20 @@ const SendEmail = () => {
     const groupConfig = GROUPS[selectedGroup];
 
     if (selectedGroup === "all") {
-      // Para "todos", buscar sem filtros
       getUsers({});
     } else {
-      // Buscar com os filtros específicos do grupo
       getUsers({
         profiles: groupConfig.profiles?.[0],
         roles: groupConfig.roles?.[0],
         subprofiles: groupConfig.subprofiles?.[0],
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup]);
 
   const recipientCount = userList?.length || 0;
 
   const handleSendEmail = async () => {
-    // Validação
     if (!selectedGroup) {
       showAlert({
         icon: "error",
@@ -143,11 +134,11 @@ const SendEmail = () => {
       };
 
       await sendGroupEmail(emailData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       showAlert({
         icon: "error",
         title: "Erro ao Enviar E-mail",
-        text: err.response?.data?.message || "Ocorreu um erro ao enviar o e-mail.",
+        text: getErrorMessage(err, "Ocorreu um erro ao enviar o e-mail."),
       });
     } finally {
       setIsSending(false);
@@ -155,160 +146,143 @@ const SendEmail = () => {
   };
 
   return (
-    <div className="send-email-page">
-      {/* Header */}
-      <header className="header">
-        <div className="header__container">
-          <div className="header__brand">
-            <div className="header__icon">
-              <Mail />
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-line bg-card px-8 py-6 shadow-sm">
+        <div className="mx-auto flex max-w-[1280px] items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light text-primary">
+              <Mail className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="header__title">Portal WePGCOMP</h1>
-              <p className="header__subtitle">Envio de E-mails</p>
+              <h1 className="m-0 text-xl font-semibold text-foreground">Portal WePGCOMP</h1>
+              <p className="m-0 text-sm text-muted">Envio de E-mails</p>
             </div>
           </div>
-          <button className="button button--ghost" onClick={() => router.back()}>
-            <ArrowLeft />
+          <Button variante="ghost" onClick={() => router.back()}>
+            <ArrowLeft className="h-5 w-5" />
             Voltar
-          </button>
+          </Button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="send-email-page__main">
-        <p className="send-email-page__description">
+      <main className="mx-auto max-w-[1280px] px-8 py-12">
+        <p className="mb-8 text-base text-muted">
           Envie mensagens para grupos específicos de usuários
         </p>
 
-        <div className="send-email-page__grid">
-          {/* Email Composition Card */}
-          <div className="card animate-fade-in">
-            <div className="card__header">
-              <Send />
-              <h2 className="card__title">Compor E-mail</h2>
-            </div>
-            <p className="card__subtitle">
-              Preencha os detalhes da mensagem que será enviada
-            </p>
-
-            <div>
-              <div className="form-group">
-                <label>Destinatários</label>
-                <Select
-                  value={selectedGroup}
-                  onValueChange={(value) => setSelectedGroup(value as GroupType)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um grupo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(GROUPS).map(([key, config]) => (
-                      <SelectItem key={key} value={key}>
-                        {config.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="form-group">
-                <label>Assunto</label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Digite o assunto do e-mail"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Mensagem</label>
-                <textarea
-                  className="textarea"
-                  placeholder="Digite a mensagem do e-mail"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={8}
-                />
-              </div>
-
-              <button
-                className="button button--primary button--full-width"
-                onClick={handleSendEmail}
-                disabled={!selectedGroup || !subject || !message || isSending || loadingUserList}
+        <div className="grid gap-8 lg:grid-cols-2">
+          <Card
+            title="Compor E-mail"
+            subtitle="Preencha os detalhes da mensagem que será enviada"
+            icon={<Send className="h-5 w-5" />}
+          >
+            <Campo label="Destinatários">
+              <select
+                className="w-full rounded-md border border-[#d9dce0] bg-white px-3 py-2.5 text-[0.9375rem] leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10"
+                value={selectedGroup}
+                onChange={(e) =>
+                  setSelectedGroup(e.target.value as GroupType | "")
+                }
               >
-                {isSending ? (
-                  <>Enviando...</>
-                ) : (
-                  <>
-                    <Send />
-                    Enviar E-mail para {recipientCount} destinatário(s)
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+                <option value="" disabled>
+                  Selecione um grupo
+                </option>
+                {Object.entries(GROUPS).map(([key, config]) => (
+                  <option key={key} value={key}>
+                    {config.label}
+                  </option>
+                ))}
+              </select>
+            </Campo>
 
-          {/* Recipients List Card */}
-          <div className="card animate-fade-in">
-            <div className="card__header">
-              <Users />
-              <h2 className="card__title">Destinatários</h2>
-            </div>
-            <p className="card__subtitle">
-              Selecione um grupo para ver os destinatários
-            </p>
+            <Campo label="Assunto">
+              <Input
+                type="text"
+                placeholder="Digite o assunto do e-mail"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
+            </Campo>
 
+            <Campo label="Mensagem">
+              <Textarea
+                placeholder="Digite a mensagem do e-mail"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={8}
+              />
+            </Campo>
+
+            <Button
+              larguraTotal
+              onClick={handleSendEmail}
+              disabled={!selectedGroup || !subject || !message || isSending || loadingUserList}
+            >
+              {isSending ? (
+                <>Enviando...</>
+              ) : (
+                <>
+                  <Send className="h-5 w-5" />
+                  Enviar E-mail para {recipientCount} destinatário(s)
+                </>
+              )}
+            </Button>
+          </Card>
+
+          <Card
+            title="Destinatários"
+            subtitle="Selecione um grupo para ver os destinatários"
+            icon={<Users className="h-5 w-5" />}
+          >
             {!selectedGroup ? (
-              <div className="recipients-list__empty">
-                <div className="recipients-list__empty-icon">
-                  <UserCircle />
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="mb-6 rounded-full bg-muted-light p-6">
+                  <UserCircle className="h-12 w-12 text-muted" />
                 </div>
-                <p className="recipients-list__empty-text">
+                <p className="text-muted">
                   Selecione um grupo para visualizar os destinatários
                 </p>
               </div>
             ) : loadingUserList ? (
-              <div className="recipients-list__empty">
-                <div className="loading-spinner"></div>
-                <p className="recipients-list__empty-text">
-                  Carregando destinatários...
-                </p>
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <Spinner className="mb-6" />
+                <p className="text-muted">Carregando destinatários...</p>
               </div>
             ) : recipientCount === 0 ? (
-              <div className="recipients-list__empty">
-                <div className="recipients-list__empty-icon">
-                  <UserCircle />
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="mb-6 rounded-full bg-muted-light p-6">
+                  <UserCircle className="h-12 w-12 text-muted" />
                 </div>
-                <p className="recipients-list__empty-text">
+                <p className="text-muted">
                   Nenhum usuário encontrado neste grupo
                 </p>
               </div>
             ) : (
               <>
-                <div className="recipients-list__count">
-                  <p>
-                    Total: <strong>{recipientCount}</strong> destinatário(s)
+                <div className="mb-6 rounded-md border border-primary/20 bg-primary-light p-4">
+                  <p className="m-0 text-sm font-medium text-foreground">
+                    Total: <strong className="font-bold text-primary">{recipientCount}</strong> destinatário(s)
                   </p>
                 </div>
 
-                <div className="recipients-list__scroll">
-                  <div className="recipients-list__items">
+                <div className="max-h-[480px] overflow-y-auto pr-4">
+                  <div className="flex flex-col gap-2">
                     {userList.map((user) => (
-                      <div key={user.id} className="recipients-list__item">
-                        <div className="recipients-list__item-content">
-                          <div className="recipients-list__item-icon">
-                            <UserCircle />
+                      <div
+                        key={user.id}
+                        className="rounded-md border border-line bg-primary/[0.05] p-6 transition hover:border-primary/40 hover:shadow-sm"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="shrink-0 rounded-full bg-primary-light p-2">
+                            <UserCircle className="h-5 w-5 text-primary" />
                           </div>
-                          <div className="recipients-list__item-info">
-                            <p className="recipients-list__item-name">
+                          <div className="min-w-0 flex-1">
+                            <p className="mb-1 truncate text-sm font-medium text-foreground">
                               {user.name}
                             </p>
-                            <div className="recipients-list__item-email">
-                              <Mail />
-                              <span>{user.email}</span>
+                            <div className="flex items-center gap-1 text-xs text-muted">
+                              <Mail className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{user.email}</span>
                             </div>
                           </div>
                         </div>
@@ -318,7 +292,7 @@ const SendEmail = () => {
                 </div>
               </>
             )}
-          </div>
+          </Card>
         </div>
       </main>
     </div>

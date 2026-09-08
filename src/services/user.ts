@@ -1,6 +1,13 @@
 "use client";
 import axiosInstance from "@/utils/api";
 import { UpdateUserRequest } from "@/models/update-user";
+import {
+  GetUserParams,
+  RegisterUserParams,
+  CreateProfessorBySuperadminParams,
+  ResetPasswordSendEmailParams,
+  ResetPasswordParams,
+} from "@/models/user";
 
 const baseUrl = "/users";
 const authBaseUrl = "/auth";
@@ -21,6 +28,12 @@ export const userApi = {
 
   getAdmins: async () => {
     const { data } = await instance.get(`${baseUrl}/admins`);
+
+    return data;
+  },
+
+  findUserById: async (id: string) => {
+    const { data } = await instance.get(`${baseUrl}/${id}`);
 
     return data;
   },

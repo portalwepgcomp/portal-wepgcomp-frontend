@@ -1,30 +1,29 @@
 "use client";
 
 import { FormAlterarSenha } from "@/components/Forms/AlterarSenha/FormAlterarSenha";
-import "./style.scss";
 import { useUsers } from "@/hooks/useUsers";
 import LoadingPage from "@/components/LoadingPage";
 import { useEdicao } from "@/hooks/useEdicao";
 
-export default function AlterarSenha({ params }) {
+export default function AlterarSenha({ params }: { params: { token: string } }) {
   const { loadingResetPassword } = useUsers();
   const { Edicao } = useEdicao();
 
   return (
-    <div className='container d-flex flex-column flex-grow-1 text-black alterar-senha-tela'>
+    <div className="relative mx-auto flex flex-grow flex-col bg-white text-black">
       {loadingResetPassword && <LoadingPage />}
       {!loadingResetPassword && (
         <>
-          <div className='container'>
-            <h1 className='d-flex justify-content-center mt-5 fw-normal ms-2'>
-              {Edicao?.name || "Carregando..."}
+          <div className="mx-auto w-full max-w-[654px]">
+            <h1 className="ms-2 mt-5 flex justify-center text-5xl font-normal text-[#0066BA]">
+              {Edicao?.name || "WEPGCOMP"}
             </h1>
-            <hr />
-            <h2 className='d-flex justify-content-center mb-4 fw-bold text-black'>
+            <hr className="border-[0.125rem] border-brand-orange" />
+            <h2 className="mb-4 flex justify-center text-2xl font-bold text-black">
               Alteração de Senha
             </h2>
           </div>
-          <div className='container d-flex justify-content-center mb-5'>
+          <div className="mx-auto mb-5 flex justify-center">
             <FormAlterarSenha params={params} />
           </div>
         </>

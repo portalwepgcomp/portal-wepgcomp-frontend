@@ -1,6 +1,8 @@
 "use client"
 import axiosInstance from '@/utils/api';
 import { api } from "@/context/AuthProvider/util";
+import { unwrapPaginatedList } from "@/types/api";
+import { Edicao, EdicaoParams, GetEdicaoParams } from "@/models/edicao";
 
 const baseUrl = "/event";
 const instance = axiosInstance;
@@ -14,11 +16,15 @@ export interface ISessaoAtivaResposta {
 }
 
 export const edicaoApi = {
-    listEdicao: async () => {
-        
-
-        const { data } = await instance.get(`${baseUrl}`);
-        return data;
+    listEdicao: async (params?: string | GetEdicaoParams): Promise<Edicao[]> => {
+        const queryParams =
+            typeof params === 'string'
+                ? { search: params }
+                : params;
+        const { data } = await instance.get(`${baseUrl}`, {
+            params: queryParams,
+        });
+        return unwrapPaginatedList<Edicao>(data);
     },
 
     getEdicaoById: async (idEdicao: string) => {

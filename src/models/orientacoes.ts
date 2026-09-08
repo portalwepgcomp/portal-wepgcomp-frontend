@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-interface OrientacaoParams {
+export interface OrientacaoParams {
     summary?: string;
     authorGuidance?: string;
     reviewerGuidance?: string;
@@ -8,7 +6,7 @@ interface OrientacaoParams {
     eventEditionId: string;
 }
 
-interface Orientacao extends OrientacaoParams {
+export interface Orientacao extends OrientacaoParams {
     id: string;
     createdAt: string;
     deletedAt: string;

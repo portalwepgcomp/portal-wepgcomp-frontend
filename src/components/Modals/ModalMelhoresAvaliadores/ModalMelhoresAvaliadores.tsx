@@ -1,7 +1,7 @@
 "use client";
+
 import ModalComponent from "@/components/UI/ModalComponent/ModalComponent";
 import { FormMelhorAvaliador } from "@/components/Forms/MelhoresAvaliadores/FormMelhoresAvaliadores";
-import "./style.scss";
 
 export default function ModalMelhoresAvaliadores() {
   return (
@@ -17,13 +17,13 @@ export default function ModalMelhoresAvaliadores() {
       idCloseModal="escolherAvaliadorModalClose"
       loading={false}
       labelConfirmButton="Salvar"
-      colorButtonConfirm="success"
+      colorButtonConfirm="#019A34"
     >
-      <div className="body-modal">
-        <div className=" d-flex justify-content-center fw-bold ms-5 fs-1">
+      <div className="w-full text-black">
+        <h2 className="mb-4 flex justify-center text-2xl font-bold">
           Escolha os melhores avaliadores
-        </div>
-        <div className=" d-flex justify-content-center fs-6 ms-5">
+        </h2>
+        <div className="flex justify-center">
           <FormMelhorAvaliador />
         </div>
       </div>

@@ -4,73 +4,56 @@ import OrientacoesAudiencia from "@/components/Orientacoes/OrientacoesAudiencia"
 import OrientacoesAutores from "@/components/Orientacoes/OrientacoesAutores";
 import OrientacoesAvaliadores from "@/components/Orientacoes/OrientacoesAvaliadores";
 import Banner from "@/components/UI/Banner";
-import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useOrientacao } from "@/hooks/useOrientacao";
-import { useContext, useEffect, useState } from "react";
-import "./style.scss";
+import { cn } from "@/utils/cn";
+import { useEffect, useState } from "react";
+
+const tabs = [
+  { id: 0, label: "Autores" },
+  { id: 1, label: "Avaliadores" },
+  { id: 2, label: "Audiência" },
+] as const;
+
+const tabBase =
+  "flex w-36 sm:w-44 cursor-pointer items-center justify-center rounded-xl border-2 border-brand-orange py-2 text-sm sm:text-base font-semibold tracking-wide shadow-sm transition duration-200";
 
 export default function Orientacoes() {
-    const [setion, setSetion] = useState<number>(0);
-    const { user } = useContext(AuthContext);
+  const [setion, setSetion] = useState<number>(0);
+  const { getOrientacoes } = useOrientacao();
 
-    const isAdm = user?.level === "Superadmin";
+  useEffect(() => {
+    getOrientacoes();
+  }, [getOrientacoes]);
 
-    const { postOrientacao, getOrientacoes, orientacoes } =
-        useOrientacao();
-
-    useEffect(() => {
-        getOrientacoes();
-    }, []);
-
-    useEffect(() => {
-        if(orientacoes === undefined){
-            const eventEditionId = getEventEditionIdStorage();
-            postOrientacao({
-                eventEditionId: eventEditionId ?? "",
-                summary: "Sumário criado",
-            });
-        }
-    }, [orientacoes])
-
-    return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "50px",
-            }}>
-            <Banner title="Orientações" />
-            <>
-                    <div className="button">
-                        <div
-                            className={
-                                setion == 0 ? "buttonTrue" : "buttonFalse"
-                            }
-                            onClick={() => setSetion(0)}>
-                            Autores
-                        </div>
-                        <div
-                            className={
-                                setion == 1 ? "buttonTrue" : "buttonFalse"
-                            }
-                            onClick={() => setSetion(1)}>
-                            Avaliadores
-                        </div>
-                        <div
-                            className={
-                                setion == 2 ? "buttonTrue" : "buttonFalse"
-                            }
-                            onClick={() => setSetion(2)}>
-                            Audiência
-                        </div>
-                    </div>
-                    <>
-                        {setion == 0 ? <OrientacoesAutores /> : ""}
-                        {setion == 1 ? <OrientacoesAvaliadores /> : ""}
-                        {setion == 2 ? <OrientacoesAudiencia /> : ""}
-                    </>
-                </>
+  return (
+    <div className="w-full">
+      <Banner title="Orientações" />
+      <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 flex flex-col gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {tabs.map((tab) => (
+            <div
+              key={tab.id}
+              className={cn(
+                tabBase,
+                setion === tab.id
+                  ? "bg-brand-orange text-white shadow-sm"
+                  : "bg-white text-brand-orange hover:bg-orange-50",
+              )}
+              onClick={() => setSetion(tab.id)}
+              onKeyDown={(e) => e.key === "Enter" && setSetion(tab.id)}
+              role="button"
+              tabIndex={0}
+            >
+              {tab.label}
+            </div>
+          ))}
         </div>
-    );
+        <div>
+          {setion === 0 && <OrientacoesAutores />}
+          {setion === 1 && <OrientacoesAvaliadores />}
+          {setion === 2 && <OrientacoesAudiencia />}
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
-
+import { Info, UserPlus } from "lucide-react";
 import { useUsers } from "@/hooks/useUsers";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registrarErro } from "@/utils/logError";
+import { useSweetAlert } from "@/hooks/useAlert";
 
-import "./style.scss";
-import InfoBox from "@/components/InfoBox/InfoBox";
+import { Campo, Input } from "@/components/UI/Input";
+import Spinner from "@/components/UI/Spinner";
 
 const formCadastroProfessorSchema = z.object({
   nome: z
@@ -23,7 +23,7 @@ const formCadastroProfessorSchema = z.object({
     .min(1, "O email é obrigatório.")
     .email({ message: "E-mail inválido!" })
     .refine((email) => email.toLowerCase().endsWith("@ufba.br"), {
-      message: "E-mail deve ser da UFBA (@ufba.br)",
+      message: "E-mail deve ser institucional da UFBA (@ufba.br)",
     }),
   matricula: z
     .string({ invalid_type_error: "Campo inválido!" })
@@ -41,10 +41,20 @@ interface FormCadastroProfessorProps {
   showButtons?: boolean;
 }
 
-export function FormCadastroProfessor({ onSuccess, formRef, showButtons = true }: FormCadastroProfessorProps) {
+const labelObrigatorio = (texto: string) => (
+  <>
+    {texto} <span className="text-error font-bold">*</span>
+  </>
+);
+
+export function FormCadastroProfessor({
+  onSuccess,
+  formRef,
+  showButtons = true,
+}: FormCadastroProfessorProps) {
   const { createProfessorBySuperadmin, loadingCreateProfessor } = useUsers();
-  const router = useRouter();
-  
+  const { showAlert } = useSweetAlert();
+
   const {
     register,
     handleSubmit,
@@ -60,7 +70,9 @@ export function FormCadastroProfessor({ onSuccess, formRef, showButtons = true }
     },
   });
 
-  const handleFormCadastroProfessor = async (data: FormCadastroProfessorSchema) => {
+  const handleFormCadastroProfessor = async (
+    data: FormCadastroProfessorSchema,
+  ) => {
     const { nome, email, matricula } = data;
 
     const body = {
@@ -71,11 +83,15 @@ export function FormCadastroProfessor({ onSuccess, formRef, showButtons = true }
 
     try {
       await createProfessorBySuperadmin(body);
-      reset(); // Limpa o formulário após sucesso
+      reset();
+      showAlert({
+        icon: "success",
+        title: "Professor Cadastrado!",
+        text: "Uma senha temporária de primeiro acesso foi enviada ao e-mail institucional.",
+      });
       onSuccess?.();
     } catch (error) {
-      // Error handling is done in the hook
-      console.error("Error creating professor:", error);
+      registrarErro("Erro ao cadastrar professor", error);
     }
   };
 
@@ -91,107 +107,103 @@ export function FormCadastroProfessor({ onSuccess, formRef, showButtons = true }
     setValue("matricula", numbersOnly);
   };
 
-  const handleCancel = () => {
-    reset();
-    router.push("/usuarios");
-  };
-
   return (
-    <div className="cadastro-professor-form">
-      <form className="row" onSubmit={handleSubmit(handleFormCadastroProfessor)} ref={formRef}>
-        <div className="col-12 mb-3">
-          <label className="form-label fs-5 fw-bold">
-            Nome completo
-            <span className="text-danger ms-1 fs-5">*</span>
-          </label>
-          <input
-            type="text"
-            className={`form-control input-title ${errors.nome ? "is-invalid" : ""}`}
-            id="nome"
-            placeholder="Insira o nome completo do professor"
-            {...register("nome")}
-            onChange={handleAoMudarDeNome}
-            disabled={loadingCreateProfessor}
-          />
-          {errors.nome && (
-            <div className="invalid-feedback">
-              {errors.nome.message}
-            </div>
-          )}
+    <form
+      onSubmit={handleSubmit(handleFormCadastroProfessor)}
+      ref={formRef}
+      className="space-y-6 w-full"
+    >
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <Campo
+            label={
+              <span className="text-sm font-semibold text-foreground">
+                {labelObrigatorio("Nome Completo")}
+              </span>
+            }
+            htmlFor="nome"
+            erro={errors.nome?.message}
+          >
+            <Input
+              type="text"
+              id="nome"
+              placeholder="Ex.: Prof. Dr. João Silva"
+              className="text-sm rounded-lg"
+              {...register("nome")}
+              onChange={handleAoMudarDeNome}
+              disabled={loadingCreateProfessor}
+            />
+          </Campo>
         </div>
 
-        <div className="col-12 mb-3">
-          <label className="form-label fs-5 fw-bold">
-            E-mail institucional
-            <span className="text-danger ms-1 fs-5">*</span>
-          </label>
-          <input
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              {labelObrigatorio("E-mail Institucional (@ufba.br)")}
+            </span>
+          }
+          htmlFor="email"
+          erro={errors.email?.message}
+        >
+          <Input
             type="email"
-            className={`form-control input-title ${errors.email ? "is-invalid" : ""}`}
             id="email"
-            placeholder="professor@ufba.br"
+            placeholder="usuario@ufba.br"
+            className="text-sm rounded-lg"
             {...register("email")}
             disabled={loadingCreateProfessor}
           />
-          {errors.email && (
-            <div className="invalid-feedback">
-              {errors.email.message}
-            </div>
-          )}
-          <div className="form-text">
-            O email deve ser da UFBA (terminar com @ufba.br)
-          </div>
-        </div>
+        </Campo>
 
-        <div className="col-12 mb-4">
-          <label className="form-label fs-5 fw-bold">
-            Número de matrícula
-            <span className="text-danger ms-1 fs-5">*</span>
-          </label>
-          <input
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              {labelObrigatorio("Número de Matrícula SIAPE")}
+            </span>
+          }
+          htmlFor="matricula"
+          erro={errors.matricula?.message}
+        >
+          <Input
             type="text"
-            className={`form-control input-title ${errors.matricula ? "is-invalid" : ""}`}
             id="matricula"
-            placeholder="Digite o número de matrícula"
+            placeholder="Ex.: 1234567"
+            className="text-sm rounded-lg"
             {...register("matricula")}
             onChange={handleMudancaMatricula}
             disabled={loadingCreateProfessor}
           />
-          {errors.matricula && (
-            <div className="invalid-feedback">
-              {errors.matricula.message}
-            </div>
-          )}
+        </Campo>
+      </div>
+
+      <div className="flex items-start gap-3 rounded-xl bg-blue-50/70 p-4 text-blue-900 border border-blue-100">
+        <Info className="h-5 w-5 shrink-0 text-brand-blue mt-0.5" />
+        <div className="text-sm leading-relaxed">
+          <strong>Atenção:</strong> Uma senha temporária será gerada automaticamente e enviada por e-mail para o professor. O docente poderá redefini-la no primeiro acesso.
         </div>
+      </div>
 
-
-        <div className="col-12 mb-3">
-          <InfoBox
-              title="Informação importante:"
-              message="Uma senha temporária será gerada automaticamente e enviada por email para o professor.
-                O professor poderá alterar a senha no primeiro acesso."
-          />
+      {showButtons && (
+        <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
+          <button
+            type="submit"
+            disabled={loadingCreateProfessor}
+            className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-orange px-8 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loadingCreateProfessor ? (
+              <>
+                <Spinner className="h-4 w-4" colorClassName="text-white" />
+                <span>Cadastrando...</span>
+              </>
+            ) : (
+              <>
+                <UserPlus className="h-5 w-5" />
+                <span>Cadastrar Professor</span>
+              </>
+            )}
+          </button>
         </div>
-
-        {showButtons && (
-          <div className="col-12 d-flex justify-content-end gap-3">
-            <button
-              type="submit"
-              className="btn btn-primary btn-lg"
-              disabled={loadingCreateProfessor}
-            >
-              {loadingCreateProfessor ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Cadastrando...
-                </>
-              ) : (
-                "Cadastrar Professor"
-              )}
-            </button>
-          </div>
-        )}
-      </form>
-    </div>
+      )}
+    </form>
   );
 }

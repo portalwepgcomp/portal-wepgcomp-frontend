@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-interface SubmissionFileParams {
+export interface SubmissionFileParams {
   idUser: string;
   pdfFile: File;
 }
 
-interface SubmissionFile extends SubmissionFileParams {
+export interface SubmissionFile extends SubmissionFileParams {
   id: string;
   createdAt: Date;
   deletedAt: Date;

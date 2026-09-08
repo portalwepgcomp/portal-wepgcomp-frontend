@@ -3,8 +3,6 @@
 import ModalComponent from "@/components/UI/ModalComponent/ModalComponent";
 import FormCriterios from "@/components/Forms/Criterios/FormCriterios";
 
-import "./style.scss";
-
 export default function ModalCriterios() {
   return (
     <ModalComponent
@@ -13,11 +11,11 @@ export default function ModalCriterios() {
       loading={false}
       labelConfirmButton="Salvar"
     >
-      <div className="body-modal-criterios">
-        <h1 className="d-flex justify-content-center fw-bold ms-2">
+      <div className="w-full text-black">
+        <h1 className="mb-4 flex justify-center text-xl font-bold">
           Critérios de avaliação de apresentações
         </h1>
-        <div className=" d-flex justify-content-center mb-5">
+        <div className="mb-5 flex justify-center">
           <FormCriterios />
         </div>
       </div>

@@ -5,12 +5,7 @@ import Banner from "@/components/UI/Banner";
 
 export default function Gerenciamento() {
   return (
-    <div
-      className="d-flex flex-column"
-      style={{
-        gap: "30px",
-      }}
-    >
+    <div className="flex flex-col gap-[30px]">
       <Banner title="Gerenciamento de Usuários" />
       <Gerenciar />
     </div>

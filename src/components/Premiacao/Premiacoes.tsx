@@ -1,8 +1,5 @@
 import { useEffect } from "react";
-
 import PremiacaoCategoria from "./PremiacaoCategoria";
-
-import "./style.scss";
 import { usePremiacao } from "@/hooks/usePremiacao";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 
@@ -24,23 +21,27 @@ export default function Premiacoes({
 
   useEffect(() => {
     const eventEditionId = getEventEditionIdStorage();
+    if (!eventEditionId) return;
 
-    if (eventEditionId) {
-      switch (categoria) {
-        case "banca":
-          getPremiacoesBanca(eventEditionId);
-          break;
-        case "publico":
-          getPremiacoesAudiencia(eventEditionId);
-          break;
-        case "avaliadores":
-          getPremiacoesAvaliadores(eventEditionId);
-          break;
-        default:
-          break;
-      }
+    switch (categoria) {
+      case "banca":
+        getPremiacoesBanca(eventEditionId);
+        break;
+      case "publico":
+        getPremiacoesAudiencia(eventEditionId);
+        break;
+      case "avaliadores":
+        getPremiacoesAvaliadores(eventEditionId);
+        break;
+      default:
+        break;
     }
-  }, [categoria]);
+  }, [
+    categoria,
+    getPremiacoesAudiencia,
+    getPremiacoesAvaliadores,
+    getPremiacoesBanca,
+  ]);
 
   const getAwards = () => {
     switch (categoria) {
@@ -54,7 +55,7 @@ export default function Premiacoes({
   };
 
   return (
-    <div className="d-flex flex-column premiacao-list">
+    <div className="flex flex-col px-16 py-16 max-[1000px]:p-5">
       <PremiacaoCategoria
         categoria={categoria}
         premiacoes={getAwards()}

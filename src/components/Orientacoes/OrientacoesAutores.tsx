@@ -2,8 +2,6 @@
 
 import HtmlEditorComponent from "../HtmlEditorComponent/HtmlEditorComponent";
 import { useEffect, useState } from "react";
-
-import "./style.scss";
 import { useOrientacao } from "@/hooks/useOrientacao";
 
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
@@ -31,7 +29,7 @@ export default function OrientacoesAutores() {
   }, [orientacoes?.authorGuidance]);
 
   return (
-    <div className="orientacoes">
+    <div className="w-full pb-4 text-black">
       <HtmlEditorComponent
         content={content}
         onChange={(newValue) => setContent(newValue)}

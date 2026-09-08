@@ -1,11 +1,11 @@
 "use client";
 
+import { Campo, Input } from "@/components/UI/Input";
 import { useUsers } from "@/hooks/useUsers";
 import { useState } from "react";
 
 import { useEdicao } from "@/hooks/useEdicao";
 
-import "./style.scss";
 import ModalComponent from "@/components/UI/ModalComponent/ModalComponent";
 
 export default function ModalAlterarSenha() {
@@ -26,7 +26,7 @@ export default function ModalAlterarSenha() {
     const validationError = validateEmail(email);
     if (validationError) {
       setError(validationError);
-      return; 
+      return;
     }
     setError("");
     const body = { email };
@@ -49,35 +49,37 @@ export default function ModalAlterarSenha() {
       colorButtonConfirm="#0065A3"
       onConfirm={handleSendEmail}
     >
-      <div className="modal-alterar-senha">
-        <h1 className="d-flex justify-content-center mt-5 fw-normal border-yellow ms-2">
-          {Edicao?.name || "Carregando..."}
+      <div className="flex w-full flex-col items-center text-black">
+        <h1 className="mt-2 text-xl font-bold text-brand-navy">
+          {Edicao?.name || "WEPGCOMP"}
         </h1>
-        <hr className="linha-alterar-senha" />
 
-        <div className="content-alterar-senha">
-          <h2>Esqueci minha senha</h2>
-          <p>
+        <div className="mb-4 flex flex-col items-center text-center">
+          <h2 className="text-2xl font-semibold">Esqueci minha senha</h2>
+          <p className="mt-2 max-w-md text-center">
             Por favor, informe o e-mail cadastrado em sua conta, e enviaremos um
             link com as instruções para recuperação.
           </p>
         </div>
 
-        <div className="col-12 mb-1 field-alterar-senha">
-          <label className="form-label fw-bold form-title form-label-alterar-senha">
-            E-mail
-            <span className="text-danger ms-1 form-title">*</span>
-          </label>
-          <input
+        <Campo
+          label={
+            <>
+              E-mail <span className="text-error">*</span>
+            </>
+          }
+          htmlFor="email-alterar-senha"
+          erro={error}
+          className="mb-4 w-full max-w-[80%]"
+        >
+          <Input
             type="email"
-            className={`form-control input-title ${error ? "is-invalid" : ""}`}
             id="email-alterar-senha"
             placeholder="Insira seu e-mail"
             value={email}
             onChange={handleEmailChange}
           />
-          {error && <p className="text-danger error-message">{error}</p>}
-        </div>
+        </Campo>
       </div>
     </ModalComponent>
   );

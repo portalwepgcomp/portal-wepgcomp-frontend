@@ -1,49 +1,43 @@
 "use client";
 
 import { FormLogin } from "@/components/Forms/Login/FormLogin";
-import ModalAlterarSenha from "@/components/Modals/ModalAlterarSenha/ModalAlterarSenha";
-import "./style.scss";
 import { useEdicao } from "@/hooks/useEdicao";
+import Link from "next/link";
 
 export default function Login() {
   const { Edicao } = useEdicao();
+
   return (
-    <div className='container d-flex flex-column flex-grow-1 text-black'>
-      <div className='container'>
-        <h1 className='d-flex justify-content-center mt-5 fw-normal border-yellow ms-2'>
-          {Edicao?.name || "Carregando..."}
+    <div className="mx-auto flex max-w-[654px] flex-grow flex-col text-black">
+      <div className="mx-auto w-full max-w-[654px]">
+        <h1 className="ms-2 mt-5 flex justify-center border-b-4 border-brand-orange pb-2 text-5xl font-normal text-[#0066BA] max-[1000px]:text-2xl">
+          {Edicao?.name || "WEPGCOMP"}
         </h1>
-        <hr />
-        <h4 className='d-flex justify-content-center mb-4 fw-semibold fs-4'>
+        <hr className="mx-auto my-0 max-w-[654px] border-[0.12rem] border-brand-orange" />
+        <h4 className="mb-4 flex justify-center text-xl font-semibold">
           Acesse sua conta
         </h4>
       </div>
 
-      <div className='container d-flex flex-column'>
-        <div className='row'>
-          <div className='col-12'>
-            <div className='container d-flex justify-content-center'>
-              <FormLogin />
-            </div>
-          </div>
+      <div className="mx-auto flex w-full max-w-[654px] flex-col">
+        <div className="flex justify-center">
+          <FormLogin />
         </div>
       </div>
 
-      <div className='container d-flex justify-content-center mb-4  flex-grow-1'>
-        <div className='text-start fixed-width'>
+      <div className="mx-auto mb-4 flex flex-grow justify-center">
+        <div className="w-full max-w-[583px] text-start">
           <h6>
             Ainda não tem conta?
-            <a
-              href='/cadastro'
-              className='link-underline link-underline-opacity-0 ms-1'
+            <Link
+              href="/cadastro"
+              className="ms-1 text-blue-600 no-underline hover:underline"
             >
               Cadastre-se
-            </a>
+            </Link>
           </h6>
         </div>
       </div>
-
-      <ModalAlterarSenha />
     </div>
   );
 }

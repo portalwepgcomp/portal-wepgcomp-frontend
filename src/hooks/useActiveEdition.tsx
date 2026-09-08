@@ -1,5 +1,3 @@
-import { useContext } from "react";
-
 import {
   createContext,
   Dispatch,
@@ -7,6 +5,9 @@ import {
   SetStateAction,
   useEffect,
   useState,
+  useContext,
+  useCallback,
+  useMemo,
 } from "react";
 import { edicaoApi } from "@/services/edicao";
 
@@ -46,7 +47,11 @@ export const ActiveEditionProvider = ({ children }: ActiveEditionProps) => {
   useEffect(() => {
     const savedEdition = localStorage.getItem("activeEdition");
     if (savedEdition) {
-      setSelectEdition(JSON.parse(savedEdition));
+      try {
+        setSelectEdition(JSON.parse(savedEdition));
+      } catch {
+        localStorage.removeItem("activeEdition");
+      }
     }
   }, []);
 
@@ -56,7 +61,7 @@ export const ActiveEditionProvider = ({ children }: ActiveEditionProps) => {
     }
   }, [selectEdition]);
 
-  const ensureActiveEdition = async () => {
+  const ensureActiveEdition = useCallback(async () => {
     try {
       if (selectEdition.year) return selectEdition;
 
@@ -64,13 +69,17 @@ export const ActiveEditionProvider = ({ children }: ActiveEditionProps) => {
 
       const saved = localStorage.getItem("activeEdition");
       if (saved) {
-        const parsed = JSON.parse(saved) as { year: string; isActive: boolean };
-        if (parsed?.year) {
-          setSelectEdition(parsed);
-          return parsed;
+        try {
+          const parsed = JSON.parse(saved) as { year: string; isActive: boolean };
+          if (parsed?.year) {
+            setSelectEdition(parsed);
+            return parsed;
+          }
+        } catch {
+          localStorage.removeItem("activeEdition");
         }
       }
-      
+
       const active = await edicaoApi.getEdicaoAtiva();
       if (active?.year) {
         const meta = { year: active.year, isActive: !!active.isActive };
@@ -85,18 +94,21 @@ export const ActiveEditionProvider = ({ children }: ActiveEditionProps) => {
     } finally {
       setLoadingActiveEdition(false);
     }
-  };
+  }, [selectEdition]);
+
+  const contextValue = useMemo(
+    () => ({
+      selectEdition,
+      setSelectEdition,
+      loadingActiveEdition,
+      setLoadingActiveEdition,
+      ensureActiveEdition,
+    }),
+    [selectEdition, loadingActiveEdition, ensureActiveEdition]
+  );
 
   return (
-    <ActiveEditionContext.Provider
-      value={{
-        selectEdition,
-        setSelectEdition,
-        loadingActiveEdition,
-        setLoadingActiveEdition,
-        ensureActiveEdition,
-      }}
-    >
+    <ActiveEditionContext.Provider value={contextValue}>
       {children}
     </ActiveEditionContext.Provider>
   );

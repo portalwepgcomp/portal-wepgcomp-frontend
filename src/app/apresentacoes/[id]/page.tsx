@@ -1,20 +1,31 @@
 "use client";
 
 import Banner from "@/components/UI/Banner";
+import Button from "@/components/UI/Button";
+import Spinner from "@/components/UI/Spinner";
+import { useAuth } from "@/hooks/useAuth";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { usePresentation } from "@/hooks/usePresentation";
-import moment from "moment";
-import "moment/locale/pt-br";
+import { cn } from "@/utils/cn";
+import { registrarErro } from "@/utils/logError";
+import dayjs from "dayjs";
+import "dayjs/locale/pt-br";
+import { CalendarPlus, Download, StarIcon } from "lucide-react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import "./style.scss";
 import { formatDate, formatOnlyTime, getInitials } from "./utils";
-import { CalendarPlus, Download, StarIcon } from "lucide-react";
+import { Presentation, PresentationBookmark } from "@/models/presentation";
+
+const botaoAcaoBase =
+  "flex items-center gap-2 rounded-lg px-6 py-3 text-base font-semibold transition duration-base";
 
 export default function ApresentacaoDetalhes() {
     const params = useParams();
     const router = useRouter();
     const presentationId = params.id as string;
+
+    const { signed } = useAuth();
     const {
         getPresentationById,
         postPresentationBookmark,
@@ -32,7 +43,7 @@ export default function ApresentacaoDetalhes() {
     const hasFetched = useRef(false);
 
     useEffect(() => {
-        moment.locale("pt-br");
+        dayjs.locale("pt-br");
     }, []);
 
     useEffect(() => {
@@ -46,10 +57,6 @@ export default function ApresentacaoDetalhes() {
             isFetching.current = true;
 
             try {
-                const bookmark = await getPresentationBookmark({ presentationId });
-                if (!controller.signal.aborted) {
-                    setPresentationBookmark(bookmark);
-                }
                 const data = await getPresentationById(presentationId);
                 if (!controller.signal.aborted) {
                     setPresentation(data);
@@ -58,11 +65,22 @@ export default function ApresentacaoDetalhes() {
                     hasFetched.current = true;
                 }
 
-            } catch (err) {
+                if (signed) {
+                    try {
+                        const bookmark = await getPresentationBookmark({ presentationId });
+                        if (!controller.signal.aborted) {
+                            setPresentationBookmark(bookmark);
+                        }
+                    } catch (_errBookmark) {
+                        // Ignora erro de bookmark se falhar
+                    }
+                }
+
+            } catch (_err) {
                 if (!controller.signal.aborted) {
                     showAlert({
                         icon: "error",
-                        title: `Erro ao carregar apresentação: ${err}`,
+                        title: "Erro ao carregar apresentação",
                         text: "Ocorreu um erro ao carregar os detalhes da apresentação. Tente novamente mais tarde!",
                         confirmButtonText: "Retornar",
                     });
@@ -82,13 +100,29 @@ export default function ApresentacaoDetalhes() {
             controller.abort();
             isFetching.current = false;
         };
-    }, [presentationId]);
+    }, [presentationId, signed, getPresentationBookmark, getPresentationById, showAlert]);
 
     const handleBack = () => {
         router.back();
     };
 
     const handleFavorite = async () => {
+        if (!signed) {
+            const res = await showAlert({
+                icon: "info",
+                title: "Acesso restrito",
+                text: "Você precisa estar conectado à sua conta para favoritar esta apresentação.",
+                showCancelButton: true,
+                confirmButtonText: "Fazer Login",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (res.isConfirmed) {
+                router.push(`/login?redirect=/apresentacoes/${presentationId}`);
+            }
+            return;
+        }
+
         const wasBookmarked = presentationBookmark?.bookmarked ?? false;
 
         setPresentationBookmark({
@@ -101,7 +135,7 @@ export default function ApresentacaoDetalhes() {
             } else {
                 await postPresentationBookmark({ presentationId });
             }
-        } catch (err) {
+        } catch (_err) {
             setPresentationBookmark({
                 bookmarked: wasBookmarked
             });
@@ -112,6 +146,26 @@ export default function ApresentacaoDetalhes() {
                 text: "Não foi possível atualizar o favorito. Tente novamente.",
             });
         }
+    };
+
+    const handleAvaliar = async () => {
+        if (!signed) {
+            const res = await showAlert({
+                icon: "info",
+                title: "Acesso restrito",
+                text: "Você precisa estar conectado à sua conta para avaliar esta apresentação.",
+                showCancelButton: true,
+                confirmButtonText: "Fazer Login",
+                cancelButtonText: "Cancelar",
+            });
+
+            if (res.isConfirmed) {
+                router.push(`/login?redirect=/avaliacao/${presentationId}`);
+            }
+            return;
+        }
+
+        router.push('/avaliacao/' + presentation?.id);
     };
 
     const handleAddToCalendar = () => {
@@ -125,8 +179,8 @@ export default function ApresentacaoDetalhes() {
         }
 
         try {
-            const startDate = moment(presentation.presentationTime);
-            const endDate = moment(presentation.presentationTime).add(1, 'hour');
+            const startDate = dayjs(presentation.presentationTime);
+            const endDate = dayjs(presentation.presentationTime).add(1, 'hour');
 
             const startTime = startDate.format('YYYYMMDDTHHmmss');
             const endTime = endDate.format('YYYYMMDDTHHmmss');
@@ -157,7 +211,7 @@ export default function ApresentacaoDetalhes() {
                 title: "Erro ao criar evento",
                 text: "Não foi possível criar o evento no calendário. Tente novamente.",
             });
-            console.error('Erro ao criar evento no calendário:', err);
+            registrarErro("Erro ao criar evento no calendário", err);
         }
     };
 
@@ -190,7 +244,7 @@ export default function ApresentacaoDetalhes() {
             window.open(url, '_blank', 'noopener,noreferrer');
 
         } catch (err) {
-            console.error('Erro ao verificar arquivo:', err);
+            registrarErro("Erro ao verificar arquivo", err);
             showAlert({
                 icon: "error",
                 title: "Erro ao baixar",
@@ -201,21 +255,21 @@ export default function ApresentacaoDetalhes() {
 
     if (loading) {
         return (
-            <div className="apresentacao-loading">
-                <div className="loading-spinner"></div>
-                <p>Carregando detalhes da apresentação...</p>
+            <div className="flex min-h-[400px] flex-col items-center justify-center gap-6">
+                <Spinner />
+                <p className="text-foreground">Carregando detalhes da apresentação...</p>
             </div>
         );
     }
 
     if (error || !presentation) {
         return (
-            <div className="apresentacao-error">
-                <h2>Apresentação não encontrada</h2>
-                <p>Não foi possível carregar os detalhes desta apresentação.</p>
-                <button onClick={handleBack} className="btn-back">
+            <div className="flex min-h-[400px] flex-col items-center justify-center gap-6">
+                <h2 className="text-foreground">Apresentação não encontrada</h2>
+                <p className="text-muted">Não foi possível carregar os detalhes desta apresentação.</p>
+                <Button onClick={handleBack}>
                     Voltar para a programação
-                </button>
+                </Button>
             </div>
         );
     }
@@ -223,41 +277,59 @@ export default function ApresentacaoDetalhes() {
     return (
         <>
             <Banner title="Detalhes da Apresentação" />
-            <div className="presentation-detail-page">
-                <button className="back-button" onClick={() => router.back()}>
+            <div className="mx-auto max-w-[900px] px-5 py-10">
+                <button
+                    type="button"
+                    className="mb-6 cursor-pointer border-none bg-transparent p-0 text-base font-semibold text-brand-blue transition hover:text-brand-navy"
+                    onClick={() => router.back()}
+                >
                     ← Voltar para programação
                 </button>
 
-                <div className="detail-header">
-                    <h1 className="detail-title">{presentation.submission?.title}</h1>
+                <div className="mb-8 rounded-xl bg-gradient-to-br from-brand-blue to-brand-blue-light p-8">
+                    <h1 className="m-0 text-[28px] font-bold leading-snug text-white max-md:text-[22px]">
+                        {presentation.submission?.title}
+                    </h1>
                 </div>
 
-                <div className="actions-section">
-                    <h3 className="section-title">Ações</h3>
-                    <div className="action-buttons">
-
-                        <button className="action-button evaluate" onClick={() => router.push('/avaliacao/' + presentation.id)}>
-                            <StarIcon />
+                <div className="rounded-xl border border-line bg-card p-6">
+                    <h3 className="mb-5 text-xl font-bold text-brand-navy">Ações</h3>
+                    <div className="flex flex-wrap gap-3 max-md:flex-col">
+                        <button
+                            type="button"
+                            className={cn(
+                                botaoAcaoBase,
+                                "border-2 border-brand-blue bg-card text-brand-blue hover:bg-brand-blue hover:text-white max-md:w-full max-md:justify-center",
+                            )}
+                            onClick={handleAvaliar}
+                        >
+                            <StarIcon className="h-5 w-5" />
                             Avaliar
                         </button>
 
                         <button
-                            className="action-button secondary"
+                            type="button"
+                            className={cn(
+                                botaoAcaoBase,
+                                "border-2 border-brand-blue bg-card text-brand-blue hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50 max-md:w-full max-md:justify-center",
+                            )}
                             onClick={handleDownloadPdf}
                             disabled={!presentation.submission?.pdfFile}
-                            style={!presentation.submission?.pdfFile ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                         >
-                            <Download />
+                            <Download className="h-5 w-5" />
                             Baixar
                         </button>
 
-
                         <button
-                            className="action-button secondary"
+                            type="button"
+                            className={cn(
+                                botaoAcaoBase,
+                                "border-2 border-brand-blue bg-card text-brand-blue hover:bg-primary-light max-md:w-full max-md:justify-center",
+                            )}
                             onClick={handleFavorite}
                         >
                             <span
-                                className="button-icon"
+                                className="text-lg"
                                 style={{ color: presentationBookmark?.bookmarked ? 'red' : 'inherit' }}
                             >
                                 {presentationBookmark?.bookmarked ? '❤️' : '🤍'}
@@ -266,48 +338,61 @@ export default function ApresentacaoDetalhes() {
                         </button>
 
                         <button
-                            className="action-button primary"
+                            type="button"
+                            className={cn(
+                                botaoAcaoBase,
+                                "border-none bg-brand-blue text-white hover:bg-brand-navy max-md:w-full max-md:justify-center",
+                            )}
                             onClick={handleAddToCalendar}
                         >
-                            <CalendarPlus />
+                            <CalendarPlus className="h-5 w-5" />
                             Agendar
                         </button>
-
-
 
                         {presentation.submission?.linkHostedFile && (
                             <a
                                 href={presentation.submission?.linkHostedFile}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="action-button secondary"
+                                className={cn(
+                                    botaoAcaoBase,
+                                    "border-2 border-brand-blue bg-card text-brand-blue no-underline hover:bg-primary-light max-md:w-full max-md:justify-center",
+                                )}
                             >
-                                <span className="button-icon">🔗</span>
+                                <span className="text-lg">🔗</span>
                                 Acessar
                             </a>
                         )}
-
-
-
                     </div>
                 </div>
 
-                <div className="detail-content">
-                    <div className="presenter-card">
-                        <div className="presenter-avatar">
+                <div className="mt-8 flex flex-col gap-8">
+                    <div className="flex items-center gap-5 rounded-xl border border-line bg-card p-6 max-md:flex-col max-md:text-center">
+                        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-blue">
                             {presentation.submission?.mainAuthor?.photoFilePath ? (
-                                <img src={presentation.submission.mainAuthor.photoFilePath} alt={presentation.submission.mainAuthor.name} />
+                                <Image
+                                    src={presentation.submission.mainAuthor.photoFilePath}
+                                    alt={presentation.submission.mainAuthor.name || "Foto do autor"}
+                                    width={80}
+                                    height={80}
+                                    className="h-full w-full object-cover"
+                                    unoptimized
+                                />
                             ) : (
-                                <div className="avatar-initials">{getInitials(presentation.submission?.mainAuthor?.name || '')}</div>
+                                <div className="text-[28px] font-bold text-white">
+                                    {getInitials(presentation.submission?.mainAuthor?.name || '')}
+                                </div>
                             )}
                         </div>
-                        <div className="presenter-info">
-                            <h2 className="presenter-name">{presentation.submission?.mainAuthor?.name}</h2>
-                            <p className="presenter-email">
-                                <span className="icon">✉</span> {presentation.submission?.mainAuthor?.email}
+                        <div className="flex-1">
+                            <h2 className="mb-2 text-[22px] font-bold text-[#1a1a1a]">
+                                {presentation.submission?.mainAuthor?.name}
+                            </h2>
+                            <p className="my-1 flex items-center gap-1.5 text-sm text-muted max-md:justify-center">
+                                <span>✉</span> {presentation.submission?.mainAuthor?.email}
                             </p>
                             {presentation.submission?.advisor && (
-                                <p className="presenter-advisor">
+                                <p className="my-1 text-sm text-muted">
                                     Orientador: {presentation.submission.advisor.name}
                                 </p>
                             )}
@@ -316,47 +401,47 @@ export default function ApresentacaoDetalhes() {
                                     href={presentation.submission.mainAuthor.lattesUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="lattes-link"
+                                    className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-brand-blue px-3 py-1.5 text-sm font-semibold text-brand-blue no-underline transition hover:bg-brand-blue hover:text-white"
                                 >
-                                    <span className="icon">🔗</span> Currículo Lattes
+                                    <span>🔗</span> Currículo Lattes
                                 </a>
                             )}
                         </div>
                     </div>
 
-                    <div className="details-section">
-                        <h3 className="section-title">Detalhes da Apresentação</h3>
-                        <div className="details-grid">
-                            <div className="detail-item">
-                                <span className="detail-icon">📅</span>
-                                <div className="detail-text">
-                                    <strong>Data</strong>
-                                    <p>{formatDate(presentation.presentationTime || "")}</p>
+                    <div className="rounded-xl border border-line bg-card p-6">
+                        <h3 className="mb-5 text-xl font-bold text-brand-navy">Detalhes da Apresentação</h3>
+                        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5 max-md:grid-cols-1">
+                            <div className="flex gap-3">
+                                <span className="shrink-0 text-2xl">📅</span>
+                                <div className="flex-1">
+                                    <strong className="mb-1 block text-xs uppercase tracking-wide text-muted">Data</strong>
+                                    <p className="m-0 text-base text-[#1a1a1a]">{formatDate(presentation.presentationTime || "")}</p>
                                 </div>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-icon">🕐</span>
-                                <div className="detail-text">
-                                    <strong>Horário</strong>
-                                    <p>{formatOnlyTime(presentation.presentationTime || "")}</p>
+                            <div className="flex gap-3">
+                                <span className="shrink-0 text-2xl">🕐</span>
+                                <div className="flex-1">
+                                    <strong className="mb-1 block text-xs uppercase tracking-wide text-muted">Horário</strong>
+                                    <p className="m-0 text-base text-[#1a1a1a]">{formatOnlyTime(presentation.presentationTime || "")}</p>
                                 </div>
                             </div>
-                            <div className="detail-item">
-                                <span className="detail-icon">📍</span>
-                                <div className="detail-text">
-                                    <strong>Local</strong>
-                                    <p>Auditório A do IGEO</p>
+                            <div className="flex gap-3">
+                                <span className="shrink-0 text-2xl">📍</span>
+                                <div className="flex-1">
+                                    <strong className="mb-1 block text-xs uppercase tracking-wide text-muted">Local</strong>
+                                    <p className="m-0 text-base text-[#1a1a1a]">Auditório A do IGEO</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="abstract-section">
-                        <h3 className="section-title">Resumo</h3>
-                        <p className="abstract-text">{presentation.submission?.abstract}</p>
+                    <div className="rounded-xl border border-line bg-card p-6">
+                        <h3 className="mb-5 text-xl font-bold text-brand-navy">Resumo</h3>
+                        <p className="m-0 text-base leading-relaxed text-[#4a4a4a]">
+                            {presentation.submission?.abstract}
+                        </p>
                     </div>
-
-
                 </div>
             </div>
         </>

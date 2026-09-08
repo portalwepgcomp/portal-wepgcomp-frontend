@@ -1,13 +1,18 @@
-import { useContext } from "react";
-
-import { createContext, ReactNode, useState } from "react";
+import {
+  useContext,
+  createContext,
+  ReactNode,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 
 import { useSweetAlert } from "@/hooks/useAlert";
 
-import axiosInstance from '@/utils/api';
-
-const baseUrl = "/uploads";
-const instance = axiosInstance;
+import { uploadApi } from "@/services/upload";
+import { registrarErro } from "@/utils/logError";
+import { SubmissionFile } from "@/models/submissionFile";
+import { getErrorMessage } from "@/utils/error";
 
 interface SubmissionFileProps {
   children: ReactNode;
@@ -24,7 +29,7 @@ interface SubmissionFileProviderData {
     idSubmission: string,
     desiredFilename?: string
   ) => Promise<SubmissionFile | null>;
-  deleteFile: (idFile: string) => Promise<any>;
+  deleteFile: (idFile: string) => Promise<unknown>;
 }
 
 export const SubmissionFileContext = createContext<SubmissionFileProviderData>(
@@ -47,72 +52,76 @@ export const SubmissionFileProvider = ({ children }: SubmissionFileProps) => {
 
   const { showAlert } = useSweetAlert();
 
-  const getFiles = async () => {
+  const getFiles = useCallback(async () => {
     setLoadingSubmissionFileList(true);
 
     try {
-      const { data } = await instance.post(`${baseUrl}/list`);
+      const data = await uploadApi.listFiles();
       setSubmissionFileList(data);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      registrarErro("Erro no upload/arquivo de submissão", err);
       setSubmissionFileList([]);
 
       showAlert({
         icon: "error",
         title: "Erro ao listar arquivos",
-        text:
-          err.response?.data?.message?.message ||
-          err.response?.data?.message ||
-          "Ocorreu um erro durante a busca.",
+        text: getErrorMessage(err, "Ocorreu um erro durante a busca."),
         confirmButtonText: "Retornar",
       });
     } finally {
       setLoadingSubmissionFileList(false);
     }
-  };
+  }, [showAlert]);
 
-  const sendFile = async (file: File, idUser: string, desiredFilename?: string) => {
-    setLoadingSubmissionFile(true);
+  const sendFile = useCallback(
+    async (file: File, idUser: string, desiredFilename?: string) => {
+      setLoadingSubmissionFile(true);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file, desiredFilename || file.name);
-      formData.append("idSubmission", idUser);
+      try {
+        const data = await uploadApi.sendFile(file, idUser, desiredFilename);
 
-      const { data } = await instance.post(`${baseUrl}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+        setSubmissionFile(data);
+        setLoadingSubmissionFile(false);
+        return data;
+      } catch (err: unknown) {
+        registrarErro("Erro no upload/arquivo de submissão", err);
+        setSubmissionFile(null);
+        setLoadingSubmissionFile(false);
+        return null;
+      } finally {
+        setLoadingSubmissionFile(false);
+      }
+    },
+    []
+  );
 
-      setSubmissionFile(data);
-      setLoadingSubmissionFile(false);
-      return data;
-    } catch (err: any) {
-      console.error(err);
-      setSubmissionFile(null);
-      setLoadingSubmissionFile(false);
-      return null;
-    } finally {
-      setLoadingSubmissionFile(false);
-    }
-  };
+  const deleteFile = useCallback(async (idFile: string) => {
+    return uploadApi.deleteFile(idFile);
+  }, []);
 
-  const deleteFile = async (idFile: string) => {
-      const { data } = await instance.delete(`${baseUrl}/${idFile}`, {method: 'DELETE'});
-      return data;
-    }
+  const contextValue = useMemo(
+    () => ({
+      loadingSubmissionFileList,
+      loadingSubmissionFile,
+      submissionFileList,
+      submissionFile,
+      getFiles,
+      sendFile,
+      deleteFile,
+    }),
+    [
+      loadingSubmissionFileList,
+      loadingSubmissionFile,
+      submissionFileList,
+      submissionFile,
+      getFiles,
+      sendFile,
+      deleteFile,
+    ]
+  );
 
   return (
-    <SubmissionFileContext.Provider
-      value={{
-        loadingSubmissionFileList,
-        loadingSubmissionFile,
-        submissionFileList,
-        submissionFile,
-        getFiles,
-        sendFile,
-        deleteFile,
-      }}
-    >
+    <SubmissionFileContext.Provider value={contextValue}>
       {children}
     </SubmissionFileContext.Provider>
   );

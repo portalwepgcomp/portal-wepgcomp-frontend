@@ -1,12 +1,15 @@
 "use client";
 
-import { useUsers } from "@/hooks/useUsers";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import "./style.scss";
-import PasswordEye from "@/components/UI/PasswordEye";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ShieldCheck, ShieldX } from "lucide-react";
+
+import { useUsers } from "@/hooks/useUsers";
+import Button from "@/components/UI/Button";
+import { Campo, PasswordInput } from "@/components/UI/Input";
+import { cn } from "@/utils/cn";
 
 const formAlterarSenhaSchema = z
   .object({
@@ -14,7 +17,6 @@ const formAlterarSenhaSchema = z
       .string()
       .nonempty("Senha é obrigatória!")
       .min(8, "A senha deve ter no mínimo 8 caracteres."),
-
     confirmaSenha: z.string().nonempty("Confirmação de senha é obrigatória!"),
   })
   .refine((data) => data.senha === data.confirmaSenha, {
@@ -22,10 +24,10 @@ const formAlterarSenhaSchema = z
     path: ["confirmaSenha"],
   });
 
-export function FormAlterarSenha({ params }) {
+type FormAlterarSenhaSchema = z.infer<typeof formAlterarSenhaSchema>;
+
+export function FormAlterarSenha({ params }: Readonly<{ params: { token: string } }>) {
   const { resetPassword } = useUsers();
-  const [eye1, setEye1] = useState(false);
-  const [eye2, setEye2] = useState(false);
 
   const {
     register,
@@ -35,28 +37,21 @@ export function FormAlterarSenha({ params }) {
     resolver: zodResolver(formAlterarSenhaSchema),
   });
 
-  type FormAlterarSenhaSchema = z.infer<typeof formAlterarSenhaSchema>;
-
   const [requisitos, setRequisitos] = useState({
     minLength: false,
     hasLetter: false,
     number: false,
   });
 
-  const handleFormCadastro = (data: FormAlterarSenhaSchema) => {
-    const { senha } = data;
-
-    const body = {
-      token: params.token,
-      newPassword: senha,
-    };
-
-    resetPassword(body);
+  const handleFormAlterarSenha = (data: FormAlterarSenhaSchema) => {
+    resetPassword({ token: params.token, newPassword: data.senha });
   };
 
-  const handleChangeSenha = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const { onChange: onSenhaChange, ...senhaRegisterProps } = register("senha");
 
+  const handleChangeSenha = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSenhaChange(e);
+    const value = e.target.value;
     setRequisitos({
       minLength: value.length >= 8,
       hasLetter: /[a-zA-Z]/.test(value),
@@ -64,101 +59,76 @@ export function FormAlterarSenha({ params }) {
     });
   };
 
+  const labelObrigatorio = (texto: string) => (
+    <>
+      {texto} <span className="text-error">*</span>
+    </>
+  );
+
   return (
-    <form className="row" onSubmit={handleSubmit(handleFormCadastro)}>
-      <div className="col-12 mb-1">
-        <label className="form-label fw-bold form-title">
-          Senha
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <div className="d-flex flex-direction-row gap-2 align-items-center">
-          <input
-            type={eye1 ? "text" : "password"}
-            className="form-control input-title"
-            id="senha"
-            placeholder="Insira sua senha"
-            {...register("senha")}
-            onChange={handleChangeSenha}
-          />
-          <div className="eye" onClick={() => setEye1(!eye1)}>
-            <PasswordEye color={eye1 == false ? "black" : "blue"} />
-          </div>
-        </div>
-        <p className="text-danger error-message">{errors.senha?.message}</p>
-        <div className="mt-3">
-          <p className="mb-1 fw-semibold paragraph-title">
-            A senha deve possuir pelo menos:
-          </p>
-          <ul className="mb-0">
-            <li
-              className={`fw-semibold list-title ${
-                requisitos.minLength ? "text-success" : "text-danger"
-              }`}
-            >
-              {requisitos.minLength ? (
-                <i className="bi bi-shield-fill-check" />
-              ) : (
-                <i className="bi bi-shield-fill-x" />
-              )}{" "}
-              8 dígitos
-            </li>
-            <li
-              className={`fw-semibold list-title ${
-                requisitos.hasLetter ? "text-success" : "text-danger"
-              }`}
-            >
-              {requisitos.hasLetter ? (
-                <i className="bi bi-shield-fill-check" />
-              ) : (
-                <i className="bi bi-shield-fill-x" />
-              )}{" "}
-              1 letra
-            </li>
-            <li
-              className={`fw-semibold list-title ${
-                requisitos.number ? "text-success" : "text-danger"
-              }`}
-            >
-              {requisitos.number ? (
-                <i className="bi bi-shield-fill-check" />
-              ) : (
-                <i className="bi bi-shield-fill-x" />
-              )}{" "}
-              1 número
-            </li>
-          </ul>
-        </div>
-      </div>
+    <form className="w-full max-w-[583px]" onSubmit={handleSubmit(handleFormAlterarSenha)}>
+      <Campo
+        label={labelObrigatorio("Senha")}
+        htmlFor="senha"
+        erro={errors.senha?.message}
+        className="mb-1"
+      >
+        <PasswordInput
+          id="senha"
+          placeholder="Insira sua nova senha"
+          {...senhaRegisterProps}
+          onChange={handleChangeSenha}
+        />
+      </Campo>
 
-      <div className="col-12 mb-4">
-        <label className="form-label fw-bold form-title">
-          Confirmação de senha
-          <span className="text-danger ms-1 form-title">*</span>
-        </label>
-        <div className="d-flex flex-direction-row gap-2 align-items-center">
-          <input
-            type={eye2 ? "text" : "password"}
-            className="form-control input-title"
-            id="confirmaSenha"
-            placeholder="Insira sua senha novamente"
-            {...register("confirmaSenha")}
-          />
-          <div className="eye" onClick={() => setEye2(!eye2)}>
-            <PasswordEye color={eye2 == false ? "black" : "blue"} />
-          </div>
-        </div>
-        <p className="text-danger error-message">
-          {errors.confirmaSenha?.message}
+      <div className="mb-1 mt-3">
+        <p className="mb-1 text-xs font-semibold text-[#555555]">
+          A senha deve possuir pelo menos:
         </p>
+        <ul className="mb-0 list-none pl-0">
+          {[
+            { ok: requisitos.minLength, text: "8 dígitos" },
+            { ok: requisitos.hasLetter, text: "1 letra" },
+            { ok: requisitos.number, text: "1 número" },
+          ].map((req) => (
+            <li
+              key={req.text}
+              className={cn(
+                "text-xs font-semibold flex items-center gap-1 mb-1",
+                req.ok ? "text-success" : "text-error",
+              )}
+            >
+              {req.ok ? (
+                <ShieldCheck className="h-3.5 w-3.5 inline text-success" aria-hidden="true" />
+              ) : (
+                <ShieldX className="h-3.5 w-3.5 inline text-error" aria-hidden="true" />
+              )}
+              {req.text}
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <div className="d-flex gap-2 col-6 mx-auto justify-content-center align-items-center">
-        <button
+      <Campo
+        label={labelObrigatorio("Confirmação de senha")}
+        htmlFor="confirmaSenha"
+        erro={errors.confirmaSenha?.message}
+        className="mb-1"
+      >
+        <PasswordInput
+          id="confirmaSenha"
+          placeholder="Insira sua senha novamente"
+          {...register("confirmaSenha")}
+        />
+      </Campo>
+
+      <div className="mx-auto mt-4 flex justify-center">
+        <Button
           type="submit"
-          className="btn  text-white fs-5 fw-bold submit-button "
+          className="bg-brand-orange text-base font-bold hover:bg-brand-orange px-8"
         >
           Enviar
-        </button>
+        </Button>
       </div>
     </form>
   );
