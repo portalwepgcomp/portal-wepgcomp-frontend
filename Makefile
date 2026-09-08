@@ -18,8 +18,6 @@ test:
 typecheck:
 	npm run typecheck
 
-# Espelha a pipeline de CI (typecheck + lint + test + build).
-# Rode antes de abrir/atualizar um PR: `make ci` (ou `npm run ci`).
 export NEXT_PUBLIC_API_URL ?= http://localhost:3001
 
 ci:
