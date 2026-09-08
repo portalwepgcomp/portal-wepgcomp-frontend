@@ -11,8 +11,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "ci": "npm run typecheck && npm run lint && npm test -- --ci --coverage=false && npm run build",
     "openapi:types": "openapi-typescript ../portal-wepgcomp-api/openapi.json -o src/types/api-schema.ts",
     "clean": "rm -rf package-lock.json node_modules && npm cache clean --force"
   },
