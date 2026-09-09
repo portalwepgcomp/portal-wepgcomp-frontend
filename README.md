@@ -43,6 +43,52 @@ O ESLint é utilizado para que possamos manter um padrão de desenvolvimento na 
 npm run lint
 ```
 
+## Guia de botões
+
+Use `src/components/UI/Button.tsx` para ações. As classes são compartilhadas com
+links e SweetAlert por `src/lib/estilosBotao.ts`, com os estilos definidos em
+`src/styles/tailwind.css`.
+
+| Variante | Aparência | Uso |
+| --- | --- | --- |
+| `primary` (padrão) | Laranja da marca, texto escuro | Cadastrar, salvar, enviar, avaliar e confirmar ações comuns |
+| `secondary` / `outline` | Fundo branco e contorno neutro | Voltar, cancelar, editar, baixar e abas |
+| `danger` | Vermelho, texto branco | Excluir, resetar e confirmar ações destrutivas |
+| `ghost` | Fundo transparente | Fechar, menus e controles auxiliares |
+
+Todas as variantes têm foco visível por teclado e estado desabilitado sem efeito
+de hover. Em abas e seletores, use `secondary` com `aria-pressed`; a seleção recebe
+contorno e fundo suave da marca. Use texto ou `aria-label` para identificar ações
+que mostram apenas ícones.
+
+```tsx
+<Button type="submit" disabled={salvando}>Salvar</Button>
+<Button variante="secondary" onClick={voltar}>Voltar</Button>
+<Button variante="danger" onClick={confirmarExclusao}>Excluir</Button>
+<Button variante="secondary" aria-pressed={selecionada}>Banca</Button>
+```
+
+O tipo padrão é `button`; formulários devem declarar `type="submit"`. Mantenha
+largura, espaçamento e responsividade em `className` ou `larguraTotal`. Cores,
+contornos e estados visuais pertencem às variantes: evite sobrescrevê-los com
+classes locais, estilos inline ou `confirmButtonColor`/`cancelButtonColor`.
+
+Para links com aparência de botão, mantenha `<Link>`/`<a>` e aplique
+`obterClassesBotao("secondary")`. Para os modais compartilhados, use
+`varianteConfirmacao`; alertas comuns usam `primary` e cancelamentos usam `secondary`.
+Informe a intenção destrutiva explicitamente, independentemente do ícone do alerta:
+
+```tsx
+await showAlert({
+  title: "Excluir edição?",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonText: "Excluir",
+  cancelButtonText: "Cancelar",
+  varianteConfirmacao: "danger",
+});
+```
+
 ## Estrutura de pastas
 
 |- _-_tests__ - Onde se encontram os testes unitários do projeto
