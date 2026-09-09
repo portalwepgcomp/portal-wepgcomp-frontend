@@ -112,10 +112,9 @@ export function FormLogin() {
       </div>
 
       <div className="mx-auto mb-4 flex justify-center gap-2">
-        <Button
+        <Button size="lg" className="w-[224px]"
           type="submit"
-          variante="brand"
-          className="h-[2.375rem] w-[7.938rem] text-sm font-semibold"
+          variante="primary"
         >
           Entrar
         </Button>

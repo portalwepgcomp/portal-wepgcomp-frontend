@@ -1,9 +1,6 @@
 export const badgeBase =
   "me-1 flex items-center gap-1 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-semibold";
 
-export const actionBtnBase =
-  "inline-flex items-center justify-center gap-1 rounded-lg border border-transparent px-4 py-4 text-xs font-semibold uppercase tracking-wide shadow-sm transition-all duration-200 hover:shadow-md active:shadow-sm disabled:cursor-not-allowed disabled:opacity-60 max-sm:text-[11px] max-sm:px-3 max-sm:py-2";
-
 export const controlSelectBase =
   "box-border w-full cursor-pointer rounded-[10px] border border-[#e9ecef] bg-[#f8f9fa] px-4 py-4 text-center text-sm font-semibold text-[#495057] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.05),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] transition-all duration-300 hover:border-[#007bff] hover:bg-white focus:border-[#007bff] focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,123,255,0.1)] active:shadow-[inset_3px_3px_7px_rgba(0,0,0,0.1)] disabled:cursor-not-allowed disabled:opacity-60";
 

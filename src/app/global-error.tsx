@@ -1,5 +1,7 @@
 "use client";
 
+import Button from "@/components/UI/Button";
+import "../styles/tailwind.css";
 import { useEffect } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { registrarErro } from "@/utils/logError";
@@ -31,14 +33,14 @@ export default function GlobalError({ error, reset }: Readonly<GlobalErrorProps>
           </p>
 
           <div className="mt-6">
-            <button
+            <Button size="lg"
               type="button"
               onClick={() => reset()}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#F25C05] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-orange-600 active:scale-95"
+              variante="primary"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw  />
               Recarregar Aplicação
-            </button>
+            </Button>
           </div>
         </div>
       </body>

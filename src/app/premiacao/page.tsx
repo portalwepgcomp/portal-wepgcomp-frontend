@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import Premiacoes from "@/components/Premiacao/Premiacoes";
 import Banner from "@/components/UI/Banner";
 import Button from "@/components/UI/Button";
+import { classeItemMenu } from "@/lib/estilosMenu";
 import { Input } from "@/components/UI/Input";
 
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
@@ -13,10 +14,6 @@ import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { PremiacaoProvider } from "@/hooks/usePremiacao";
 import { presentationApi } from "@/services/presentation";
-import { cn } from "@/utils/cn";
-
-const tabClass =
-  "flex h-10 px-5 items-center justify-center rounded-xl text-sm font-semibold transition cursor-pointer max-sm:w-full";
 
 export default function Premiacao() {
   const [activeCategory, setActiveCategory] = useState<
@@ -110,6 +107,7 @@ export default function Premiacao() {
     const res = await showAlert({
       icon: "warning",
       title: "Atenção: Ação Destrutiva",
+      varianteConfirmacao: "primary",
       text: `Tem certeza que deseja resetar ${labels[target]}? Esta ação não pode ser desfeita!`,
       showCancelButton: true,
       confirmButtonText: "Sim, resetar",
@@ -154,30 +152,31 @@ export default function Premiacao() {
           <Banner title="Premiação" />
           <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <div className="flex w-full max-w-md">
+              <div className="flex w-full max-w-md items-center gap-2">
                 <Input
                   type="text"
                   placeholder="Pesquise pelo nome da apresentação"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="rounded-r-none border-2 border-brand-orange focus:border-[#E68A00] focus:ring-brand-orange/25"
+
                 />
-                <button
+                <Button variante="primary" size="lg"
                   type="button"
-                  className="flex min-w-10 items-center justify-center rounded-r-lg bg-brand-orange hover:bg-[#E68A00]"
+                  aria-label="Buscar apresentações"
+
                 >
                   <Image
                     src="/assets/images/search.svg"
                     alt="Search icon"
-                    width={20}
-                    height={20}
+                    width={14}
+                    height={14}
                   />
-                </button>
+                </Button>
               </div>
 
-              <Button
+              <Button size="lg" variante="primary"
                 type="button"
-                className="whitespace-nowrap rounded-lg bg-brand-orange px-4 py-2 hover:bg-brand-orange disabled:opacity-50 text-sm font-semibold"
+
                 onClick={handleRecalculateScores}
                 disabled={isCalculating || isResetting}
               >
@@ -185,17 +184,19 @@ export default function Premiacao() {
               </Button>
 
               <div className="relative" ref={resetRef}>
-                <Button
+                <Button size="lg"
                   type="button"
                   variante="danger"
-                  className="whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold"
+                  aria-expanded={resetOpen}
+                  aria-controls="opcoes-reset"
+
                   onClick={() => setResetOpen((v) => !v)}
                   disabled={isCalculating || isResetting}
                 >
                   {isResetting ? "Resetando..." : "Resetar ▾"}
                 </Button>
                 {resetOpen && (
-                  <ul className="absolute left-0 z-50 mt-1 min-w-[14rem] list-none rounded-md border border-line bg-white py-1 shadow-lg">
+                  <ul id="opcoes-reset" className="absolute right-0 z-50 mt-1 min-w-[14rem] list-none rounded-md border border-line bg-white py-1 shadow-lg">
                     {[
                       {
                         label: "Resetar Scores da Banca",
@@ -213,7 +214,7 @@ export default function Premiacao() {
                       <li key={item.type}>
                         <button
                           type="button"
-                          className="block w-full px-4 py-2 text-left text-sm hover:bg-[#019A34] hover:text-white"
+                          className={classeItemMenu}
                           onClick={() => handleResetScores(item.type)}
                           disabled={isResetting}
                         >
@@ -226,15 +227,12 @@ export default function Premiacao() {
               </div>
 
               {(["banca", "avaliadores", "publico"] as const).map((cat) => (
-                <button
+                <Button size="lg"
                   key={cat}
                   type="button"
-                  className={cn(
-                    tabClass,
-                    activeCategory === cat
-                      ? "border-0 bg-brand-orange text-white shadow-sm"
-                      : "border-2 border-brand-orange bg-white text-brand-orange hover:bg-orange-50",
-                  )}
+                  variante={activeCategory === cat ? "secondary" : "outline"}
+                  aria-pressed={activeCategory === cat}
+                  className="max-sm:w-full"
                   onClick={() => handleChangeCategory(cat)}
                 >
                   {cat === "banca"
@@ -242,7 +240,7 @@ export default function Premiacao() {
                     : cat === "avaliadores"
                       ? "Avaliadores"
                       : "Público"}
-                </button>
+                </Button>
               ))}
             </div>
 

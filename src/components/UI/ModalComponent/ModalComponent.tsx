@@ -3,7 +3,7 @@
 import { ReactNode, useEffect } from "react";
 import { X } from "lucide-react";
 import LoadingPage from "@/components/LoadingPage";
-import Button from "@/components/UI/Button";
+import Button, { VarianteBotao } from "@/components/UI/Button";
 import { useModal } from "@/context/ModalProvider";
 import { cn } from "@/utils/cn";
 
@@ -13,7 +13,7 @@ interface ModalComponentProps {
   loading: boolean;
   children: ReactNode[] | ReactNode;
   labelConfirmButton?: string;
-  colorButtonConfirm?: string;
+  varianteConfirmacao?: VarianteBotao;
   disabledConfirmButton?: boolean;
   isShortModal?: boolean;
   idCloseModal?: string;
@@ -27,7 +27,7 @@ export default function ModalComponent({
   formId,
   loading,
   labelConfirmButton,
-  colorButtonConfirm,
+  varianteConfirmacao = "primary",
   onConfirm,
   disabledConfirmButton,
   isShortModal,
@@ -83,15 +83,15 @@ export default function ModalComponent({
         ) : (
           <>
             <div className="flex justify-end border-0 p-2">
-              <button
+              <Button size="lg"
                 id={idCloseModal ?? "close-modal"}
                 type="button"
                 onClick={handleClose}
-                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted transition hover:bg-muted-light hover:text-foreground focus:outline-none"
+                variante="outline"
                 aria-label="Fechar"
               >
-                <X className="h-6 w-6" aria-hidden="true" />
-              </button>
+                <X  aria-hidden="true" />
+              </Button>
             </div>
 
             <div className="flex flex-col items-start overflow-y-auto px-6 pb-4">
@@ -100,16 +100,11 @@ export default function ModalComponent({
 
             {onConfirm && labelConfirmButton && (
               <div className="flex justify-center border-t border-line px-6 py-4">
-                <Button
+                <Button size="lg"
                   type={formId ? "submit" : "button"}
                   form={formId}
                   disabled={disabledConfirmButton}
-                  className="w-48 font-bold"
-                  style={
-                    colorButtonConfirm
-                      ? { backgroundColor: colorButtonConfirm }
-                      : undefined
-                  }
+                  variante={varianteConfirmacao}
                   onClick={onConfirm}
                 >
                   {labelConfirmButton}

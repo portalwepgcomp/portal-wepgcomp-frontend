@@ -1,8 +1,10 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useEffect } from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
+import { obterClassesBotao } from "@/lib/estilosBotao";
 import { registrarErro } from "@/utils/logError";
 
 interface ErrorProps {
@@ -37,20 +39,20 @@ export default function ErrorPage({ error, reset }: Readonly<ErrorProps>) {
         )}
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <button
+          <Button size="lg"
             type="button"
             onClick={() => reset()}
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-orange px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-95"
+            variante="primary"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw  />
             Tentar Novamente
-          </button>
+          </Button>
 
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-lg border border-line bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all duration-200 hover:bg-muted-light active:scale-95 no-underline"
+            className={obterClassesBotao("outline")}
           >
-            <Home className="h-4 w-4" />
+            <Home data-icon="inline-start" />
             Página Inicial
           </Link>
         </div>

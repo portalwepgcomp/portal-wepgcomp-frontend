@@ -444,9 +444,8 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
       </Campo>
 
       <div className="mx-auto mt-2 flex w-full max-[1000px]:justify-center">
-        <Button
+        <Button size="lg" className="w-[224px]" variante="primary"
           type="submit"
-          className="w-full max-w-xs bg-brand-orange text-xl font-bold hover:bg-brand-orange max-[1000px]:mx-auto"
         >
           Cadastrar
         </Button>

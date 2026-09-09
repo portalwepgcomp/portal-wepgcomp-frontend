@@ -1,12 +1,10 @@
 "use client";
 
+import { classeItemMenu } from "@/lib/estilosMenu";
 import { cn } from "@/utils/cn";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { ReactNode, useEffect, useRef, useState } from "react";
-
-const itemClass =
-  "block w-full px-4 py-2 text-left text-sm font-light text-inherit no-underline transition hover:bg-[#019A34] hover:text-white";
 
 interface PerfilMenuProps {
   children: ReactNode;
@@ -35,12 +33,12 @@ export function PerfilMenu({ children, className }: PerfilMenuProps) {
     <div className={cn("relative", className)} ref={ref}>
       <button
         type="button"
-        className="flex items-center justify-center border-0 bg-transparent p-0 text-foreground transition hover:opacity-80 focus:outline-none"
+        className="inline-flex size-9 items-center justify-center border-0 bg-transparent text-foreground hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-800"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label="Menu do perfil"
       >
-        <Menu className="h-7 w-7" aria-hidden="true" />
+        <Menu className="size-7" aria-hidden="true" />
       </button>
       {open && (
         <ul className="absolute right-0 z-50 mt-1 min-w-[12rem] list-none rounded-md border-[3px] border-muted-light bg-white p-0 py-1 shadow-lg">
@@ -65,7 +63,7 @@ export function PerfilMenuItem({
   if (href) {
     return (
       <li>
-        <Link href={href} className={itemClass} onClick={onClick}>
+        <Link href={href} className={classeItemMenu} onClick={onClick}>
           {children}
         </Link>
       </li>
@@ -74,7 +72,7 @@ export function PerfilMenuItem({
 
   return (
     <li>
-      <button type="button" className={itemClass} onClick={onClick}>
+      <button type="button" className={classeItemMenu} onClick={onClick}>
         {children}
       </button>
     </li>

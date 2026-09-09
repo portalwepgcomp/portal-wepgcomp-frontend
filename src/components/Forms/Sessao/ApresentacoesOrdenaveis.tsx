@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { Campo } from "@/components/UI/Input";
 import { cn } from "@/utils/cn";
 import type { ApresentacaoOpt } from "./useFormSessaoApresentacoes";
@@ -7,8 +8,6 @@ import type { ApresentacaoOpt } from "./useFormSessaoApresentacoes";
 const selectClasse =
   "w-full rounded-md border border-[#d9dce0] bg-white px-3 py-2.5 text-sm leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10";
 
-const botaoOutline =
-  "rounded border border-gray-300 bg-transparent px-2 py-1 text-sm transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50";
 
 interface ApresentacoesOrdenaveisProps {
   availableOptions: ApresentacaoOpt[];
@@ -85,38 +84,38 @@ export default function ApresentacoesOrdenaveis({
               >
                 <td className="p-2 align-middle">
                   <div className="mr-2.5 inline-flex gap-1" role="group">
-                    <button
+                    <Button size="lg"
                       type="button"
-                      className={botaoOutline}
+                      variante="secondary"
                       title="Subir"
                       onClick={() => moveUp(index)}
                       disabled={index === 0}
                     >
                       ↑
-                    </button>
-                    <button
+                    </Button>
+                    <Button size="lg"
                       type="button"
-                      className={botaoOutline}
+                      variante="secondary"
                       title="Descer"
                       onClick={() => moveDown(index)}
                       disabled={index === orderedApresentacoes.length - 1}
                     >
                       ↓
-                    </button>
+                    </Button>
                   </div>
                 </td>
                 <td className="p-2 align-middle">{index + 1}</td>
                 <td className="p-2 align-middle">{row.title}</td>
                 <td className="p-2 align-middle">{row.presenterName}</td>
                 <td className="p-2 align-middle">
-                  <button
+                  <Button size="lg"
                     type="button"
-                    className="rounded border border-error bg-transparent px-2 py-1 text-sm text-error transition hover:bg-error hover:text-white"
+                    variante="danger"
                     title="Excluir"
                     onClick={() => removeRow(index)}
                   >
                     Excluir
-                  </button>
+                  </Button>
                 </td>
               </tr>
             ))}
