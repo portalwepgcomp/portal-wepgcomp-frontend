@@ -19,10 +19,12 @@
     "clean": "rm -rf package-lock.json node_modules && npm cache clean --force"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
     "@hookform/resolvers": "^3.9.1",
     "@react-input/mask": "^2.0.4",
     "@tanstack/react-query": "^5.101.2",
     "axios": "^1.7.7",
+    "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "jodit-react": "^4.1.2",
@@ -38,6 +40,7 @@
     "react-select": "^5.8.3",
     "sharp": "^0.35.3",
     "sweetalert2": "^11.6.13",
+    "tailwind-merge": "^2.6.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
