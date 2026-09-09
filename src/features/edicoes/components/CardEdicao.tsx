@@ -49,7 +49,7 @@ export default function CardEdicao({
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
         <Button size="lg"
-          variante="secondary"
+          variante="outline"
           aria-label="Editar"
           onClick={onEditar}
           className={cn(
