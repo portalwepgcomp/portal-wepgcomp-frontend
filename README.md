@@ -1,69 +1,128 @@
-## Contribuções:
-- Todo merge request deve seguir a padronização em pt-BR para variáveis e métodos dentro do código.
-- Todo código que for mexido e estiver em inglês deve ser alterado para pt-BR visando tornar maior parte - padroniada em pt-BR
-- Certifique-se antes de criar um componente se ele já não existe, caso esteja em um local errado, podem - colocar na pasta correta. ex Components/Pages
-- Evite criar interfaces e métodos desnecessários
-- Evitar muitas camadas para realizar uma ação
-- Certifique-se de que não houve atualiações em bibliotecas que possam quebrar o código
-- Certifique-se de que seu código e variáveis estão os mais legíveis possível.
-- Abra um Merge Request para a branch **development** e solicite aprovação das outras pessoas do grupo.
-- Peça ao grupo que teste as funcionalidades implementadas e comunique o que há de alteração.
-- Após ter o aprove, abra um Merge Request para a **master** e solicite aprovação
-- Comunique aos mantenedores para que seja feito o deploy.
+﻿# Portal WEPGCOMP — Frontend
 
+Frontend do portal do **WEPGCOMP** (Workshop de Pós-Graduação em Computação / PGCOMP-UFBA). Consome a API em [`portal-wepgcomp-api`](https://github.com/portalwepgcomp/portal-wepgcomp-api).
 
-## Instalação
+## Sobre
 
-Instalação dos pacotes:
+Aplicação web para inscrição, programação de apresentações, avaliações, favoritos, gerenciamento de edições/sessões e demais fluxos do evento.
+
+## Stack
+
+- **Next.js** 14 (App Router) + **React** 18 + **TypeScript**
+- **Tailwind CSS**
+- **TanStack Query**, Axios, React Hook Form + Zod
+- **Jest** (unitário) e **Cypress** (e2e, opcional)
+- Node **≥ 18** e npm **≥ 10** (`engines` no `package.json`; CI usa Node 20)
+
+## Estrutura do projeto
+
+```text
+portal-wepgcomp-frontend/
+├── __tests__/              # Testes unitários (Jest)
+├── cypress/                # Testes e2e (Cypress)
+├── public/                 # Assets estáticos
+├── src/
+│   ├── app/                # Rotas e layouts (App Router)
+│   ├── components/         # Componentes reutilizáveis (UI, forms, layout)
+│   ├── features/           # Domínios de listagem/telas (apresentacoes, edicoes, …)
+│   ├── context/            # Contextos React
+│   ├── hooks/              # Hooks compartilhados
+│   ├── lib/                # Utilitários de infra (ex.: react-query)
+│   ├── services/           # Chamadas à API
+│   ├── models/ · types/    # Modelos e tipos
+│   ├── enums/ · utils/     # Enums e helpers
+│   └── styles/             # Estilos auxiliares
+├── .env.example            # Variáveis de ambiente documentadas
+├── Makefile                # Atalhos (setup, dev, ci, …)
+├── next.config.mjs
+├── jest.config.mjs
+└── package.json
+```
+
+## Pré-requisitos
+
+- Node.js ≥ 18 e npm ≥ 10
+- API local rodando (padrão: `http://localhost:3001`) — ver README da API
+
+## Instalação / Como rodar
 
 ```bash
+# 1. Instalar dependências
 npm install
-```
+# ou: make setup
 
-Para rodar o servidor de desenvolvimento:
+# 2. Variáveis de ambiente
+cp .env.example .env.local
+# Ajuste NEXT_PUBLIC_API_URL se a API não estiver em localhost:3001
 
-```bash
+# 3. Desenvolvimento
 npm run dev
+# ou: make dev
 ```
 
-Vai abrir [http://localhost:3000](http://localhost:3000) no seu browser para acessar a aplicação.
+Abre [http://localhost:3000](http://localhost:3000).
 
-## Qualidade
-Utilizamos Jest para execução dos testes unitários, para rodar basta executar os comandos:
-
-```bash
-npm run test
-// or
-npm run tes:watch
-```
-
-O ESLint é utilizado para que possamos manter um padrão de desenvolvimento na escrita do código fonte, para obter um relatório basta executar:
-
-```bash
-npm run lint
-```
-
-## Estrutura de pastas
-
-|- _-_tests__ - Onde se encontram os testes unitários do projeto
-|- src - Pasta central do projeto, onde o código fonte principal é desenvolvido
-|-----|- app - Configurações globais de exibição e roteamento das páginas
-|-----|- components - Componentes genéricos e específicos utilizados pelas páginas
-|-----|- pages - Páginas do projeto
-
-## Configurações
-
-**packacge.json** - Dependências do projeto
-**jest.config.ts** - Teste unitário
-**tsconfig.json** - Compilação do JSON
-**next.config.mjs.ts** - Next
-**sonar-project.properties** - Sonar
+O `Makefile` também exporta `NEXT_PUBLIC_API_URL=http://localhost:3001` por padrão ao usar `make`.
 
 ## Variáveis de ambiente
 
-Devem ser inseridas igualmente nas variáveis de produção (**.env.production**), desenvolvimento (**.env.developmentß**) e local(**.env.local**).
+Consulte [`.env.example`](.env.example). Em local, use `.env.local` (Next.js).
 
-## Ambientes
+| Variável | Descrição |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | URL base da API (ex.: `http://localhost:3001`) |
 
-- Produção: https://portal-wepgcomp-client.vercel.app
-- Desenvolvimento: https://portal-wepgcomp-client-development.vercel.app
+Não commite arquivos `.env` / `.env.local` com valores reais.
+
+## Scripts úteis
+
+Via npm ou Make:
+
+| Comando | Equivalente Make | Descrição |
+|---|---|---|
+| `npm install` | `make setup` | Instala dependências |
+| `npm run dev` | `make dev` | Servidor de desenvolvimento |
+| `npm run build` | `make build` | Build de produção |
+| `npm run lint` | `make lint` | ESLint |
+| `npm run typecheck` | `make typecheck` | `tsc --noEmit` |
+| `npm test` | `make test` | Testes unitários (Jest) |
+| `npm run test:watch` | — | Jest em modo watch |
+| `npm run ci` | `make ci` | typecheck + lint + test + build |
+
+## Contribuição
+
+A branch **`main` está protegida**: não faça push direto nela.
+
+1. Crie uma branch a partir de `main` com o padrão **`issue-#x`** (ex.: `issue-#19`). Para tarefas sem issue, use prefixo descritivo (`chore/…`, `docs/…`, `fix/…`).
+2. Implemente, rode localmente o que for relevante (`npm run lint`, `npm test`, `npm run build` / `make ci`).
+3. Abra um **Pull Request para `main`**.
+4. Preencha o [template de PR](.github/PULL_REQUEST_TEMPLATE.md).
+5. Aguarde **pelo menos 1 aprovação** de revisor.
+6. O **CI** do GitHub Actions (typecheck, lint, test, build) deve ficar verde.
+7. O **CodeRabbit** (`.coderabbit.yaml`) comenta automaticamente nos PRs para `main` — use como apoio, não substitui a review humana.
+
+Não existe mais fluxo com branch `development` / `master` intermediária.
+
+### Checklist rápido do PR
+
+- [ ] Branch `issue-#x` (ou prefixo chore/docs/fix)
+- [ ] PR aberto contra `main`
+- [ ] ≥ 1 aprovador
+- [ ] CI verde
+- [ ] Sem secrets / `.env` no diff
+
+## Convenções de nomes
+
+- **Código em pt-BR** (variáveis, funções, componentes e pastas alinhados ao restante do projeto).
+- Rotas em `src/app/` seguem paths em português (`apresentacoes`, `edicoes`, `sessoes`, …).
+- Componentes em pastas PascalCase sob `src/components/` (ex.: `Header`, `Forms`).
+- Domínios de feature em `src/features/<dominio>/` (kebab/minúsculo, como já usado).
+- Antes de criar um componente, verifique se já existe; evite camadas e interfaces desnecessárias.
+- Prefira nomes legíveis; não atualize dependências sem necessidade e sem validar build/testes.
+
+## Links úteis
+
+- Repositório: [portalwepgcomp/portal-wepgcomp-frontend](https://github.com/portalwepgcomp/portal-wepgcomp-frontend)
+- Issues: [Issues](https://github.com/portalwepgcomp/portal-wepgcomp-frontend/issues)
+- API: [portal-wepgcomp-api](https://github.com/portalwepgcomp/portal-wepgcomp-api)
+- Produção (Vercel): https://portal-wepgcomp-client.vercel.app
