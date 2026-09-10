@@ -5,19 +5,16 @@ import { useState } from "react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useSweetAlert } from "@/hooks/useAlert";
-import { cn } from "@/utils/cn";
 import { Edicao } from "@/models/edicao";
 
 interface CardEdicaoProps {
   edicao: Edicao;
-  edicaoAtiva: boolean;
   onEditar: () => void;
   onExcluir: () => void;
 }
 
 export default function CardEdicao({
   edicao,
-  edicaoAtiva,
   onEditar,
   onExcluir,
 }: Readonly<CardEdicaoProps>) {
@@ -57,10 +54,7 @@ export default function CardEdicao({
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
         <button
           onClick={onEditar}
-          className={cn(
-            "w-min border-0 bg-transparent p-0",
-            !edicaoAtiva && "hidden",
-          )}
+          className="border-0 bg-transparent p-0"
           type="button"
           onMouseEnter={() => setHoveredId("editar")}
           onMouseLeave={() => setHoveredId(null)}
@@ -74,7 +68,6 @@ export default function CardEdicao({
           />
         </button>
 
-        {edicaoAtiva && (
           <button
             type="button"
             className="w-min border-0 bg-transparent p-0"
@@ -90,7 +83,6 @@ export default function CardEdicao({
               style={estilo("excluir")}
             />
           </button>
-        )}
       </div>
     </div>
   );
