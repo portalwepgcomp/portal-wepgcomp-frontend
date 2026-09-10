@@ -7,6 +7,15 @@ const nextConfig = {
   images: {
     domains: ['proext.ufba.br'],
   },
+  async redirects() {
+    return [
+      {
+        source: "/users/confirm-email",
+        destination: "/confirmar-email",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 
