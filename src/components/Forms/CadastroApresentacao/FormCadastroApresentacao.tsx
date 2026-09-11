@@ -6,7 +6,6 @@ import { FileUp, Save, Sparkles, UserCheck } from "lucide-react";
 
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
 import { Campo, Input, Textarea } from "@/components/UI/Input";
-import { maskPhone } from "@/lib/masks";
 import { cn } from "@/utils/cn";
 import { useFormCadastroApresentacao } from "./useFormCadastroApresentacao";
 
@@ -201,7 +200,7 @@ export function FormCadastroApresentacao() {
                   className="text-sm rounded-lg"
                   mask="(__) _____-____"
                   replacement={{ _: /\d/ }}
-                  value={value ? maskPhone(value) : ""}
+                  value={value ?? ""}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
                   onBlur={onBlur}
                 />
