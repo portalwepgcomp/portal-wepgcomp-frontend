@@ -344,9 +344,7 @@ export default function FormSessaoAuxiliar({
                 .tz("America/Sao_Paulo", true)
                 .toDate()}
               isClearable
-              filterTime={(time) =>
-                field.value ? combinedTimeFilter(time) : false
-              }
+              filterTime={(time) => combinedTimeFilter(time)}
               placeholderText={formAuxiliarFields.inicio.placeholder}
               toggleCalendarOnIconClick
             />
@@ -384,9 +382,7 @@ export default function FormSessaoAuxiliar({
                 .tz("America/Sao_Paulo", true)
                 .toDate()}
               isClearable
-              filterTime={(time) =>
-                field.value ? combinedTimeFilter(time) : false
-              }
+              filterTime={(time) => combinedTimeFilter(time)}
               placeholderText={formAuxiliarFields.final.placeholder}
               toggleCalendarOnIconClick
             />
