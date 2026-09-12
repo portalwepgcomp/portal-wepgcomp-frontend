@@ -46,7 +46,6 @@ export default function ModalAlterarSenha() {
       loading={loadingSendEmail}
       labelConfirmButton="Enviar"
       disabledConfirmButton={!email || !!error}
-      colorButtonConfirm="#0065A3"
       onConfirm={handleSendEmail}
     >
       <div className="flex w-full flex-col items-center text-black">

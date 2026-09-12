@@ -27,7 +27,7 @@ const formContatoSchema = z.object({
 type FormContatoSchema = z.infer<typeof formContatoSchema>;
 
 const inputClass =
-  "w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition focus:border-brand-orange focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange";
+  "w-full rounded-lg bg-white px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition focus:border-brand-orange focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange";
 
 export function FormContato() {
   const { Edicao } = useEdicao();
@@ -119,15 +119,9 @@ export function FormContato() {
       </Campo>
 
       <div className="flex justify-end pt-1">
-        <Button
+        <Button size="lg" variante="primary"
           type="submit"
           disabled={!Edicao?.isActive || isSubmitting}
-          className={cn(
-            "rounded-lg px-7 py-2.5 text-sm font-semibold transition-all duration-200 shadow-sm",
-            Edicao?.isActive
-              ? "bg-brand-orange text-white hover:bg-brand-orange/90 hover:shadow active:scale-[0.98]"
-              : "cursor-not-allowed bg-slate-300 text-slate-500",
-          )}
         >
           {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
         </Button>

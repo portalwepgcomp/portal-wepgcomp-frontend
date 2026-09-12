@@ -1,19 +1,12 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { FormCadastroProfessor } from "@/components/Forms/CadastroProfessor/FormCadastroProfessor";
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
 import Banner from "@/components/UI/Banner";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { ArrowLeft, GraduationCap } from "lucide-react";
-import { cn } from "@/utils/cn";
-
-const headerBtnClass = cn(
-  "inline-flex items-center gap-2 rounded-lg border border-line bg-card px-4 py-2.5",
-  "text-sm font-semibold text-foreground shadow-sm transition-all duration-200",
-  "hover:bg-muted-light hover:border-brand-blue hover:text-brand-blue",
-  "[&_svg]:h-4 [&_svg]:w-4",
-);
 
 export default function Professores() {
   const router = useRouter();
@@ -25,10 +18,10 @@ export default function Professores() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <button className={headerBtnClass} onClick={() => router.push("/gerenciamento")}>
+          <Button size="lg" variante="outline" onClick={() => router.push("/gerenciamento")}>
             <ArrowLeft />
             Voltar para Gerenciamento
-          </button>
+          </Button>
         </div>
 
         <div className="rounded-2xl border border-line bg-card p-6 shadow-sm sm:p-8">

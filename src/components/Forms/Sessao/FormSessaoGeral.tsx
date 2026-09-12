@@ -395,11 +395,10 @@ export default function FormSessaoAuxiliar({
       </Campo>
 
       <div className="flex justify-center">
-        <Button
+        <Button size="lg" variante="primary"
           type="submit"
           id="sg-submit-button"
           disabled={!Edicao?.isActive}
-          className="bg-brand-orange hover:bg-brand-orange"
         >
           {confirmButton.label}
         </Button>

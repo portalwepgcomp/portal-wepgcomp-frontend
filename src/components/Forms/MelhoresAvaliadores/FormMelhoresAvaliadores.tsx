@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useContext, useEffect, useState } from "react";
 import Select from "react-select";
 import { Controller, useForm } from "react-hook-form";
@@ -195,14 +196,13 @@ export function FormMelhorAvaliador() {
       )}
 
       <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
-        <button
+        <Button size="lg" variante="primary"
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-orange px-8 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Save className="h-5 w-5" />
+          <Save  />
           <span>Salvar Premiação</span>
-        </button>
+        </Button>
       </div>
     </form>
   );

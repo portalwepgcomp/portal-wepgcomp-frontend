@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect } from "react";
 import { ArrowLeft, FileText } from "lucide-react";
@@ -12,14 +13,6 @@ import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
 import Banner from "@/components/UI/Banner";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useSubmission } from "@/hooks/useSubmission";
-import { cn } from "@/utils/cn";
-
-const headerBtnClass = cn(
-  "inline-flex items-center gap-2 rounded-lg border border-line bg-card px-4 py-2.5",
-  "text-sm font-semibold text-foreground shadow-sm transition-all duration-200",
-  "hover:bg-muted-light hover:border-brand-blue hover:text-brand-blue",
-  "[&_svg]:h-4 [&_svg]:w-4",
-);
 
 export default function CadastroApresentacao() {
   const { user } = useContext(AuthContext);
@@ -69,10 +62,10 @@ export default function CadastroApresentacao() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <button className={headerBtnClass} onClick={() => router.push(destinoVoltar)}>
+          <Button size="lg" variante="outline" onClick={() => router.push(destinoVoltar)}>
             <ArrowLeft />
             Voltar para {user?.level === "Default" ? "Minha Apresentação" : "Apresentações"}
-          </button>
+          </Button>
         </div>
 
         {!user ? (

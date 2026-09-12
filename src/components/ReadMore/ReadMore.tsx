@@ -1,3 +1,4 @@
+import Button from "@/components/UI/Button";
 import React, { useState } from "react";
 
 interface ReadMoreProps {
@@ -19,13 +20,13 @@ function ReadMoreComponent({ text, maxLength = 100 }: ReadMoreProps) {
   return (
     <span className="flex w-full flex-col items-start text-justify text-base leading-relaxed text-[#333] max-md:w-full">
       {expanded ? text : text.slice(0, maxLength) + "..."}
-      <button
-        className="mt-1 cursor-pointer rounded border-0 bg-brand-accent px-2.5 py-0.5 text-base text-white transition hover:opacity-90 focus:outline-none"
+      <Button size="lg"
+        variante="secondary" className="mt-1"
         onClick={() => setExpanded((v) => !v)}
         type="button"
       >
         {expanded ? "Ler menos" : "Ler mais"}
-      </button>
+      </Button>
     </span>
   );
 }

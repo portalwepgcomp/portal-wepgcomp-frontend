@@ -1,5 +1,6 @@
 "use client";
 
+import { obterClassesBotao } from "@/lib/estilosBotao";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useEffect, useState } from "react";
 import HtmlEditorComponent from "../HtmlEditorComponent/HtmlEditorComponent";
@@ -52,7 +53,7 @@ export default function Endereco() {
             href={mapsExternalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-orange-50 px-3 py-1.5 text-xs font-semibold text-brand-orange border border-orange-200 transition hover:bg-brand-orange hover:text-white"
+            className={obterClassesBotao("outline")}
           >
             <span>Como chegar</span>
             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

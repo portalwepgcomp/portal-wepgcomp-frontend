@@ -1,6 +1,8 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import Link from "next/link";
+import { obterClassesBotao } from "@/lib/estilosBotao";
 import { FileQuestion, Home, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
@@ -22,20 +24,20 @@ export default function NotFound() {
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-lg bg-brand-orange px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-95 no-underline"
+            className={obterClassesBotao("primary")}
           >
-            <Home className="h-4 w-4" />
+            <Home data-icon="inline-start" />
             Ir para o Início
           </Link>
 
-          <button
+          <Button size="lg"
             type="button"
             onClick={() => window.history.back()}
-            className="inline-flex items-center gap-2 rounded-lg border border-line bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all duration-200 hover:bg-muted-light active:scale-95"
+            variante="outline"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft  />
             Voltar
-          </button>
+          </Button>
         </div>
       </div>
     </div>
