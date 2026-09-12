@@ -76,20 +76,28 @@ export default function Header() {
     return [...filtered].sort((a, b) => Number(b.value) - Number(a.value));
   }, [edicoesList]);
 
-  function perfil() {
+  function perfil(compact = false) {
     if (!user) return null;
 
-    if (user.level !== "Default")
-      return <PerfilAdmin profile={user?.profile} role={user?.level} />;
+    const name = user.name;
+    if (user.level !== "Default") {
+      return (
+        <PerfilAdmin
+          profile={user.profile}
+          role={user.level}
+          userName={name}
+          compact={compact}
+        />
+      );
+    }
 
     switch (user.profile) {
       case "Listener":
-        return <PerfilOuvinte />;
+        return <PerfilOuvinte userName={name} compact={compact} />;
       case "Professor":
-        return <PerfilProfessor />;
+        return <PerfilProfessor userName={name} compact={compact} />;
       case "Presenter":
-        return <PerfilApresentador />;
-
+        return <PerfilApresentador userName={name} compact={compact} />;
       default:
         return null;
     }
@@ -193,8 +201,8 @@ export default function Header() {
             </button>
             <div className="flex h-10 w-1/2 items-center justify-center rounded-lg border border-gray-400">
               {signed ? (
-                <div className="flex h-full flex-col items-center justify-center text-[10px] text-black">
-                  {perfil()}
+                <div className="flex h-full items-center justify-center">
+                  {perfil(true)}
                 </div>
               ) : (
                 <Link
@@ -272,9 +280,7 @@ export default function Header() {
 
               <li className="max-[1000px]:hidden">
                 {signed ? (
-                  <div className="flex flex-col items-center justify-center text-[10px] text-black">
-                    Olá, {user?.name.split(" ")[0]}!{perfil()}
-                  </div>
+                  perfil(false)
                 ) : (
                   <Link
                     className={cn(linkBase, "active")}
