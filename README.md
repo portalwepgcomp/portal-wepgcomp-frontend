@@ -170,3 +170,33 @@ Não existe mais fluxo com branch `development` / `master` intermediária.
 
 - Produção: https://portal-wepgcomp-client.vercel.app
 - Desenvolvimento: https://portal-wepgcomp-client-development.vercel.app
+
+
+### Reproduzir favoritos por edição (issue #5)
+
+Com a API irmã em `../portal-wepgcomp-api`, dependências instaladas e `.env`
+apontando para PostgreSQL local, execute na raiz do frontend:
+
+```bash
+node scripts/seed-favoritos.cjs
+```
+
+O script insere dados fictícios com IDs fixos, sem apagar registros existentes.
+Pode ser executado novamente para restaurar os dois favoritos do cenário.
+Aceita o caminho da API como primeiro argumento e recusa bancos remotos.
+
+- Login local: `favoritos.issue5@example.test` / `FavoritosTeste5!`.
+- Edições 2025 e 2026: uma apresentação favoritada em cada uma.
+- Edição 2027: sem favoritos.
+
+Inicie a API na porta 3001 e o frontend com `NEXT_PUBLIC_API_URL=http://localhost:3001`.
+Entre com o usuário acima e abra `/favoritos`. Alterne o seletor entre 2025, 2026
+e 2027: a lista e o contador devem mostrar apenas a edição escolhida. Remova o
+favorito de 2025 e confirme que o de 2026 continua disponível. Execute o seed
+novamente para repetir o teste.
+
+A consulta envia `eventEditionId` e filtra também `submission.eventEditionId`
+na resposta, mantendo compatibilidade com a API atual enquanto a
+[issue da API #2](https://github.com/portalwepgcomp/portal-wepgcomp-api/issues/2)
+não for implementada. Os testes de regressão podem ser executados com
+`npm test -- --runInBand --coverage=false favoritos`.

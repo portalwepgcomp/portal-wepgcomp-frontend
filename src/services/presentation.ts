@@ -44,14 +44,25 @@ export const presentationApi = {
     return data;
   },
 
-  getPresentationBookmarks: async (): Promise<BookmarkedPresentations> => {
-    const { data } = await instance.get(`${baseUrl}/bookmarks`, {
+  getPresentationBookmarks: async (
+    eventEditionId: string,
+    signal?: AbortSignal,
+  ): Promise<BookmarkedPresentations> => {
+    if (!eventEditionId) return { bookmarkedPresentations: [] };
+    const { data } = await instance.get<BookmarkedPresentations>(`${baseUrl}/bookmarks`, {
+      params: { eventEditionId },
+      signal,
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    return data;
+    // A API atual ainda pode devolver favoritos de outras edições (issue API #2).
+    return {
+      bookmarkedPresentations: data.bookmarkedPresentations.filter(
+        (item) => item.submission?.eventEditionId === eventEditionId,
+      ),
+    };
   },
 
   postPresentationBookmark: async (body: PresentationBookmarkRegister) => {
