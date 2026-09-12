@@ -26,9 +26,9 @@ async function seed() {
     for (const year of [2025, 2026, 2027]) {
       const startDate = new Date(`${year}-10-15T12:00:00Z`);
       await tx.eventEdition.upsert({
-        where: { id: id('02', year) }, update: {},
+        where: { id: id('02', year) }, update: { name: `WEPGCOMP ${year}` },
         create: {
-          id: id('02', year), name: `WEPGCOMP ${year} - Teste favoritos`,
+          id: id('02', year), name: `WEPGCOMP ${year}`,
           description: 'Dados fictícios para reproduzir a issue frontend #5.',
           callForPapersText: 'Chamada de teste', partnersText: 'Parceiros de teste',
           location: 'Sala de teste', startDate,
