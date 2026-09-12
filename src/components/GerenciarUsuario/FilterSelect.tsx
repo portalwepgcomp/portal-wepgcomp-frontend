@@ -41,9 +41,8 @@ export default function FilterSelect({
           user.isActive &&
           !user.isPresenterActive),
       inativo: (user: User) => !user.isActive,
-      superadmin: (user: User) => user.isSuperadmin,
-      admin: (user: User) => user.isAdmin && !user.isSuperadmin,
-      normal: (user: User) => !user.isAdmin && !user.isSuperadmin,
+      admin: (user: User) => user.level === "Admin",
+      normal: (user: User) => user.level === "Default",
       apresentador: (user: User) => user.profile === "Presenter",
       professor: (user: User) => user.profile === "Professor",
       ouvinte: (user: User) => user.profile === "Listener",

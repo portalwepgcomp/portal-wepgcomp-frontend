@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { ProfileType, RoleType, SubprofileType } from "@/models/user";
 import { getErrorMessage } from "@/utils/error";
 
-type GroupType = "professors" | "admins" | "superadmins" | "presenters" | "listeners" | "all";
+type GroupType = "professors" | "admins" | "presenters" | "listeners" | "all";
 
 interface GroupConfig {
   label: string;
@@ -30,10 +30,6 @@ const GROUPS: Record<GroupType, GroupConfig> = {
   admins: {
     label: "Admins",
     roles: ["Admin"],
-  },
-  superadmins: {
-    label: "SuperAdmins",
-    roles: ["Superadmin"],
   },
   presenters: {
     label: "Apresentadores",

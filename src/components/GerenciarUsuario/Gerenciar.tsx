@@ -27,7 +27,6 @@ export default function Gerenciar() {
     approveTeacher,
     approvePresenter,
     promoteToAdmin,
-    promoteToSuperadmin,
     demoteUser,
     deleteUser,
   } = useGerenciarUsuarios();
@@ -74,7 +73,6 @@ export default function Gerenciar() {
                 onAprovarProfessor={approveTeacher}
                 onAprovarApresentador={approvePresenter}
                 onPromoverAdmin={promoteToAdmin}
-                onPromoverSuperadmin={promoteToSuperadmin}
                 onRebaixar={demoteUser}
               />
             ))}

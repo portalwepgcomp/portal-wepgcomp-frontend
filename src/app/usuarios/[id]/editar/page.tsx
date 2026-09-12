@@ -22,7 +22,7 @@ const updateUserSchema = z
     profile: z.enum(["Presenter", "Professor", "Listener"], {
       message: "Selecione um perfil válido.",
     }),
-    level: z.enum(["Superadmin", "Admin", "Default"], {
+    level: z.enum(["Admin", "Default"], {
       message: "Selecione um nível de permissão válido.",
     }),
     registrationNumberType: z.enum(["CPF", "MATRICULA"]),
@@ -340,7 +340,6 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                 >
                   <option value="Default">Normal</option>
                   <option value="Admin">Administrador</option>
-                  <option value="Superadmin">Super Administrador</option>
                 </select>
               </Campo>
 

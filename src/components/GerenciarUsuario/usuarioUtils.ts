@@ -16,8 +16,7 @@ export function obterStatusUsuario(user: User) {
 }
 
 export function obterPermissaoUsuario(user: User) {
-  if (user.isSuperadmin) return "SUPERADMIN" as const;
-  if (user.isAdmin) return "ADMIN" as const;
+  if (user.level === "Admin") return "ADMIN" as const;
   return "NORMAL" as const;
 }
 
@@ -47,12 +46,10 @@ function correspondeFiltroStatus(user: User, status: string): boolean {
 
 function correspondeFiltroPermissao(user: User, permission: string): boolean {
   switch (permission) {
-    case "superadmin":
-      return user.isSuperadmin;
     case "admin":
-      return user.isAdmin && !user.isSuperadmin;
+      return user.level === "Admin";
     case "normal":
-      return !user.isAdmin && !user.isSuperadmin;
+      return user.level === "Default";
     default:
       return true;
   }

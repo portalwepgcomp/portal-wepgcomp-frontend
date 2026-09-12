@@ -23,7 +23,6 @@ interface GerenciarUsuarioCardProps {
   onAprovarProfessor: (id: string) => void;
   onAprovarApresentador: (id: string) => void;
   onPromoverAdmin: (id: string) => void;
-  onPromoverSuperadmin: (id: string) => void;
   onRebaixar: (id: string) => void;
 }
 
@@ -54,7 +53,6 @@ export default function GerenciarUsuarioCard({
   onAprovarProfessor,
   onAprovarApresentador,
   onPromoverAdmin,
-  onPromoverSuperadmin,
   onRebaixar,
 }: GerenciarUsuarioCardProps) {
   const status = obterStatusUsuario(usuario) as StatusUsuario;
@@ -124,7 +122,6 @@ export default function GerenciarUsuarioCard({
             onAprovarProfessor={onAprovarProfessor}
             onAprovarApresentador={onAprovarApresentador}
             onPromoverAdmin={onPromoverAdmin}
-            onPromoverSuperadmin={onPromoverSuperadmin}
             onRebaixar={onRebaixar}
           />
         </SecaoCard>

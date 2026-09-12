@@ -1,7 +1,7 @@
 describe('Componente dos Formulários de Sessão', () => {
     beforeEach(() => {
       cy.fixture('usuarios').as('userData');
-      cy.login('profsuperadmin@example.com', 'string'); // insert super-admin credentials
+      cy.login('profsuperadmin@example.com', 'string'); // insert admin credentials
       cy.visit('/sessoes');
       cy.wait(2000);
 

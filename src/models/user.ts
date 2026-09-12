@@ -1,6 +1,6 @@
 export type ProfileType = "Professor" | "Presenter" | "Listener";
 export type SubprofileType = "Doctorate" | "Master" | "Bachelor" | "Other";
-export type RoleType = "Superadmin" | "Admin" | "Default";
+export type RoleType = "Admin" | "Default";
 export type StatusType = "Active" | "Inactive";
 
 export interface UserAccount {
@@ -58,8 +58,6 @@ export interface User extends RegisterUserParams {
   isActive: boolean;
   isTeacherActive: boolean;
   isPresenterActive: boolean;
-  isAdmin: boolean;
-  isSuperadmin: boolean;
   hasSubmission: boolean;
 }
 
@@ -72,7 +70,7 @@ export interface ResetPasswordParams {
   newPassword: string;
 }
 
-export interface CreateProfessorBySuperadminParams {
+export interface CreateProfessorByAdminParams {
   name: string;
   email: string;
   registrationNumber: string;

@@ -14,7 +14,6 @@ interface GerenciarUsuarioAcoesProps {
   onAprovarProfessor: (id: string) => void;
   onAprovarApresentador: (id: string) => void;
   onPromoverAdmin: (id: string) => void;
-  onPromoverSuperadmin: (id: string) => void;
   onRebaixar: (id: string) => void;
 }
 
@@ -56,15 +55,12 @@ export default function GerenciarUsuarioAcoes({
   onAprovarProfessor,
   onAprovarApresentador,
   onPromoverAdmin,
-  onPromoverSuperadmin,
   onRebaixar,
 }: GerenciarUsuarioAcoesProps) {
   const router = useRouter();
   const desabilitado = !edicaoAtiva || carregando;
 
-  const isSuperadmin = usuarioAtual?.level === "Superadmin";
-  const isAdmin =
-    usuarioAtual?.level === "Admin" || usuarioAtual?.level === "Superadmin";
+  const isAdmin = usuarioAtual?.level === "Admin";
   const isSelf = usuario.id === usuarioAtual?.id;
 
   const acoes: React.ReactNode[] = [];
@@ -116,7 +112,7 @@ export default function GerenciarUsuarioAcoes({
     );
   }
 
-  if (isSuperadmin) {
+  if (isAdmin) {
     acoes.push(
       <BotaoAcao
         key="edit"
@@ -129,7 +125,7 @@ export default function GerenciarUsuarioAcoes({
     );
   }
 
-  if (isSuperadmin && !usuario.isAdmin && !usuario.isSuperadmin && !isSelf) {
+  if (isAdmin && usuario.level === "Default" && !isSelf) {
     acoes.push(
       <BotaoAcao
         key="promote-admin"
@@ -142,32 +138,8 @@ export default function GerenciarUsuarioAcoes({
     );
   }
 
-  if (
-    isSuperadmin &&
-    usuario.isAdmin &&
-    !usuario.isSuperadmin &&
-    !isSelf
-  ) {
-    acoes.push(
-      <BotaoAcao
-        key="promote-superadmin"
-        rotulo="Promover a Superadmin"
-        title="Promover a Superadmin"
-        className="border-[#ff9800] bg-gradient-to-br from-[#ff9800] to-[#ffb74d] text-white hover:from-[#f57c00] hover:to-[#ff9800]"
-        onClick={() => onPromoverSuperadmin(usuario.id)}
-        disabled={desabilitado}
-      />,
-    );
-  }
-
-  if (
-    isSuperadmin &&
-    !isSelf &&
-    (usuario.isAdmin || usuario.isSuperadmin)
-  ) {
-    const rotulo = usuario.isSuperadmin
-      ? "REBAIXAR PARA ADMIN"
-      : "REBAIXAR PARA PADRÃO";
+  if (isAdmin && usuario.level === "Admin" && !isSelf) {
+    const rotulo = "REBAIXAR PARA PADRÃO";
     acoes.push(
       <BotaoAcao
         key="demote"

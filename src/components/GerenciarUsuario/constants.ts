@@ -16,8 +16,6 @@ export const statusSelectClasses = {
 } as const;
 
 export const permissionBadgeClasses = {
-  SUPERADMIN:
-    "inline-flex w-full items-center justify-center gap-2 rounded-[10px] border border-[#ffcc02] bg-gradient-to-br from-[#fff8e1] to-[#ffecb3] px-4 py-4 text-sm font-semibold uppercase tracking-wide text-[#e65100] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.05),inset_-2px_-2px_5px_rgba(255,255,255,0.8)]",
   ADMIN:
     "inline-flex w-full items-center justify-center gap-2 rounded-[10px] border border-[#2196f3] bg-gradient-to-br from-[#e3f2fd] to-[#bbdefb] px-4 py-4 text-sm font-semibold uppercase tracking-wide text-[#1565c0] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.05),inset_-2px_-2px_5px_rgba(255,255,255,0.8)]",
   NORMAL:
@@ -54,7 +52,6 @@ export const opcoesFiltro = {
   ],
   permission: [
     { value: "", label: "Todas as permissões" },
-    { value: "superadmin", label: "Super Admin", countKey: "superadmin" },
     { value: "admin", label: "Admin", countKey: "admin" },
     { value: "normal", label: "Normal", countKey: "normal" },
   ],

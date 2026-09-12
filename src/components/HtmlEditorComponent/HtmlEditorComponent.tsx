@@ -6,6 +6,7 @@ import HtmlEditor from "../HtmlEditor/HtmlEditor";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useEdicao } from "@/hooks/useEdicao";
 import Button from "@/components/UI/Button";
+import { isAdminLevel } from "@/components/Perfil/perfilLabels";
 
 interface HtmlEditorComponentProps {
   content: string;
@@ -22,7 +23,7 @@ export default function HtmlEditorComponent({
   const { user } = useContext(AuthContext);
   const { Edicao } = useEdicao();
 
-  const isAdm = user?.level === "Superadmin";
+  const isAdm = isAdminLevel(user?.level);
 
   return (
     <div className="flex flex-col">

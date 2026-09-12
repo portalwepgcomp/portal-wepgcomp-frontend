@@ -40,10 +40,10 @@ export function useListaApresentacoes({
   // Adia o termo de busca para não refazer a query a cada tecla.
   const buscaTrim = useDeferredValue(busca).trim();
 
-  // "minhas": Superadmin vê todas; demais veem só as próprias.
+  // "minhas": Admin vê todas; demais veem só as próprias.
   // "todas": o back já força ownership para Default.
   const mainAuthorId =
-    escopo === "minhas" && user?.level !== "Superadmin" ? user?.id : undefined;
+    escopo === "minhas" && user?.level !== "Admin" ? user?.id : undefined;
 
   const { data, isLoading, error, refetch } = useSubmissionsQuery(
     eventEditionId
@@ -70,7 +70,7 @@ export function useListaApresentacoes({
   // Autor limitado a 1 submissão por edição.
   const ehLimitado =
     escopo === "minhas"
-      ? user?.level !== "Superadmin"
+      ? user?.level !== "Admin"
       : user?.level === "Default";
   const criarDesabilitado = ehLimitado && possuiSubmissaoPropria;
 

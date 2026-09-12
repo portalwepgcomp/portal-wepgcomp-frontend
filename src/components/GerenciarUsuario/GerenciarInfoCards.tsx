@@ -46,16 +46,6 @@ export default function GerenciarInfoCards() {
           </svg>
         }
       />
-      <InfoCard
-        corFundo="bg-gradient-to-br from-[#fff8e1] to-[#ffecb3] text-[#e65100]"
-        titulo="Superadministrador"
-        descricao="Acesso completo ao sistema"
-        icone={
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" />
-          </svg>
-        }
-      />
     </div>
   );
 }

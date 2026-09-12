@@ -52,7 +52,7 @@ export function FormCadastroProfessor({
   formRef,
   showButtons = true,
 }: FormCadastroProfessorProps) {
-  const { createProfessorBySuperadmin, loadingCreateProfessor } = useUsers();
+  const { createProfessorByAdmin, loadingCreateProfessor } = useUsers();
   const { showAlert } = useSweetAlert();
 
   const {
@@ -82,7 +82,7 @@ export function FormCadastroProfessor({
     };
 
     try {
-      await createProfessorBySuperadmin(body);
+      await createProfessorByAdmin(body);
       reset();
       showAlert({
         icon: "success",

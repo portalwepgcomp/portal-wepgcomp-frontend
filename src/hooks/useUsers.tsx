@@ -16,10 +16,9 @@ import {
   User,
   GetUserParams,
   RegisterUserParams,
-  CreateProfessorBySuperadminParams,
+  CreateProfessorByAdminParams,
   ResetPasswordSendEmailParams,
   ResetPasswordParams,
-  RoleType,
 } from "@/models/user";
 import { unwrapPaginatedList } from "@/types/api";
 import { userApi } from "@/services/user";
@@ -46,8 +45,8 @@ interface UserProviderData {
   admins: User[];
   getUsers: (params: GetUserParams) => Promise<void>;
   registerUser: (body: RegisterUserParams) => Promise<void>;
-  createProfessorBySuperadmin: (
-    body: CreateProfessorBySuperadminParams,
+  createProfessorByAdmin: (
+    body: CreateProfessorByAdminParams,
   ) => Promise<User | undefined>;
   resetPasswordSendEmail: (body: ResetPasswordSendEmailParams) => Promise<void>;
   resetPassword: (body: ResetPasswordParams) => Promise<void>;
@@ -57,7 +56,6 @@ interface UserProviderData {
   approveTeacher: (userId: string) => Promise<void>;
   approvePresenter: (userId: string) => Promise<void>;
   promoteToAdmin: (userId: string) => Promise<void>;
-  promoteToSuperadmin: (userId: string) => Promise<void>;
   demoteUser: (userId: string) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
   updateUser: (
@@ -159,12 +157,12 @@ export const UserProvider = ({ children }: UserProps) => {
     [router, showAlert],
   );
 
-  const createProfessorBySuperadmin = useCallback(
-    async (body: CreateProfessorBySuperadminParams) => {
+  const createProfessorByAdmin = useCallback(
+    async (body: CreateProfessorByAdminParams) => {
       setLoadingCreateProfessor(true);
 
       try {
-        const response = await userApi.createProfessorBySuperadmin(body);
+        const response = await userApi.createProfessorByAdmin(body);
 
         showAlert({
           icon: "success",
@@ -442,41 +440,6 @@ export const UserProvider = ({ children }: UserProps) => {
     [getUsers, showAlert],
   );
 
-  const promoteToSuperadmin = useCallback(
-    async (userId: string) => {
-      setLoadingRoleAction(true);
-
-      try {
-        const targetUser = userListRef.current.find((u) => u.id === userId);
-        if (!targetUser) {
-          throw new Error("Usuário não encontrado");
-        }
-
-        await userApi.updateUser(targetUser.email, { level: "Superadmin" });
-        showAlert({
-          icon: "success",
-          title: "Usuário promovido a Superadministrador!",
-          timer: 3000,
-          showConfirmButton: false,
-        });
-        getUsers({});
-      } catch (err: unknown) {
-        showAlert({
-          icon: "error",
-          title: "Erro ao promover usuário",
-          text: getErrorMessage(
-            err,
-            "Ocorreu um erro ao tentar promover o usuário. Tente novamente!",
-          ),
-          confirmButtonText: "Retornar",
-        });
-      } finally {
-        setLoadingRoleAction(false);
-      }
-    },
-    [getUsers, showAlert],
-  );
-
   const demoteUser = useCallback(
     async (userId: string) => {
       setLoadingRoleAction(true);
@@ -487,14 +450,7 @@ export const UserProvider = ({ children }: UserProps) => {
           throw new Error("Usuário não encontrado");
         }
 
-        let targetLevel: RoleType = "Default";
-        if (targetUser.isSuperadmin) {
-          targetLevel = "Admin";
-        } else if (targetUser.isAdmin) {
-          targetLevel = "Default";
-        }
-
-        await userApi.updateUser(targetUser.email, { level: targetLevel });
+        await userApi.updateUser(targetUser.email, { level: "Default" });
         showAlert({
           icon: "success",
           title: "Usuário rebaixado com sucesso!",
@@ -619,7 +575,7 @@ export const UserProvider = ({ children }: UserProps) => {
       admins,
       getUsers,
       registerUser,
-      createProfessorBySuperadmin,
+      createProfessorByAdmin,
       resetPasswordSendEmail,
       resetPassword,
       getAdvisors,
@@ -628,7 +584,6 @@ export const UserProvider = ({ children }: UserProps) => {
       approveTeacher,
       approvePresenter,
       promoteToAdmin,
-      promoteToSuperadmin,
       demoteUser,
       deleteUser,
       updateUser,
@@ -650,7 +605,7 @@ export const UserProvider = ({ children }: UserProps) => {
       admins,
       getUsers,
       registerUser,
-      createProfessorBySuperadmin,
+      createProfessorByAdmin,
       resetPasswordSendEmail,
       resetPassword,
       getAdvisors,
@@ -659,7 +614,6 @@ export const UserProvider = ({ children }: UserProps) => {
       approveTeacher,
       approvePresenter,
       promoteToAdmin,
-      promoteToSuperadmin,
       demoteUser,
       deleteUser,
       updateUser,

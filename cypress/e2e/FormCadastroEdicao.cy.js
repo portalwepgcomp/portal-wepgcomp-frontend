@@ -1,7 +1,7 @@
 describe('Componente do Formulário de Cadastro de Edição', () => {
     beforeEach(() => {
       cy.fixture('usuarios').as('userData');
-      cy.login('profsuperadmin@example.com', 'string'); // insert super-admin credentials
+      cy.login('profsuperadmin@example.com', 'string'); // insert admin credentials
 
     });
 

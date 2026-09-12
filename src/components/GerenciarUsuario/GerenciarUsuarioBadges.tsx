@@ -5,19 +5,7 @@ import { User } from "@/models/user";
 export default function GerenciarUsuarioBadges({ user }: { user: User }) {
   const badges: React.ReactNode[] = [];
 
-  if (user.isSuperadmin) {
-    badges.push(
-      <span
-        key="superadmin"
-        className={cn(
-          badgeBase,
-          "border-[#ffcc02] bg-gradient-to-br from-[#fff8e1] to-[#ffecb3] text-[#e65100]",
-        )}
-      >
-        Superadmin
-      </span>,
-    );
-  } else if (user.isAdmin) {
+  if (user.level === "Admin") {
     badges.push(
       <span
         key="admin"

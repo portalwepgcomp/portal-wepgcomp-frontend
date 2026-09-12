@@ -4,7 +4,7 @@ import { UpdateUserRequest } from "@/models/update-user";
 import {
   GetUserParams,
   RegisterUserParams,
-  CreateProfessorBySuperadminParams,
+  CreateProfessorByAdminParams,
   ResetPasswordSendEmailParams,
   ResetPasswordParams,
 } from "@/models/user";
@@ -64,9 +64,7 @@ export const userApi = {
     return data;
   },
 
-  createProfessorBySuperadmin: async (
-    body: CreateProfessorBySuperadminParams,
-  ) => {
+  createProfessorByAdmin: async (body: CreateProfessorByAdminParams) => {
     const { data } = await instance.post(`${baseUrl}/create-professor`, body);
 
     return data;

@@ -8,6 +8,7 @@ import {
   PerfilMenuSection,
 } from "../UI/PerfilMenu";
 import { usePerfilCertificado } from "./usePerfilCertificado";
+import { isAdminLevel } from "./perfilLabels";
 import { ProfileType, RoleType } from "@/models/user";
 
 interface PerfilAdminProps {
@@ -25,7 +26,7 @@ export default function PerfilAdmin({
 }: Readonly<PerfilAdminProps>) {
   const { logout } = useContext(AuthContext);
   const { certificateDownload } = usePerfilCertificado();
-  const isSuperadmin = role === "Superadmin";
+  const isAdmin = isAdminLevel(role);
 
   return (
     <PerfilMenu
@@ -55,7 +56,7 @@ export default function PerfilAdmin({
         </PerfilMenuItem>
       </PerfilMenuSection>
 
-      {isSuperadmin && (
+      {isAdmin && (
         <PerfilMenuSection title="Administração">
           <PerfilMenuItem href="/edicoes">Eventos</PerfilMenuItem>
           <PerfilMenuItem href="/usuarios">Usuários</PerfilMenuItem>

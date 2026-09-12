@@ -34,11 +34,7 @@ export default function CadastroApresentacao() {
 
     const isPresenter = user.profile === "Presenter";
     const isProfessor = user.profile === "Professor";
-    const isAdmin =
-      user.level === "Admin" ||
-      user.level === "Superadmin" ||
-      (user as unknown as { role?: string }).role === "Admin" ||
-      (user as unknown as { role?: string }).role === "Superadmin";
+    const isAdmin = user.level === "Admin";
 
     if (!isPresenter && !isProfessor && !isAdmin) {
       showAlert({

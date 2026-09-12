@@ -13,8 +13,8 @@ export function profileLabel(profile: ProfileType): string {
   }
 }
 
-export function isAdminLevel(level: RoleType): boolean {
-  return level === "Admin" || level === "Superadmin";
+export function isAdminLevel(level?: RoleType | string): boolean {
+  return level === "Admin";
 }
 
 export function userInitials(name: string): string {

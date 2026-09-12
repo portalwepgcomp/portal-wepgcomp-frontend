@@ -23,13 +23,11 @@ export interface UpdateUserResponse {
   registrationNumberType: "CPF" | "MATRICULA" | null;
   photoFilePath: string | null;
   profile: "Presenter" | "Professor" | "Listener";
-  level: "Superadmin" | "Admin" | "Default";
+  level: "Admin" | "Default";
   isActive: boolean;
   isVerified: boolean;
   isTeacherActive: boolean;
   isPresenterActive: boolean;
-  isAdmin: boolean;
-  isSuperadmin: boolean;
   createdAt: string;
   updatedAt: string;
   updatedBy: string | null;
