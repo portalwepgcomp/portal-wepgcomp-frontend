@@ -1,5 +1,6 @@
 "use client";
 
+import { obterClassesBotao } from "@/lib/estilosBotao";
 import Link from "next/link";
 
 import { useEffect, useState } from "react";
@@ -62,9 +63,8 @@ export default function Orientacao() {
 
 			<Link
 				className={cn(
-					"orientacao-link mt-10 flex h-[60px] w-[300px] cursor-pointer items-center justify-center",
-					"rounded-xl border border-white text-lg font-semibold text-white",
-					"hover:bg-white hover:text-brand-orange hover:opacity-80",
+					"orientacao-link mt-10",
+					obterClassesBotao("secondary"),
 					"max-[480px]:mt-5",
 				)}
 				href="/orientacoes"

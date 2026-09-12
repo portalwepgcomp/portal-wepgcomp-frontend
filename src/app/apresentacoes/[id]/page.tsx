@@ -6,19 +6,17 @@ import Spinner from "@/components/UI/Spinner";
 import { useAuth } from "@/hooks/useAuth";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { usePresentation } from "@/hooks/usePresentation";
-import { cn } from "@/utils/cn";
+import { obterClassesBotao } from "@/lib/estilosBotao";
 import { registrarErro } from "@/utils/logError";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
-import { CalendarPlus, Download, StarIcon } from "lucide-react";
+import { CalendarPlus, Download, Heart, LinkIcon, StarIcon } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { formatDate, formatOnlyTime, getInitials } from "./utils";
 import { Presentation, PresentationBookmark } from "@/models/presentation";
 
-const botaoAcaoBase =
-  "flex items-center gap-2 rounded-lg px-6 py-3 text-base font-semibold transition duration-base";
 
 export default function ApresentacaoDetalhes() {
     const params = useParams();
@@ -267,7 +265,7 @@ export default function ApresentacaoDetalhes() {
             <div className="flex min-h-[400px] flex-col items-center justify-center gap-6">
                 <h2 className="text-foreground">Apresentação não encontrada</h2>
                 <p className="text-muted">Não foi possível carregar os detalhes desta apresentação.</p>
-                <Button onClick={handleBack}>
+                <Button size="lg" variante="outline" onClick={handleBack}>
                     Voltar para a programação
                 </Button>
             </div>
@@ -278,13 +276,14 @@ export default function ApresentacaoDetalhes() {
         <>
             <Banner title="Detalhes da Apresentação" />
             <div className="mx-auto max-w-[900px] px-5 py-10">
-                <button
+                <Button size="lg"
                     type="button"
-                    className="mb-6 cursor-pointer border-none bg-transparent p-0 text-base font-semibold text-brand-blue transition hover:text-brand-navy"
+                    variante="outline"
+                    className="mb-6"
                     onClick={() => router.back()}
                 >
                     ← Voltar para programação
-                </button>
+                </Button>
 
                 <div className="mb-8 rounded-xl bg-gradient-to-br from-brand-blue to-brand-blue-light p-8">
                     <h1 className="m-0 text-[28px] font-bold leading-snug text-white max-md:text-[22px]">
@@ -295,71 +294,55 @@ export default function ApresentacaoDetalhes() {
                 <div className="rounded-xl border border-line bg-card p-6">
                     <h3 className="mb-5 text-xl font-bold text-brand-navy">Ações</h3>
                     <div className="flex flex-wrap gap-3 max-md:flex-col">
-                        <button
+                        <Button size="lg"
                             type="button"
-                            className={cn(
-                                botaoAcaoBase,
-                                "border-2 border-brand-blue bg-card text-brand-blue hover:bg-brand-blue hover:text-white max-md:w-full max-md:justify-center",
-                            )}
+                            variante="primary"
+                            className="max-md:w-full"
                             onClick={handleAvaliar}
                         >
-                            <StarIcon className="h-5 w-5" />
+                            <StarIcon  />
                             Avaliar
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button size="lg"
                             type="button"
-                            className={cn(
-                                botaoAcaoBase,
-                                "border-2 border-brand-blue bg-card text-brand-blue hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50 max-md:w-full max-md:justify-center",
-                            )}
+                            variante="secondary"
+                            className="max-md:w-full"
                             onClick={handleDownloadPdf}
                             disabled={!presentation.submission?.pdfFile}
                         >
-                            <Download className="h-5 w-5" />
+                            <Download  />
                             Baixar
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button size="lg"
                             type="button"
-                            className={cn(
-                                botaoAcaoBase,
-                                "border-2 border-brand-blue bg-card text-brand-blue hover:bg-primary-light max-md:w-full max-md:justify-center",
-                            )}
+                            variante={presentationBookmark?.bookmarked ? "secondary" : "outline"}
+                            className="max-md:w-full"
                             onClick={handleFavorite}
                         >
-                            <span
-                                className="text-lg"
-                                style={{ color: presentationBookmark?.bookmarked ? 'red' : 'inherit' }}
-                            >
-                                {presentationBookmark?.bookmarked ? '❤️' : '🤍'}
-                            </span>
+                            <Heart data-icon="inline-start" />
                             {presentationBookmark?.bookmarked ? 'Desfavoritar' : 'Favoritar'}
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button size="lg"
                             type="button"
-                            className={cn(
-                                botaoAcaoBase,
-                                "border-none bg-brand-blue text-white hover:bg-brand-navy max-md:w-full max-md:justify-center",
-                            )}
+                            variante="secondary"
+                            className="max-md:w-full"
                             onClick={handleAddToCalendar}
                         >
-                            <CalendarPlus className="h-5 w-5" />
+                            <CalendarPlus  />
                             Agendar
-                        </button>
+                        </Button>
 
                         {presentation.submission?.linkHostedFile && (
                             <a
                                 href={presentation.submission?.linkHostedFile}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={cn(
-                                    botaoAcaoBase,
-                                    "border-2 border-brand-blue bg-card text-brand-blue no-underline hover:bg-primary-light max-md:w-full max-md:justify-center",
-                                )}
+                                className={`${obterClassesBotao("secondary")} max-md:w-full`}
                             >
-                                <span className="text-lg">🔗</span>
+                                <LinkIcon data-icon="inline-start" />
                                 Acessar
                             </a>
                         )}
@@ -401,9 +384,9 @@ export default function ApresentacaoDetalhes() {
                                     href={presentation.submission.mainAuthor.lattesUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-brand-blue px-3 py-1.5 text-sm font-semibold text-brand-blue no-underline transition hover:bg-brand-blue hover:text-white"
+                                    className={`${obterClassesBotao("secondary")} mt-2`}
                                 >
-                                    <span>🔗</span> Currículo Lattes
+                                    <LinkIcon data-icon="inline-start" /> Currículo Lattes
                                 </a>
                             )}
                         </div>

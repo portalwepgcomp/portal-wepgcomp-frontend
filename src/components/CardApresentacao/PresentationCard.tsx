@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useContext, useEffect, useState } from "react";
 
@@ -111,13 +112,13 @@ export default function PresentationCard({
         </div>
         {!!signed && (
           <div>
-            <button
+            <Button size="lg"
               type="button"
-              className="rounded-[20px] border-0 bg-white px-5 py-0.5 text-brand-orange transition hover:bg-brand-orange hover:text-white"
+              variante="primary"
               onClick={handleEvaluateClick}
             >
               Avaliar
-            </button>
+            </Button>
           </div>
         )}
       </div>

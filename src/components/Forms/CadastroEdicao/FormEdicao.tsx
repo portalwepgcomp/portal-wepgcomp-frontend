@@ -319,11 +319,10 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <div className="mx-auto my-5 w-full max-w-xs">
-        <Button
+        <Button size="lg" variante="primary"
           type="submit"
           disabled={!Edicao?.isActive || !isValid}
           larguraTotal
-          className="bg-brand-orange text-base font-bold hover:bg-brand-orange"
         >
           Salvar
         </Button>

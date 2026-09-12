@@ -8,7 +8,7 @@ export default function Login() {
   const { Edicao } = useEdicao();
 
   return (
-    <div className="mx-auto flex max-w-[654px] flex-grow flex-col text-black">
+    <div className="mx-auto flex min-h-[60vh] max-w-[654px] flex-grow flex-col justify-center px-4 py-8 text-black">
       <div className="mx-auto w-full max-w-[654px]">
         <h1 className="ms-2 mt-5 flex justify-center border-b-4 border-brand-orange pb-2 text-5xl font-normal text-[#0066BA] max-[1000px]:text-2xl">
           {Edicao?.name || "WEPGCOMP"}
@@ -25,7 +25,7 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="mx-auto mb-4 flex flex-grow justify-center">
+      <div className="mx-auto mb-4 flex justify-center">
         <div className="w-full max-w-[583px] text-start">
           <h6>
             Ainda não tem conta?

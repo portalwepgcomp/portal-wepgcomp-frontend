@@ -15,7 +15,7 @@ import { useSessoesQuery } from "@/features/sessoes/hooks/useSessoesQuery";
 import { useRoomsQuery } from "@/features/sessoes/hooks/useRoomsQuery";
 
 import { useActiveEdition } from "@/hooks/useActiveEdition";
-import { cn } from "@/utils/cn";
+import Button from "@/components/UI/Button";
 import IndicadorDeCarregamento from "../IndicadorDeCarregamento/IndicadorDeCarregamento";
 import LinhaAgenda from "./LinhaAgenda";
 import { Presentation } from "@/models/presentation";
@@ -104,17 +104,15 @@ export default function ScheduleSection() {
 
         <div className="mb-10 flex flex-wrap justify-center gap-4">
           {dates.map((date) => (
-            <button
+            <Button size="lg"
               key={date}
               type="button"
-              className={cn(
-                "cursor-pointer rounded-[25px] border-[3px] border-brand-orange px-8 py-3 text-base font-semibold capitalize text-brand-navy transition duration-200 hover:bg-brand-orange hover:text-white max-md:px-6 max-md:py-2.5 max-md:text-sm",
-                selectedDate === date && "bg-brand-orange text-white",
-              )}
+              variante={selectedDate === date ? "secondary" : "outline"}
+              aria-pressed={selectedDate === date}
               onClick={() => changeDate(date)}
             >
               {formatDateLabel(date)}
-            </button>
+            </Button>
           ))}
         </div>
 

@@ -225,11 +225,10 @@ export default function FormSessaoApresentacoes({
       </Campo>
 
       <div className="flex justify-center">
-        <Button
+        <Button size="lg" variante="primary"
           type="submit"
           id="sa-submit-button"
           disabled={!edicao?.isActive}
-          className="bg-brand-orange hover:bg-brand-orange"
         >
           {confirmButton.label}
         </Button>

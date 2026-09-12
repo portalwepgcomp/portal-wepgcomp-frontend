@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -8,14 +9,6 @@ import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
 import Banner from "@/components/UI/Banner";
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
 import { edicaoApi } from "@/services/edicao";
-import { cn } from "@/utils/cn";
-
-const headerBtnClass = cn(
-  "inline-flex items-center gap-2 rounded-lg border border-line bg-card px-4 py-2.5",
-  "text-sm font-semibold text-foreground shadow-sm transition-all duration-200",
-  "hover:bg-muted-light hover:border-brand-blue hover:text-brand-blue",
-  "[&_svg]:h-4 [&_svg]:w-4",
-);
 
 export default function EditarEdicao() {
   const params = useParams();
@@ -34,10 +27,10 @@ export default function EditarEdicao() {
 
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <button className={headerBtnClass} onClick={() => router.push("/edicoes")}>
+          <Button size="lg" variante="outline" onClick={() => router.push("/edicoes")}>
             <ArrowLeft />
             Voltar para Edições
-          </button>
+          </Button>
         </div>
 
         {isLoading ? (
