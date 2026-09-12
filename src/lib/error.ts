@@ -1,5 +1,21 @@
 import { isAxiosError } from "axios";
 
+type ValidationDetail = {
+  messages?: unknown;
+};
+
+function getDetailsMessage(data: Record<string, unknown>): string | undefined {
+  if (!Array.isArray(data.details)) return undefined;
+
+  const messages = data.details.flatMap((detail: ValidationDetail) =>
+    Array.isArray(detail?.messages)
+      ? detail.messages.filter((message): message is string => typeof message === "string")
+      : [],
+  );
+
+  return messages.length > 0 ? messages.join(". ") : undefined;
+}
+
 /**
  * Extrai de forma segura e tipada a mensagem de erro retornada pelo backend ou lançada localmente.
  */
@@ -14,6 +30,11 @@ export function getErrorMessage(
 
     if (err.response?.data) {
       const data = err.response.data as Record<string, unknown>;
+      const detailsMessage = getDetailsMessage(data);
+      if (detailsMessage) {
+        return detailsMessage;
+      }
+
       if (typeof data.message === "string") {
         return data.message;
       }
