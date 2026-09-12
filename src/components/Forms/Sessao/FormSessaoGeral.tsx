@@ -62,6 +62,8 @@ const selectClasse =
 const datepickerClasse =
   "w-full rounded-md border border-[#d9dce0] bg-white px-3 py-2.5 text-sm leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10";
 
+const MAX_SESSION_DURATION_MINUTES = 720;
+
 const formSessaoAuxiliarSchema = z
   .object({
     titulo: z
@@ -111,6 +113,16 @@ const formSessaoAuxiliarSchema = z
     },
     {
       message: "A data e horário de fim devem ser posteriores ao início.",
+      path: ["final"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (!data.inicio || !data.final) return true;
+      return getDurationInMinutes(data.inicio, data.final) <= MAX_SESSION_DURATION_MINUTES;
+    },
+    {
+      message: "A sessão não pode durar mais que 12 horas.",
       path: ["final"],
     },
   );
@@ -383,11 +395,10 @@ export default function FormSessaoAuxiliar({
       </Campo>
 
       <div className="flex justify-center">
-        <Button
+        <Button size="lg" variante="primary"
           type="submit"
           id="sg-submit-button"
           disabled={!Edicao?.isActive}
-          className="bg-brand-orange hover:bg-brand-orange"
         >
           {confirmButton.label}
         </Button>

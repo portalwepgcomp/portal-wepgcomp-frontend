@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, GripVertical, Info, Layers } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -12,14 +13,6 @@ import { useEdicao } from "@/hooks/useEdicao";
 import { useSession } from "@/hooks/useSession";
 import { SwapPresentationsOnSession } from "@/models/session";
 import { Submission } from "@/models/submission";
-import { cn } from "@/utils/cn";
-
-const headerBtnClass = cn(
-  "inline-flex items-center gap-2 rounded-lg border border-line bg-card px-4 py-2.5",
-  "text-sm font-semibold text-foreground shadow-sm transition-all duration-200",
-  "hover:bg-muted-light hover:border-brand-blue hover:text-brand-blue",
-  "[&_svg]:h-4 [&_svg]:w-4",
-);
 
 export default function OrdenarApresentacoes() {
   const params = useParams();
@@ -84,10 +77,10 @@ export default function OrdenarApresentacoes() {
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         {/* Navigation & Header */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <button className={headerBtnClass} onClick={() => router.push("/sessoes")}>
+          <Button size="lg" variante="outline" onClick={() => router.push("/sessoes")}>
             <ArrowLeft />
             Voltar para Sessões
-          </button>
+          </Button>
 
           {salvo && (
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 text-emerald-700 border border-emerald-200 shadow-sm animate-in fade-in duration-200">

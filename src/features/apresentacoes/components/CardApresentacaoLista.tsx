@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import Button from "@/components/UI/Button";
+import { Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useSweetAlert } from "@/hooks/useAlert";
@@ -28,12 +29,6 @@ export default function CardApresentacaoLista({
   onExcluir,
 }: Readonly<CardApresentacaoListaProps>) {
   const { showAlert } = useSweetAlert();
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
-  const estilo = (id: string) => ({
-    transition: "transform 0.3s ease",
-    transform: hoveredId === id ? "scale(1.2)" : "scale(1)",
-  });
 
   const apresentador = item.mainAuthor?.name?.trim() || "Sem nome";
   const orientador = item.advisor?.name?.trim() || "";
@@ -51,13 +46,12 @@ export default function CardApresentacaoLista({
       text: "Ao deletar você não poderá reverter essa ação.",
       icon: "warning",
       showCancelButton: true,
-      cancelButtonColor: "#CF000A",
       cancelButtonText: "Cancelar",
       showConfirmButton: true,
-      confirmButtonColor: "#019A34",
+      varianteConfirmacao: "primary",
       confirmButtonText: "Deletar",
-    }).then((result) => {
-      if (result.isConfirmed) onExcluir();
+    }).then((resultado) => {
+      if (resultado.isConfirmed) onExcluir();
     });
   };
 
@@ -87,15 +81,12 @@ export default function CardApresentacaoLista({
             download
             target="_blank"
             rel="noopener noreferrer"
-            onMouseEnter={() => setHoveredId("link")}
-            onMouseLeave={() => setHoveredId(null)}
           >
             <Image
               src="/assets/images/link.svg"
               alt={`Link externo ${nomeArquivo || "arquivo"}`}
               width={40}
               height={40}
-              style={estilo("link")}
             />
           </a>
         ) : null}
@@ -106,54 +97,39 @@ export default function CardApresentacaoLista({
             download
             target="_blank"
             rel="noopener noreferrer"
-            onMouseEnter={() => setHoveredId("download")}
-            onMouseLeave={() => setHoveredId(null)}
           >
             <Image
               src="/assets/images/download.svg.svg"
               alt={`Download ${nomeArquivo || "arquivo"}`}
               width={40}
               height={40}
-              style={estilo("download")}
             />
           </a>
         ) : null}
 
-        <button
+        <Button size="lg"
+          variante="secondary"
+          aria-label="Editar"
           onClick={onEditar}
           className={cn(
-            "w-min border-0 bg-transparent p-0",
+            "",
             !edicaoAtiva && "hidden",
           )}
           type="button"
-          onMouseEnter={() => setHoveredId("editar")}
-          onMouseLeave={() => setHoveredId(null)}
         >
-          <Image
-            src="/assets/images/edit.svg"
-            alt="Editar"
-            width={50}
-            height={50}
-            style={estilo("editar")}
-          />
-        </button>
+          <Pencil  aria-hidden="true" />
+        </Button>
 
         {edicaoAtiva && (
-          <button
+          <Button size="lg"
             type="button"
-            className="w-min border-0 bg-transparent p-0"
+
+            variante="danger"
+            aria-label="Excluir"
             onClick={confirmarExclusao}
-            onMouseEnter={() => setHoveredId("excluir")}
-            onMouseLeave={() => setHoveredId(null)}
           >
-            <Image
-              src="/assets/images/delete.svg"
-              alt="Excluir"
-              width={50}
-              height={50}
-              style={estilo("excluir")}
-            />
-          </button>
+            <Trash2  aria-hidden="true" />
+          </Button>
         )}
       </div>
     </div>

@@ -443,10 +443,11 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
         />
       </Campo>
 
-      <div className="mt-2">
+      <div className="mx-auto mt-2 flex w-full max-[1000px]:justify-center">
         <Button
           type="submit"
-          className="w-full h-10 text-xl font-bold "
+          className="h-10 w-full max-w-[224px] text-xl font-bold"
+          variante="primary"
         >
           Cadastrar
         </Button>

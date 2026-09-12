@@ -17,7 +17,6 @@ export default function ModalMelhoresAvaliadores() {
       idCloseModal="escolherAvaliadorModalClose"
       loading={false}
       labelConfirmButton="Salvar"
-      colorButtonConfirm="#019A34"
     >
       <div className="w-full text-black">
         <h2 className="mb-4 flex justify-center text-2xl font-bold">

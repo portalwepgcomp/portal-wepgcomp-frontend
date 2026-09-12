@@ -5,6 +5,8 @@ import { useContext, useEffect, useMemo, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import Button from "@/components/UI/Button";
+import { obterClassesBotao } from "@/lib/estilosBotao";
 import { Home } from "lucide-react";
 
 import { AuthContext } from "@/context/AuthProvider/authProvider";
@@ -76,20 +78,28 @@ export default function Header() {
     return [...filtered].sort((a, b) => Number(b.value) - Number(a.value));
   }, [edicoesList]);
 
-  function perfil() {
+  function perfil(compact = false) {
     if (!user) return null;
 
-    if (user.level !== "Default")
-      return <PerfilAdmin profile={user?.profile} role={user?.level} />;
+    const name = user.name;
+    if (user.level !== "Default") {
+      return (
+        <PerfilAdmin
+          profile={user.profile}
+          role={user.level}
+          userName={name}
+          compact={compact}
+        />
+      );
+    }
 
     switch (user.profile) {
       case "Listener":
-        return <PerfilOuvinte />;
+        return <PerfilOuvinte userName={name} compact={compact} />;
       case "Professor":
-        return <PerfilProfessor />;
+        return <PerfilProfessor userName={name} compact={compact} />;
       case "Presenter":
-        return <PerfilApresentador />;
-
+        return <PerfilApresentador userName={name} compact={compact} />;
       default:
         return null;
     }
@@ -180,25 +190,26 @@ export default function Header() {
           </div>
 
           <section className="flex w-full gap-2 min-[1001px]:hidden">
-            <button
-              className="flex h-10 w-1/2 items-center justify-center rounded-lg border border-gray-400"
+            <Button size="lg"
+              variante="secondary"
+              className="w-1/2"
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
               aria-controls="navbarSupportedContent"
               aria-expanded={menuOpen}
-              aria-label="Toggle navigation"
+              aria-label="Alternar navegação"
             >
               {/* Ícone de navegação mobile moderno do lucide-react */}
-              <Home className="h-5 w-5 text-gray-700" aria-hidden="true" />
-            </button>
-            <div className="flex h-10 w-1/2 items-center justify-center rounded-lg border border-gray-400">
+              <Home  aria-hidden="true" />
+            </Button>
+            <div className="flex w-1/2 items-center justify-center">
               {signed ? (
-                <div className="flex h-full flex-col items-center justify-center text-[10px] text-black">
-                  {perfil()}
+                <div className="flex h-full items-center justify-center">
+                  {perfil(true)}
                 </div>
               ) : (
                 <Link
-                  className={cn(linkBase, "flex h-full w-full items-center justify-center text-base")}
+                  className={cn(obterClassesBotao("outline"), "w-full")}
                   aria-current="page"
                   href="/login"
                 >
@@ -272,9 +283,7 @@ export default function Header() {
 
               <li className="max-[1000px]:hidden">
                 {signed ? (
-                  <div className="flex flex-col items-center justify-center text-[10px] text-black">
-                    Olá, {user?.name.split(" ")[0]}!{perfil()}
-                  </div>
+                  perfil(false)
                 ) : (
                   <Link
                     className={cn(linkBase, "active")}

@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .botao {
+    --button-radius-lg: 0.625rem;
+    --button-radius-md: 0.5rem;
+  }
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground font-sans text-[15px] leading-normal antialiased;

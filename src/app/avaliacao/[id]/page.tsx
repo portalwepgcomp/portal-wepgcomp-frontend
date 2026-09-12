@@ -169,8 +169,7 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
               )}
             </div>
             <div className="flex flex-row items-center">
-              <Button
-                className="h-[43px] w-[246px] rounded-xl border-2 border-brand-orange bg-brand-orange text-xl font-bold hover:bg-[#E68A00]"
+              <Button size="lg" variante="primary"
                 onClick={sendEvaluation}
                 disabled={loadingEvaluation || !Edicao?.isActive}
               >

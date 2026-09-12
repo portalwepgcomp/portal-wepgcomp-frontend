@@ -39,7 +39,6 @@ export default function ModalCadastroProfessor({
       idCloseModal="cadastroProfessorModalClose"
       loading={loadingCreateProfessor}
       labelConfirmButton="Cadastrar Professor"
-      colorButtonConfirm="#0066BA"
       className="modal-above-header"
     >
       <div className="w-full text-black">

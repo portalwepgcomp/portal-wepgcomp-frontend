@@ -123,9 +123,8 @@ export function FormAlterarSenha({ params }: Readonly<{ params: { token: string 
       </Campo>
 
       <div className="mx-auto mt-4 flex justify-center">
-        <Button
+        <Button size="lg" variante="primary"
           type="submit"
-          className="bg-brand-orange text-base font-bold hover:bg-brand-orange px-8"
         >
           Enviar
         </Button>

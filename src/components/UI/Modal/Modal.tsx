@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useState } from "react";
 import { X } from "lucide-react";
 
@@ -37,14 +38,15 @@ export default function Modal({ content, reference }: Readonly<ModalProps>) {
             aria-hidden
           />
           <div className="fixed left-1/2 top-[50%] w-[85vw] max-w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 bg-white shadow-2xl max-[480px]:w-[95vw]">
-            <button
+            <Button size="lg"
               type="button"
               onClick={() => closeModal()}
-              className="relative left-[94%] top-5 h-6 w-6 cursor-pointer border-0 bg-transparent text-muted hover:text-foreground max-[480px]:left-[88%]"
+              variante="outline"
+              className="relative left-[94%] top-5 max-[480px]:left-[88%]"
               aria-label="Fechar"
             >
-              <X className="h-6 w-6" aria-hidden="true" />
-            </button>
+              <X  aria-hidden="true" />
+            </Button>
             {content}
           </div>
         </div>

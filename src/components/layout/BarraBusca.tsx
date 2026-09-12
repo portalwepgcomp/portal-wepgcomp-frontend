@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { Search } from "lucide-react";
 import { Input } from "@/components/UI/Input";
 import { cn } from "@/utils/cn";
@@ -23,7 +24,7 @@ export default function BarraBusca({
   return (
     <div
       className={cn(
-        "flex w-full max-w-md items-stretch",
+        "flex w-[28rem] max-w-full items-center gap-2",
         ocultar && "invisible",
         className,
       )}
@@ -35,16 +36,16 @@ export default function BarraBusca({
         aria-describedby="botao-busca"
         value={valor}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-r-none border-[2px] border-brand-orange focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
+        className="min-w-0 flex-1"
       />
-      <button
-        className="flex items-center justify-center rounded-r-md border border-brand-orange bg-brand-orange px-4 text-white transition-colors duration-200 hover:bg-orange-600 focus:outline-none"
+      <Button size="lg"
+        variante="primary"
         type="button"
         id="botao-busca"
         aria-label="Buscar"
       >
-        <Search className="h-5 w-5" />
-      </button>
+        <Search  />
+      </Button>
     </div>
   );
 }
