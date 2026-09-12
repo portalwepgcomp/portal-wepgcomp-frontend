@@ -25,9 +25,6 @@ const realizacaoLogos: Logo[] = [
     height: 130,
     priority: true,
   },
-];
-
-const apoioLogos: Logo[] = [
   {
     src: "/assets/images/logo-capes-fundo-claro.jpg",
     alt: "Capes Logo",
@@ -40,6 +37,16 @@ const apoioLogos: Logo[] = [
     alt: "Proext Logo",
     width: 100,
     height: 130,
+    priority: true,
+  },
+];
+
+const apoioLogos: Logo[] = [
+  {
+    src: "/assets/images/WEX_Logo_Red_Vector.svg",
+    alt: "WEX Logo",
+    width: 150,
+    height: 150,
     priority: true,
   },
 ];
