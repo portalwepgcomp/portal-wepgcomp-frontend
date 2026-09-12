@@ -5,19 +5,16 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useSweetAlert } from "@/hooks/useAlert";
-import { cn } from "@/utils/cn";
 import { Edicao } from "@/models/edicao";
 
 interface CardEdicaoProps {
   edicao: Edicao;
-  edicaoAtiva: boolean;
   onEditar: () => void;
   onExcluir: () => void;
 }
 
 export default function CardEdicao({
   edicao,
-  edicaoAtiva,
   onEditar,
   onExcluir,
 }: Readonly<CardEdicaoProps>) {
@@ -48,30 +45,25 @@ export default function CardEdicao({
       </div>
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
-        <Button size="lg"
+        <Button
+          size="lg"
           variante="outline"
           aria-label="Editar"
           onClick={onEditar}
-          className={cn(
-            "",
-            !edicaoAtiva && "hidden",
-          )}
           type="button"
         >
-          <Pencil  aria-hidden="true" />
+          <Pencil aria-hidden="true" />
         </Button>
 
-        {edicaoAtiva && (
-          <Button size="lg"
-            type="button"
-
-            variante="danger"
-            aria-label="Excluir"
-            onClick={confirmarExclusao}
-          >
-            <Trash2  aria-hidden="true" />
-          </Button>
-        )}
+        <Button
+          size="lg"
+          type="button"
+          variante="danger"
+          aria-label="Excluir"
+          onClick={confirmarExclusao}
+        >
+          <Trash2 aria-hidden="true" />
+        </Button>
       </div>
     </div>
   );
