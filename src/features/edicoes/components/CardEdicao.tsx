@@ -1,33 +1,24 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
+import Button from "@/components/UI/Button";
+import { Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useSweetAlert } from "@/hooks/useAlert";
-import { cn } from "@/utils/cn";
 import { Edicao } from "@/models/edicao";
 
 interface CardEdicaoProps {
   edicao: Edicao;
-  edicaoAtiva: boolean;
   onEditar: () => void;
   onExcluir: () => void;
 }
 
 export default function CardEdicao({
   edicao,
-  edicaoAtiva,
   onEditar,
   onExcluir,
 }: Readonly<CardEdicaoProps>) {
   const { showAlert } = useSweetAlert();
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
-  const estilo = (id: string) => ({
-    transition: "transform 0.3s ease",
-    transform: hoveredId === id ? "scale(1.2)" : "scale(1)",
-  });
 
   const confirmarExclusao = () => {
     showAlert({
@@ -35,13 +26,12 @@ export default function CardEdicao({
       text: "Ao deletar você não poderá reverter essa ação.",
       icon: "warning",
       showCancelButton: true,
-      cancelButtonColor: "#CF000A",
       cancelButtonText: "Cancelar",
       showConfirmButton: true,
-      confirmButtonColor: "#019A34",
+      varianteConfirmacao: "primary",
       confirmButtonText: "Deletar",
-    }).then((result) => {
-      if (result.isConfirmed) onExcluir();
+    }).then((resultado) => {
+      if (resultado.isConfirmed) onExcluir();
     });
   };
 
@@ -55,42 +45,25 @@ export default function CardEdicao({
       </div>
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
-        <button
+        <Button
+          size="lg"
+          variante="outline"
+          aria-label="Editar"
           onClick={onEditar}
-          className={cn(
-            "w-min border-0 bg-transparent p-0",
-            !edicaoAtiva && "hidden",
-          )}
           type="button"
-          onMouseEnter={() => setHoveredId("editar")}
-          onMouseLeave={() => setHoveredId(null)}
         >
-          <Image
-            src="/assets/images/edit.svg"
-            alt="Editar"
-            width={50}
-            height={50}
-            style={estilo("editar")}
-          />
-        </button>
+          <Pencil aria-hidden="true" />
+        </Button>
 
-        {edicaoAtiva && (
-          <button
-            type="button"
-            className="w-min border-0 bg-transparent p-0"
-            onClick={confirmarExclusao}
-            onMouseEnter={() => setHoveredId("excluir")}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            <Image
-              src="/assets/images/delete.svg"
-              alt="Excluir"
-              width={50}
-              height={50}
-              style={estilo("excluir")}
-            />
-          </button>
-        )}
+        <Button
+          size="lg"
+          type="button"
+          variante="danger"
+          aria-label="Excluir"
+          onClick={confirmarExclusao}
+        >
+          <Trash2 aria-hidden="true" />
+        </Button>
       </div>
     </div>
   );

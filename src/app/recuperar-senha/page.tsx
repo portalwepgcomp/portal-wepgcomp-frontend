@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import { Campo, Input } from "@/components/UI/Input";
 import Button from "@/components/UI/Button";
+import { obterClassesBotao } from "@/lib/estilosBotao";
 import { useUsers } from "@/hooks/useUsers";
 import { useEdicao } from "@/hooks/useEdicao";
 import LoadingPage from "@/components/LoadingPage";
@@ -68,9 +69,9 @@ export default function RecuperarSenha() {
             </p>
             <Link
               href="/login"
-              className="mt-2 inline-flex items-center gap-2 rounded-lg border border-brand-orange px-6 py-2 font-semibold text-brand-orange no-underline transition hover:bg-orange-50"
+              className={`${obterClassesBotao("outline")} mt-2`}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft data-icon="inline-start" />
               Voltar para o login
             </Link>
           </div>
@@ -110,12 +111,11 @@ export default function RecuperarSenha() {
               />
             </Campo>
 
-            <Button
+            <Button size="lg" variante="primary"
               type="button"
               larguraTotal
               disabled={!email || !!error}
               onClick={handleEnviar}
-              className="bg-brand-orange font-semibold hover:bg-brand-orange"
             >
               Enviar link de recuperação
             </Button>
@@ -123,9 +123,9 @@ export default function RecuperarSenha() {
             <div className="mt-5 text-center">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1 text-sm text-slate-500 no-underline hover:text-slate-800"
+                className={obterClassesBotao("outline")}
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft data-icon="inline-start" />
                 Voltar para o login
               </Link>
             </div>

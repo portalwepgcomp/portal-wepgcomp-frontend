@@ -1,5 +1,6 @@
 "use client";
 
+import { classeItemMenu } from "@/lib/estilosMenu";
 import { cn } from "@/utils/cn";
 import type { ProfileType, RoleType } from "@/models/user";
 import {
@@ -11,10 +12,6 @@ import {
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
-
-const itemClass =
-  "block w-full px-3 py-2 text-left text-sm font-medium text-foreground no-underline transition hover:bg-primary-light hover:text-primary";
-
 interface PerfilMenuProps {
   children: ReactNode;
   userName: string;
@@ -162,7 +159,7 @@ export function PerfilMenuItem({
   danger = false,
 }: PerfilMenuItemProps) {
   const className = cn(
-    itemClass,
+    classeItemMenu,
     danger && "text-error hover:bg-error-light hover:text-error",
   );
 

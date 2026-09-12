@@ -36,9 +36,9 @@ export default function HtmlEditorComponent({
       {isAdm && (
         <div className="flex justify-end gap-2">
           {handleEditField && (
-            <Button
+            <Button size="lg" variante={toggleEditor ? "primary" : "outline"}
               type="button"
-              className="mt-4 self-end bg-success px-8 py-2 hover:bg-success"
+              className="mt-4 self-end"
               onClick={() => {
                 if (toggleEditor) {
                   handleEditField();

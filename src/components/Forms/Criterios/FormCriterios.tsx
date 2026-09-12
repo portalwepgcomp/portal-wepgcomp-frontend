@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -220,15 +221,14 @@ export default function FormCriterios() {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
-        <button
+        <Button size="lg" variante="primary"
           type="submit"
           id="sa-submit-button"
           disabled={!Edicao?.isActive || isSubmitting}
-          className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-orange px-8 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Save className="h-5 w-5" />
+          <Save  />
           <span>Salvar Todos os Critérios</span>
-        </button>
+        </Button>
       </div>
     </form>
   );

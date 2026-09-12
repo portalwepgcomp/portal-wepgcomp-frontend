@@ -154,8 +154,8 @@ const SendEmail = () => {
               <p className="m-0 text-sm text-muted">Envio de E-mails</p>
             </div>
           </div>
-          <Button variante="ghost" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
+          <Button size="lg" variante="outline" onClick={() => router.back()}>
+            <ArrowLeft  />
             Voltar
           </Button>
         </div>
@@ -209,7 +209,7 @@ const SendEmail = () => {
               />
             </Campo>
 
-            <Button
+            <Button size="lg" variante="primary"
               larguraTotal
               onClick={handleSendEmail}
               disabled={!selectedGroup || !subject || !message || isSending || loadingUserList}
@@ -218,7 +218,7 @@ const SendEmail = () => {
                 <>Enviando...</>
               ) : (
                 <>
-                  <Send className="h-5 w-5" />
+                  <Send  />
                   Enviar E-mail para {recipientCount} destinatário(s)
                 </>
               )}

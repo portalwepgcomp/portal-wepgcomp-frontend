@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
+import Button from "@/components/UI/Button";
+import { Pencil, Trash2 } from "lucide-react";
 
 import { useSweetAlert } from "@/hooks/useAlert";
 import { cn } from "@/utils/cn";
@@ -23,12 +23,6 @@ export default function CardSessao({
   onReordenar,
 }: Readonly<CardSessaoProps>) {
   const { showAlert } = useSweetAlert();
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
-  const estilo = (id: string) => ({
-    transition: "transform 0.3s ease",
-    transform: hoveredId === id ? "scale(1.2)" : "scale(1)",
-  });
 
   const podeReordenar =
     sessao.type === "Presentation" && (sessao.presentations?.length ?? 0) > 0;
@@ -39,13 +33,12 @@ export default function CardSessao({
       text: "Ao deletar você não poderá reverter essa ação.",
       icon: "warning",
       showCancelButton: true,
-      cancelButtonColor: "#CF000A",
       cancelButtonText: "Cancelar",
       showConfirmButton: true,
-      confirmButtonColor: "#019A34",
+      varianteConfirmacao: "primary",
       confirmButtonText: "Deletar",
-    }).then((result) => {
-      if (result.isConfirmed) onExcluir();
+    }).then((resultado) => {
+      if (resultado.isConfirmed) onExcluir();
     });
   };
 
@@ -62,50 +55,38 @@ export default function CardSessao({
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
         {podeReordenar && edicaoAtiva && (
-          <button
-            className="mr-2 mt-1 h-9 min-w-max rounded-[0.625rem] bg-brand-accent px-4 py-1 text-sm font-extrabold text-white max-[980px]:h-auto max-[980px]:min-w-0"
+          <Button size="lg"
+            variante="secondary" className="mr-2 mt-1"
             onClick={onReordenar}
             type="button"
           >
             Trocar ordem das apresentações
-          </button>
+          </Button>
         )}
 
-        <button
+        <Button size="lg"
+          variante="secondary"
+          aria-label="Editar"
           onClick={onEditar}
           className={cn(
-            "w-min border-0 bg-transparent p-0",
+            "",
             !edicaoAtiva && "hidden",
           )}
           type="button"
-          onMouseEnter={() => setHoveredId("editar")}
-          onMouseLeave={() => setHoveredId(null)}
         >
-          <Image
-            src="/assets/images/edit.svg"
-            alt="Editar"
-            width={50}
-            height={50}
-            style={estilo("editar")}
-          />
-        </button>
+          <Pencil  aria-hidden="true" />
+        </Button>
 
         {edicaoAtiva && (
-          <button
+          <Button size="lg"
             type="button"
-            className="w-min border-0 bg-transparent p-0"
+
+            variante="danger"
+            aria-label="Excluir"
             onClick={confirmarExclusao}
-            onMouseEnter={() => setHoveredId("excluir")}
-            onMouseLeave={() => setHoveredId(null)}
           >
-            <Image
-              src="/assets/images/delete.svg"
-              alt="Excluir"
-              width={50}
-              height={50}
-              style={estilo("excluir")}
-            />
-          </button>
+            <Trash2  aria-hidden="true" />
+          </Button>
         )}
       </div>
     </div>

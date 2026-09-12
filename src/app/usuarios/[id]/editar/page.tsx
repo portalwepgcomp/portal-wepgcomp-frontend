@@ -308,7 +308,7 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                   }
                   maxLength={selectedProfile === "Listener" ? 14 : 13}
                   className={cn(
-                    "w-full rounded-md border border-line px-3 py-2.5 text-sm outline-none",
+                    "w-full rounded-md px-3 py-2.5 text-sm outline-none",
                     "focus:border-brand-blue focus:ring-1 focus:ring-brand-blue",
                   )}
                 />
@@ -333,7 +333,7 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                 className="mb-3"
               >
                 <select
-                  className="w-full rounded-md border border-line px-3 py-2.5 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
+                  className="w-full rounded-md px-3 py-2.5 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
                   id="permissao"
                   name="permissao"
                   defaultValue={user.level}
@@ -344,15 +344,15 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
               </Campo>
 
               <div className="mt-4 flex justify-end gap-2.5">
-                <Button
+                <Button size="lg"
                   type="button"
-                  variante="ghost"
+                  variante="danger"
                   onClick={() => router.push("/usuarios")}
                   disabled={isSubmitting}
                 >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button size="lg" variante="primary" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Salvando..." : "Salvar Alterações"}
                 </Button>
               </div>

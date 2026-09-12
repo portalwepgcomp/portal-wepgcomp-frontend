@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { cn } from "@/utils/cn";
-import { actionBtnBase } from "./constants";
+import Button, { VarianteBotao } from "@/components/UI/Button";
 import { User, UserProfile } from "@/models/user";
 
 interface GerenciarUsuarioAcoesProps {
@@ -22,18 +21,19 @@ function BotaoAcao({
   disabled,
   title,
   rotulo,
-  className,
+  variante,
 }: {
   onClick: () => void;
   disabled?: boolean;
   title: string;
   rotulo: string;
-  className: string;
+  variante: VarianteBotao;
 }) {
   return (
-    <button
+    <Button size="lg"
       type="button"
-      className={cn(actionBtnBase, className)}
+      variante={variante}
+      aria-label={title}
       onClick={onClick}
       disabled={disabled}
       title={title}
@@ -42,7 +42,7 @@ function BotaoAcao({
       <span className="inline md:hidden" aria-hidden>
         •
       </span>
-    </button>
+    </Button>
   );
 }
 
@@ -70,7 +70,7 @@ export default function GerenciarUsuarioAcoes({
       key="delete"
       rotulo="Excluir Usuário"
       title="Excluir Usuário"
-      className="border-red-500 bg-gradient-to-br from-red-500 to-red-400 text-white hover:from-red-600 hover:to-red-500"
+      variante="danger"
       onClick={() => onExcluir(usuario.id)}
       disabled={desabilitado}
     />,
@@ -87,7 +87,7 @@ export default function GerenciarUsuarioAcoes({
         key="approve-teacher"
         rotulo="Aprovar Professor"
         title="Aprovar Professor"
-        className="border-[#4caf50] bg-gradient-to-br from-[#4caf50] to-[#66bb6a] text-white hover:from-[#388e3c] hover:to-[#4caf50]"
+        variante="primary"
         onClick={() => onAprovarProfessor(usuario.id)}
         disabled={desabilitado}
       />,
@@ -105,7 +105,7 @@ export default function GerenciarUsuarioAcoes({
         key="approve-presenter"
         rotulo="Aprovar Apresentador"
         title="Aprovar Apresentador"
-        className="border-[#4caf50] bg-gradient-to-br from-[#4caf50] to-[#66bb6a] text-white hover:from-[#388e3c] hover:to-[#4caf50]"
+        variante="primary"
         onClick={() => onAprovarApresentador(usuario.id)}
         disabled={desabilitado}
       />,
@@ -118,7 +118,7 @@ export default function GerenciarUsuarioAcoes({
         key="edit"
         rotulo="Editar usuário"
         title="Editar usuário"
-        className="border-[#00bcd4] bg-gradient-to-br from-[#00bcd4] to-[#4dd0e1] text-white hover:from-[#0097a7] hover:to-[#00bcd4]"
+        variante="secondary"
         onClick={() => router.push(`/usuarios/${usuario.id}/editar`)}
         disabled={desabilitado}
       />,
@@ -131,7 +131,7 @@ export default function GerenciarUsuarioAcoes({
         key="promote-admin"
         rotulo="Promover a Admin"
         title="Promover a Admin"
-        className="border-[#2196f3] bg-gradient-to-br from-[#2196f3] to-[#42a5f5] text-white hover:from-[#1976d2] hover:to-[#2196f3]"
+        variante="secondary"
         onClick={() => onPromoverAdmin(usuario.id)}
         disabled={desabilitado}
       />,
@@ -145,7 +145,7 @@ export default function GerenciarUsuarioAcoes({
         key="demote"
         rotulo={rotulo}
         title={rotulo}
-        className="border-[#9e9e9e] bg-gradient-to-br from-[#9e9e9e] to-[#bdbdbd] text-white hover:from-[#757575] hover:to-[#9e9e9e]"
+        variante="danger"
         onClick={() => onRebaixar(usuario.id)}
         disabled={desabilitado}
       />,

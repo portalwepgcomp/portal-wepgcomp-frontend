@@ -1,15 +1,16 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { InputHTMLAttributes, TextareaHTMLAttributes, forwardRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/utils/cn";
 
 const campoBase =
-  "w-full rounded-md border border-[#d9dce0] bg-white px-3 py-2.5 text-[0.9375rem] leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 placeholder:text-[#80868b] disabled:opacity-60 disabled:cursor-not-allowed";
+  "w-full rounded-md border border-gray-300 bg-white px-3 text-[0.9375rem] leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 placeholder:text-[14px] placeholder:text-[#80868b] disabled:opacity-60 disabled:cursor-not-allowed";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   function Input({ className, ...props }, ref) {
-    return <input ref={ref} className={cn(campoBase, className)} {...props} />;
+    return <input ref={ref} className={cn(campoBase, "h-9 py-0", className)} {...props} />;
   },
 );
 
@@ -45,7 +46,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
     return (
       <div
         className={cn(
-          "relative flex w-full items-center rounded-md border border-[#d9dce0] bg-white transition hover:border-[#bdc1c6] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10",
+          "relative flex h-9 w-full items-center rounded-md border border-gray-300 bg-white transition hover:border-[#bdc1c6] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10",
           disabled && "opacity-60 cursor-not-allowed",
           className,
         )}
@@ -54,24 +55,25 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           ref={ref}
           type={estaVisivel ? "text" : "password"}
           disabled={disabled}
-          className="w-full flex-1 border-0 bg-transparent px-3 py-2.5 text-[0.9375rem] leading-normal text-foreground outline-none placeholder:text-[#80868b]"
+          className="h-full min-w-0 w-full flex-1 border-0 bg-transparent px-3 py-0 text-[0.9375rem] leading-normal text-foreground outline-none placeholder:text-[14px] placeholder:text-[#80868b]"
           {...props}
         />
-        <button
+        <Button size="lg" className="mr-2 h-full"
           type="button"
           onClick={alternarVisibilidade}
           disabled={disabled}
-          className="flex h-full items-center justify-center border-0 bg-transparent px-3 text-muted hover:text-foreground focus:outline-none"
+          variante="ghost"
+
           aria-label={estaVisivel ? "Ocultar senha" : "Ver senha"}
           title={estaVisivel ? "Ocultar senha" : "Ver senha"}
           tabIndex={-1}
         >
           {estaVisivel ? (
-            <EyeOff className="h-4 w-4 text-brand-blue" aria-hidden="true" />
+            <EyeOff  aria-hidden="true" />
           ) : (
-            <Eye className="h-4 w-4 text-[#80868b]" aria-hidden="true" />
+            <Eye  aria-hidden="true" />
           )}
-        </button>
+        </Button>
       </div>
     );
   },
@@ -84,7 +86,7 @@ export const Textarea = forwardRef<
   return (
     <textarea
       ref={ref}
-      className={cn(campoBase, "min-h-[200px] resize-none", className)}
+      className={cn(campoBase, "min-h-[200px] resize-none py-2.5", className)}
       {...props}
     />
   );

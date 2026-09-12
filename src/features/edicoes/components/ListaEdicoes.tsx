@@ -56,7 +56,6 @@ export default function ListaEdicoes() {
               <CardEdicao
                 key={edicao.id}
                 edicao={edicao}
-                edicaoAtiva={edicaoAtiva}
                 onEditar={() => abrirEdicao(edicao.id)}
                 onExcluir={() => excluir(edicao.id)}
               />

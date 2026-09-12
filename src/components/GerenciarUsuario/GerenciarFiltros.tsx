@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { Search, Info } from "lucide-react";
 import { cn } from "@/utils/cn";
 import FilterSelect from "./FilterSelect";
@@ -35,8 +36,8 @@ export default function GerenciarFiltros({
         <input
           type="text"
           className={cn(
-            "flex-1 rounded-lg border-2 border-[#e9ecef] px-4 py-2 pr-10 text-base transition-[border-color] duration-200",
-            "placeholder:text-[#6c757d] focus:border-[#007bff] focus:outline-none focus:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]",
+            "h-9 flex-1 rounded-lg border border-gray-300 px-4 py-0 pr-10 text-base transition-[border-color] duration-200",
+            "placeholder:text-[14px] placeholder:text-[#6c757d] focus:border-[#007bff] focus:outline-none focus:shadow-[0_0_0_0.2rem_rgba(0,123,255,0.25)]",
           )}
           placeholder="Pesquise pelo nome ou e-mail do usuário"
           onChange={(e) => onBuscaChange(e.target.value)}
@@ -69,22 +70,17 @@ export default function GerenciarFiltros({
           userList={userList}
           onChange={(value) => onFiltroChange("profile", value)}
         />
-        <button
+        <Button size="lg"
           type="button"
-          className={cn(
-            "flex h-[38px] w-[38px] shrink-0 items-center justify-center self-end rounded-lg",
-            "border-2 border-[#e9ecef] bg-white text-[#6c757d] transition-all duration-200",
-            "hover:border-[#007bff] hover:bg-[#f8f9fa] hover:text-[#007bff]",
-            infoVisivel && "border-[#007bff] text-[#007bff]",
-            "max-md:mt-4 max-md:self-center",
-          )}
+          variante={infoVisivel ? "secondary" : "outline"}
+          className="self-end max-md:mt-4 max-md:self-center"
           onClick={onToggleInfo}
           title="Informações sobre status e permissões"
           aria-label="Mostrar informações"
           aria-pressed={infoVisivel}
         >
-          <Info className="h-5 w-5" aria-hidden="true" />
-        </button>
+          <Info  aria-hidden="true" />
+        </Button>
       </div>
     </div>
   );

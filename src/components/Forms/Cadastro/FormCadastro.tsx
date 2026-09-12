@@ -446,7 +446,8 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
       <div className="mx-auto mt-2 flex w-full max-[1000px]:justify-center">
         <Button
           type="submit"
-          className="w-full max-w-xs bg-brand-orange text-xl font-bold hover:bg-brand-orange max-[1000px]:mx-auto"
+          className="h-10 w-full max-w-[224px] text-xl font-bold"
+          variante="primary"
         >
           Cadastrar
         </Button>

@@ -1,39 +1,44 @@
-import { ButtonHTMLAttributes, forwardRef } from "react";
+"use client";
+
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
+import { type VariantProps } from "class-variance-authority";
+import { forwardRef } from "react";
+import { twMerge } from "tailwind-merge";
 import { cn } from "@/utils/cn";
+import {
+  buttonVariants,
+  resolverVarianteBotao,
+  type VarianteBotao,
+} from "@/lib/estilosBotao";
 
-export type VarianteBotao = "primary" | "ghost" | "danger" | "brand";
+export { buttonVariants } from "@/lib/estilosBotao";
+export type { VarianteBotao } from "@/lib/estilosBotao";
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export type ButtonProps = ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & {
+  /** Compatibilidade com os usos existentes; novos usos podem usar variant. */
   variante?: VarianteBotao;
   larguraTotal?: boolean;
-}
-
-const base =
-  "inline-flex items-center justify-center gap-2 rounded-md px-6 py-3 text-base font-medium transition duration-base disabled:opacity-50 disabled:cursor-not-allowed";
-
-const variantes: Record<VarianteBotao, string> = {
-  primary:
-    "bg-primary text-white hover:bg-primary-hover hover:shadow-md hover:-translate-y-px",
-  brand:
-    "bg-brand-blue text-white hover:bg-brand-blue/90 hover:shadow-md hover:-translate-y-px",
-  ghost:
-    "bg-transparent text-foreground hover:bg-muted-light",
-  danger:
-    "bg-error text-white hover:opacity-90 hover:shadow-md",
 };
 
+// forwardRef mantém a referência funcional no React 18 usado pelo portal.
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variante = "primary", larguraTotal = false, className, type = "button", ...props },
+  { className, variant, variante, size = "lg", larguraTotal = false, type = "button", ...props },
   ref,
 ) {
   return (
-    <button
+    <ButtonPrimitive
       ref={ref}
       type={type}
-      className={cn(base, variantes[variante], larguraTotal && "w-full", className)}
+      data-slot="button"
+      className={(state) => twMerge(cn(
+        buttonVariants({ variant: variant ?? resolverVarianteBotao(variante), size }),
+        larguraTotal && "w-full",
+        typeof className === "function" ? className(state) : className,
+      ))}
       {...props}
     />
   );
 });
 
+export { Button };
 export default Button;

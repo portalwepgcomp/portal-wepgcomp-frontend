@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useEffect, useMemo } from "react";
 import { ArrowLeft, Calendar, Layers } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -13,14 +14,6 @@ import { SessaoTipoEnum } from "@/enums/session";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useSession } from "@/hooks/useSession";
 import { useSessoesQuery } from "@/features/sessoes/hooks/useSessoesQuery";
-import { cn } from "@/utils/cn";
-
-const headerBtnClass = cn(
-  "inline-flex items-center gap-2 rounded-lg border border-line bg-card px-4 py-2.5",
-  "text-sm font-semibold text-foreground shadow-sm transition-all duration-200",
-  "hover:bg-muted-light hover:border-brand-blue hover:text-brand-blue",
-  "[&_svg]:h-4 [&_svg]:w-4",
-);
 
 export default function EditarSessao() {
   const params = useParams();
@@ -54,10 +47,10 @@ export default function EditarSessao() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <button className={headerBtnClass} onClick={() => router.push("/sessoes")}>
+          <Button size="lg" variante="outline" onClick={() => router.push("/sessoes")}>
             <ArrowLeft />
             Voltar para Sessões
-          </button>
+          </Button>
         </div>
 
         {loadingSessao ? (

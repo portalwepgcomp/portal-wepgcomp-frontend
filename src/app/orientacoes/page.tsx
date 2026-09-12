@@ -5,20 +5,18 @@ import OrientacoesAutores from "@/components/Orientacoes/OrientacoesAutores";
 import OrientacoesAvaliadores from "@/components/Orientacoes/OrientacoesAvaliadores";
 import Banner from "@/components/UI/Banner";
 import { useOrientacao } from "@/hooks/useOrientacao";
-import { cn } from "@/utils/cn";
+import Button from "@/components/UI/Button";
 import { useEffect, useState } from "react";
 
-const tabs = [
+const abas = [
   { id: 0, label: "Autores" },
   { id: 1, label: "Avaliadores" },
   { id: 2, label: "Audiência" },
 ] as const;
 
-const tabBase =
-  "flex w-36 sm:w-44 cursor-pointer items-center justify-center rounded-xl border-2 border-brand-orange py-2 text-sm sm:text-base font-semibold tracking-wide shadow-sm transition duration-200";
 
 export default function Orientacoes() {
-  const [setion, setSetion] = useState<number>(0);
+  const [secao, definirSecao] = useState<number>(0);
   const { getOrientacoes } = useOrientacao();
 
   useEffect(() => {
@@ -30,28 +28,21 @@ export default function Orientacoes() {
       <Banner title="Orientações" />
       <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 flex flex-col gap-6">
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              className={cn(
-                tabBase,
-                setion === tab.id
-                  ? "bg-brand-orange text-white shadow-sm"
-                  : "bg-white text-brand-orange hover:bg-orange-50",
-              )}
-              onClick={() => setSetion(tab.id)}
-              onKeyDown={(e) => e.key === "Enter" && setSetion(tab.id)}
-              role="button"
-              tabIndex={0}
+          {abas.map((aba) => (
+            <Button size="lg"
+              key={aba.id}
+              variante={secao === aba.id ? "secondary" : "outline"}
+              aria-pressed={secao === aba.id}
+              onClick={() => definirSecao(aba.id)}
             >
-              {tab.label}
-            </div>
+              {aba.label}
+            </Button>
           ))}
         </div>
         <div>
-          {setion === 0 && <OrientacoesAutores />}
-          {setion === 1 && <OrientacoesAvaliadores />}
-          {setion === 2 && <OrientacoesAudiencia />}
+          {secao === 0 && <OrientacoesAutores />}
+          {secao === 1 && <OrientacoesAvaliadores />}
+          {secao === 2 && <OrientacoesAudiencia />}
         </div>
       </div>
     </div>

@@ -64,6 +64,14 @@ export const userApi = {
     return data;
   },
 
+  confirmEmail: async (token: string) => {
+    const { data } = await instance.post(`${baseUrl}/confirm-email`, null, {
+      params: { token },
+    });
+
+    return data;
+  },
+
   createProfessorByAdmin: async (body: CreateProfessorByAdminParams) => {
     const { data } = await instance.post(`${baseUrl}/create-professor`, body);
 

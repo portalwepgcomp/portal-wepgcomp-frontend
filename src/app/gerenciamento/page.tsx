@@ -8,7 +8,7 @@ const Index = () => {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f0f3f7] to-[#e8eef5]">
+    <div className="min-h-screen bg-background">
       <header className="border-b border-line bg-card px-8 py-12 text-center shadow-sm">
         <p className="m-0 text-xl font-medium text-foreground">
           Painel Administrativo
@@ -17,7 +17,7 @@ const Index = () => {
 
       <main className="mx-auto max-w-[1280px] px-8 py-12">
         <div className="mx-auto grid max-w-[1200px] gap-8 md:grid-cols-3">
-          <div className="rounded-lg bg-card p-6 text-center shadow-md transition hover:-translate-y-1 hover:shadow-lg">
+          <div className="flex h-full flex-col rounded-lg bg-card p-6 text-center shadow-md transition hover:-translate-y-1 hover:shadow-lg">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-light">
               <Mail className="h-8 w-8 text-primary" />
             </div>
@@ -27,7 +27,7 @@ const Index = () => {
             <p className="mb-8 text-sm text-muted">
               Envie mensagens para grupos específicos de usuários do sistema
             </p>
-            <Button
+            <Button size="lg" variante="primary" className="mt-auto"
               larguraTotal
               onClick={() => router.push("/gerenciamento/enviar-email")}
             >
@@ -35,7 +35,7 @@ const Index = () => {
             </Button>
           </div>
 
-          <div className="rounded-lg bg-card p-6 text-center shadow-md transition hover:-translate-y-1 hover:shadow-lg">
+          <div className="flex h-full flex-col rounded-lg bg-card p-6 text-center shadow-md transition hover:-translate-y-1 hover:shadow-lg">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary-light">
               <GraduationCap className="h-8 w-8 text-primary" />
             </div>
@@ -43,7 +43,7 @@ const Index = () => {
               Professores
             </h3>
             <p className="mb-8 text-sm text-muted">Cadastre novos professores</p>
-            <Button
+            <Button size="lg" variante="primary" className="mt-auto"
               larguraTotal
               onClick={() => router.push("/gerenciamento/professores")}
             >

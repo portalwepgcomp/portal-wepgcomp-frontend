@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/UI/Button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Info, UserPlus } from "lucide-react";
@@ -185,23 +186,22 @@ export function FormCadastroProfessor({
 
       {showButtons && (
         <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
-          <button
+          <Button size="lg" variante="primary"
             type="submit"
             disabled={loadingCreateProfessor}
-            className="inline-flex h-11 items-center gap-2 rounded-lg bg-brand-orange px-8 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loadingCreateProfessor ? (
               <>
-                <Spinner className="h-4 w-4" colorClassName="text-white" />
+                <Spinner  colorClassName="text-white" />
                 <span>Cadastrando...</span>
               </>
             ) : (
               <>
-                <UserPlus className="h-5 w-5" />
+                <UserPlus  />
                 <span>Cadastrar Professor</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       )}
     </form>
