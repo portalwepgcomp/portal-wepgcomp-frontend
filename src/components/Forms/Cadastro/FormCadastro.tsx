@@ -50,7 +50,7 @@ const formCadastroSchema = z
       ctx.addIssue({
         path: ["matricula"],
         message:
-          data.perfil === "ouvinte"
+          data.perfil === "ouvinte" && data.subperfil === "outro"
             ? "CPF é obrigatório."
             : "Matrícula é obrigatória.",
         code: z.ZodIssueCode.custom,
@@ -309,17 +309,34 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
           className="mb-1"
         >
           <div className="flex flex-wrap gap-4">
-            {(["doutorando", "mestrando", "graduando", "outro"] as const).map(
+            {([
+              {
+               "value": "doutorando",
+               "label": "Doutorando (PGCOMP)"
+              },
+              {
+                "value": "mestrando",
+                "label": "Mestrando (PGCOMP)"
+              },
+              {
+                "value": "graduando",
+                "label": "Graduando (IC/UFBA)"
+              },
+              {
+                "value": "outro",
+                "label": "Outro"
+              }
+              ] as const).map(
               (tipo) => (
-                <label key={tipo} className={radioLabel} htmlFor={`sub-${tipo}`}>
+                <label key={tipo.value} className={radioLabel} htmlFor={`sub-${tipo.value}`}>
                   <input
                     type="radio"
                     className="h-4 w-4 accent-brand-orange"
-                    id={`sub-${tipo}`}
-                    value={tipo}
+                    id={`sub-${tipo.value}`}
+                    value={tipo.value}
                     {...register("subperfil")}
                   />
-                  {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
+                  {tipo.label}
                 </label>
               ),
             )}
@@ -343,7 +360,7 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
           type="text"
           id="matricula"
           placeholder={
-            perfil === "ouvinte"
+            perfil === "ouvinte" && subperfil === "outro"
               ? "000.000.000-00"
               : perfil === "professor"
                 ? "Insira sua matrícula SIAPE"
