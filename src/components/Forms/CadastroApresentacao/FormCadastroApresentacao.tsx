@@ -104,6 +104,7 @@ export function FormCadastroApresentacao() {
             id="titulo"
             placeholder="Ex.: Aplicação de Aprendizado Profundo no Diagnóstico Médico"
             className="text-sm rounded-lg"
+            maxLength={300}
             {...register("titulo")}
           />
         </Campo>
@@ -122,6 +123,7 @@ export function FormCadastroApresentacao() {
             rows={5}
             placeholder="Descreva o contexto, objetivos, metodologia e resultados esperados da sua pesquisa..."
             className={cn("text-sm rounded-lg leading-relaxed")}
+            maxLength={800}
             {...register("resumo")}
             onInput={aoMudarTextarea}
           />
