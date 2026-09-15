@@ -64,9 +64,10 @@ export default function PresentationCard({
       return;
     }
     if (presentationBookmark && presentationBookmark.bookmarked) {
-      deletePresentationBookmark(presentationBookmarkData);
       if (onDelete) {
         onDelete();
+      } else {
+        deletePresentationBookmark(presentationBookmarkData);
       }
     } else {
       postPresentationBookmark(presentationBookmarkData);
