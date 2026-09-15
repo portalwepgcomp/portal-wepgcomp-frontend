@@ -41,15 +41,7 @@ const realizacaoLogos: Logo[] = [
   },
 ];
 
-const apoioLogos: Logo[] = [
-  {
-    src: "/assets/images/WEX_Logo_Red_Vector.svg",
-    alt: "WEX Logo",
-    width: 150,
-    height: 150,
-    priority: true,
-  },
-];
+
 
 function LogosGrupo({ logos }: { logos: Logo[] }) {
   return (
@@ -74,20 +66,20 @@ function LogosGrupo({ logos }: { logos: Logo[] }) {
 export default function Realizacao() {
   return (
     <div className="flex w-full flex-col items-center gap-8 border-t-2 border-brand-accent bg-[#fafafa] py-12 pb-6 max-md:px-4 max-md:py-8">
-      <div className="flex w-[90%] flex-wrap items-start justify-between gap-16 max-md:flex-col max-md:items-center max-md:gap-12">
+      <div className="flex w-[90%] flex-wrap items-start justify-center gap-16 max-md:flex-col max-md:items-center max-md:gap-12">
         <div className="flex flex-col items-center gap-6">
           <h3 className="relative mb-2 text-2xl font-bold uppercase tracking-wide text-brand-navy after:mx-auto after:mt-2 after:block after:h-[3px] after:w-10 after:rounded after:bg-brand-accent max-md:text-[1.3rem]">
             Realização
           </h3>
           <LogosGrupo logos={realizacaoLogos} />
         </div>
-
-        <div className="flex flex-col items-center gap-6">
+        {/* Manter comentado enquanto não existir outro apoiador */}
+        {/* <div className="flex flex-col items-center gap-6">
           <h3 className="relative mb-2 text-2xl font-bold uppercase tracking-wide text-brand-navy after:mx-auto after:mt-2 after:block after:h-[3px] after:w-10 after:rounded after:bg-brand-accent max-md:text-[1.3rem]">
             Apoio
           </h3>
           <LogosGrupo logos={apoioLogos} />
-        </div>
+        </div> */}
       </div>
     </div>
   );
