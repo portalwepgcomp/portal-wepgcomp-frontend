@@ -145,7 +145,7 @@ export default function GerenciarUsuarioAcoes({
         key="promote-admin"
         rotulo="Promover a Admin"
         title="Promover a Admin"
-        variante="secondary"
+        variante="successLight"
         onClick={() => onPromoverAdmin(usuario.id)}
         disabled={desabilitado}
       />,
