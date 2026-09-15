@@ -37,6 +37,7 @@ export default function ListaFavoritos() {
               <PresentationCard
                 key={item.id}
                 id={item.id}
+                submissionId={item.submission?.id}
                 title={item.submission?.title ?? ""}
                 subtitle={item.submission?.abstract ?? ""}
                 name={item.submission?.mainAuthor?.name ?? ""}

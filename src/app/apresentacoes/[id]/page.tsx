@@ -5,6 +5,7 @@ import Button from "@/components/UI/Button";
 import Spinner from "@/components/UI/Spinner";
 import { useAuth } from "@/hooks/useAuth";
 import { useSweetAlert } from "@/hooks/useAlert";
+import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { usePresentation } from "@/hooks/usePresentation";
 import { obterClassesBotao } from "@/lib/estilosBotao";
 import { registrarErro } from "@/utils/logError";
@@ -32,6 +33,7 @@ export default function ApresentacaoDetalhes() {
     } = usePresentation();
 
     const { showAlert } = useSweetAlert();
+    const { baixarPdf, baixandoPdf } = useApresentacaoPdf();
     const [presentation, setPresentation] = useState<Presentation | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -213,43 +215,11 @@ export default function ApresentacaoDetalhes() {
         }
     };
 
-    const handleDownloadPdf = async () => {
-        const pdfFile = presentation?.submission?.pdfFile;
-
-        if (!pdfFile) {
-            showAlert({
-                icon: "warning",
-                title: "Arquivo não disponível",
-                text: "Esta apresentação não possui arquivo PDF cadastrado.",
-            });
-            return;
-        }
-
-        try {
-            const url = `${process.env.NEXT_PUBLIC_API_URL}/uploads/${pdfFile}`;
-
-            const response = await fetch(url, { method: 'HEAD' });
-
-            if (!response.ok) {
-                showAlert({
-                    icon: "warning",
-                    title: "Arquivo não encontrado",
-                    text: "O arquivo PDF desta apresentação não está mais disponível no servidor.",
-                });
-                return;
-            }
-
-            window.open(url, '_blank', 'noopener,noreferrer');
-
-        } catch (err) {
-            registrarErro("Erro ao verificar arquivo", err);
-            showAlert({
-                icon: "error",
-                title: "Erro ao baixar",
-                text: "Não foi possível verificar a disponibilidade do arquivo. Tente novamente mais tarde.",
-            });
-        }
-    };
+    const handleDownloadPdf = () =>
+        baixarPdf(
+            presentation?.submission?.id,
+            presentation?.submission?.pdfFile,
+        );
 
     if (loading) {
         return (
@@ -309,7 +279,7 @@ export default function ApresentacaoDetalhes() {
                             variante="secondary"
                             className="max-md:w-full"
                             onClick={handleDownloadPdf}
-                            disabled={!presentation.submission?.pdfFile}
+                            disabled={baixandoPdf || !presentation.submission?.pdfFile}
                         >
                             <Download  />
                             Baixar
