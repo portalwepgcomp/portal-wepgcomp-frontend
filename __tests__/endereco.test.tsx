@@ -34,9 +34,9 @@ describe("Endereço do evento", () => {
 
     expect(directionsUrl).toContain(expectedMapsQuery);
     expect(directionsUrl).toContain("hl=pt-BR");
-    expect(mapUrl).toContain("openstreetmap.org/export/embed.html");
-    expect(mapUrl).toContain("marker=-12.9980929,-38.5072076");
-    expect(mapUrl).not.toContain("google.com/maps/embed");
+    expect(mapUrl).toContain("google.com/maps/embed");
+    expect(mapUrl).toContain("-12.9980929,-38.5072076");
+    expect(mapUrl).not.toContain(expectedLocation);
     expect(map).toHaveAttribute("loading", "eager");
     expect(directionsLink).toHaveAttribute("target", "_blank");
     expect(directionsLink).toHaveAttribute(

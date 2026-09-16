@@ -9,7 +9,7 @@ const MAPS_QUERY = encodeURIComponent(
   `${EVENT_LOCATION_NAME} - UFBA - ${EVENT_LOCATION_ADDRESS}`,
 );
 const EVENT_MAP_URL =
-  "https://www.openstreetmap.org/export/embed.html?bbox=-38.5112076%2C-13.0020929%2C-38.5032076%2C-12.9940929&layer=mapnik&marker=-12.9980929%2C-38.5072076";
+  "https://www.google.com/maps/embed?hl=pt-BR&origin=mfe&pb=!1m3!2m1!1s-12.9980929%2C-38.5072076!6i17";
 
 export default function Endereco() {
   const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${MAPS_QUERY}`;
