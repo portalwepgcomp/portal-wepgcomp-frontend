@@ -10,8 +10,8 @@ const MAPS_QUERY = encodeURIComponent(
 );
 
 export default function Endereco() {
-  const mapsEmbedUrl = `https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1s${MAPS_QUERY}!6i16`;
-  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&query=${MAPS_QUERY}`;
+  const mapsEmbedUrl = `https://www.google.com/maps/embed?hl=pt-BR&origin=mfe&pb=!1m3!2m1!1s${MAPS_QUERY}!6i16`;
+  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${MAPS_QUERY}`;
 
   return (
     <div className="flex w-full flex-col items-start gap-4">

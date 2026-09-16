@@ -38,6 +38,7 @@ describe("Endereço do evento", () => {
       "src",
       expect.stringMatching(/^https:\/\/www\.google\.com\/maps\/embed\?/),
     );
+    expect(map).toHaveAttribute("src", expect.stringContaining("hl=pt-BR"));
     expect(map).toHaveAttribute("loading", "eager");
     expect(directionsLink).toHaveAttribute("target", "_blank");
     expect(directionsLink).toHaveAttribute(
