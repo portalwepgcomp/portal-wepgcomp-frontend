@@ -18,6 +18,10 @@ const buttonStyles = cva(
         destructive:
           "bg-red-700 text-white hover:bg-red-800 focus-visible:border-red-700 focus-visible:ring-red-700/50",
         link: "text-blue-800 underline-offset-4 hover:underline",
+        activate1:
+          "bg-green-600 text-white hover:bg-green-700 px-10 focus-visible:border-green-600 focus-visible:ring-green-600/50",
+        activate2:
+          "border border-green-600 bg-transparent text-green-700 hover:bg-green-50 px-10 focus-visible:border-green-600 focus-visible:ring-green-600/50",
       },
       size: {
         default:
@@ -46,7 +50,7 @@ export function buttonVariants(props?: Parameters<typeof buttonStyles>[0]) {
 }
 
 export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
-export type VarianteBotao = "primary" | "secondary" | "outline" | "danger" | "ghost";
+export type VarianteBotao = "primary" | "secondary" | "outline" | "danger" | "ghost" | "activate1" | "activate2";
 
 const variantes: Record<VarianteBotao, ButtonVariant> = {
   primary: "default",
@@ -54,6 +58,8 @@ const variantes: Record<VarianteBotao, ButtonVariant> = {
   outline: "outline",
   danger: "destructive",
   ghost: "ghost",
+  activate1: "activate1",
+  activate2: "activate2",
 };
 
 export function resolverVarianteBotao(variante: VarianteBotao = "primary"): ButtonVariant {
