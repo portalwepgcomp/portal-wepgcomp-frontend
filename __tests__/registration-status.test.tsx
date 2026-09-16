@@ -43,7 +43,22 @@ describe("status das inscrições", () => {
     expect(isRegistrationOpen("true")).toBe(true);
   });
 
-  it.each([undefined, "", "false", "TRUE", " true ", "1", "sim"])(
+  it("mantém as inscrições fechadas quando a variável não está definida", () => {
+    const previousValue = process.env.REGISTRATION_OPEN;
+    delete process.env.REGISTRATION_OPEN;
+
+    try {
+      expect(isRegistrationOpen()).toBe(false);
+    } finally {
+      if (previousValue === undefined) {
+        delete process.env.REGISTRATION_OPEN;
+      } else {
+        process.env.REGISTRATION_OPEN = previousValue;
+      }
+    }
+  });
+
+  it.each(["", "false", "TRUE", " true ", "1", "sim"])(
     "mantém as inscrições fechadas para o valor %s",
     (value) => {
       expect(isRegistrationOpen(value)).toBe(false);
