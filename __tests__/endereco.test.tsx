@@ -34,6 +34,11 @@ describe("Endereço do evento", () => {
 
     expect(directionsUrl).toContain(expectedMapsQuery);
     expect(mapUrl).toContain(expectedMapsQuery);
+    expect(map).toHaveAttribute(
+      "src",
+      expect.stringMatching(/^https:\/\/www\.google\.com\/maps\/embed\?/),
+    );
+    expect(map).toHaveAttribute("loading", "eager");
     expect(directionsLink).toHaveAttribute("target", "_blank");
     expect(directionsLink).toHaveAttribute(
       "rel",

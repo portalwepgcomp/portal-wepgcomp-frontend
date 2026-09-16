@@ -10,7 +10,7 @@ const MAPS_QUERY = encodeURIComponent(
 );
 
 export default function Endereco() {
-  const mapsEmbedUrl = `https://maps.google.com/maps?q=${MAPS_QUERY}&z=16&output=embed`;
+  const mapsEmbedUrl = `https://www.google.com/maps/embed?origin=mfe&pb=!1m3!2m1!1s${MAPS_QUERY}!6i16`;
   const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&query=${MAPS_QUERY}`;
 
   return (
@@ -60,7 +60,7 @@ export default function Endereco() {
           title="Mapa do Local do Evento"
           src={mapsEmbedUrl}
           className="h-full w-full border-0"
-          loading="lazy"
+          loading="eager"
           allowFullScreen
           referrerPolicy="no-referrer-when-downgrade"
         />
