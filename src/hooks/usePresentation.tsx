@@ -6,7 +6,7 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { BookmarkedPresentations } from "@/models/presentatio-bookmarks";
+import { useQueryClient } from "@tanstack/react-query";
 import { presentationApi } from "@/services/presentation";
 import {
   Presentation,
@@ -21,14 +21,10 @@ interface PresentationProps {
 interface PresentationProviderData {
   presentationList: Presentation[];
   presentationBookmark: PresentationBookmark;
-  presentationBookmarks: BookmarkedPresentations;
   getPresentationAll: (eventEditionId: string) => Promise<void>;
   getPresentationBookmark: (
     presentationBookmark: PresentationBookmarkRegister
   ) => Promise<PresentationBookmark>;
-  getPresentationBookmarks: () => Promise<
-    BookmarkedPresentations | { bookmarked: boolean }
-  >;
   postPresentationBookmark: (
     presentationBookmark: PresentationBookmarkRegister
   ) => Promise<void>;
@@ -48,10 +44,7 @@ export const PresentationProvider = ({ children }: PresentationProps) => {
   const [presentationList, setpresentationList] = useState<Presentation[]>([]);
   const [presentationBookmark, setpresentationBookmark] =
     useState<PresentationBookmark>({ bookmarked: false });
-  const [presentationBookmarks, setPresentationbookmarks] =
-    useState<BookmarkedPresentations>({
-      bookmarkedPresentations: [],
-    });
+  const queryClient = useQueryClient();
 
   const getPresentationById = useCallback(
     async (id: string): Promise<Presentation> => {
@@ -89,58 +82,43 @@ export const PresentationProvider = ({ children }: PresentationProps) => {
     []
   );
 
-  const getPresentationBookmarks = useCallback(async () => {
-    try {
-      const response = await presentationApi.getPresentationBookmarks();
-      setPresentationbookmarks(response);
-      return response;
-    } catch {
-      const fallback = { bookmarked: false };
-      setpresentationBookmark(fallback);
-      return fallback;
-    }
-  }, []);
-
   const postPresentationBookmark = useCallback(
     async (presentationBookmark: PresentationBookmarkRegister) => {
       try {
         await presentationApi.postPresentationBookmark(presentationBookmark);
+        await queryClient.invalidateQueries({ queryKey: ["presentationBookmarks"] });
       } catch {}
     },
-    []
+    [queryClient]
   );
 
   const deletePresentationBookmark = useCallback(
     async (presentationBookmark: PresentationBookmarkRegister) => {
       try {
         await presentationApi.deletePresentationBookmark(presentationBookmark);
-        await getPresentationBookmarks();
+        await queryClient.invalidateQueries({ queryKey: ["presentationBookmarks"] });
       } catch {}
     },
-    [getPresentationBookmarks]
+    [queryClient]
   );
 
   const contextValue = useMemo(
     () => ({
       presentationList,
       presentationBookmark,
-      presentationBookmarks,
       getPresentationAll,
       postPresentationBookmark,
       deletePresentationBookmark,
       getPresentationBookmark,
-      getPresentationBookmarks,
       getPresentationById,
     }),
     [
       presentationList,
       presentationBookmark,
-      presentationBookmarks,
       getPresentationAll,
       postPresentationBookmark,
       deletePresentationBookmark,
       getPresentationBookmark,
-      getPresentationBookmarks,
       getPresentationById,
     ]
   );
