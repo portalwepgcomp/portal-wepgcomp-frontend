@@ -313,41 +313,41 @@ export function FormCadastro({
           className="mb-1"
         >
           <div className="flex flex-wrap gap-4">
-            {([
-              {
-               "value": "doutorando",
-               "label": "Doutorando (PGCOMP)"
-              },
-              {
-                "value": "mestrando",
-                "label": "Mestrando (PGCOMP)"
-              },
-              {
-                "value": "graduando",
-                "label": "Graduando (IC/UFBA)"
-              },
-              {
-                "value": "outro",
-                "label": "Outro"
-              }
-              ] as const).map(
-              (tipo) => (
-                <label
-                  key={tipo.value}
-                  className={radioLabel}
-                  htmlFor={`sub-${tipo.value}`}
-                >
-                  <input
-                    type="radio"
-                    className="h-4 w-4 accent-brand-orange"
-                    id={`sub-${tipo.value}`}
-                    value={tipo.value}
-                    {...register("subperfil")}
-                  />
-                  {tipo.label}
-                </label>
-              ),
-            )}
+            {(
+              [
+                {
+                  value: "doutorando",
+                  label: "Doutorando (PGCOMP)",
+                },
+                {
+                  value: "mestrando",
+                  label: "Mestrando (PGCOMP)",
+                },
+                {
+                  value: "graduando",
+                  label: "Graduando (IC/UFBA)",
+                },
+                {
+                  value: "outro",
+                  label: "Outro",
+                },
+              ] as const
+            ).map((tipo) => (
+              <label
+                key={tipo.value}
+                className={radioLabel}
+                htmlFor={`sub-${tipo.value}`}
+              >
+                <input
+                  type="radio"
+                  className="h-4 w-4 accent-brand-orange"
+                  id={`sub-${tipo.value}`}
+                  value={tipo.value}
+                  {...register("subperfil")}
+                />
+                {tipo.label}
+              </label>
+            ))}
           </div>
         </Campo>
       )}

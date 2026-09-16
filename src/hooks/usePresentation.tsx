@@ -86,7 +86,9 @@ export const PresentationProvider = ({ children }: PresentationProps) => {
     async (presentationBookmark: PresentationBookmarkRegister) => {
       try {
         await presentationApi.postPresentationBookmark(presentationBookmark);
-        await queryClient.invalidateQueries({ queryKey: ["presentationBookmarks"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["presentationBookmarks"],
+        });
       } catch {}
     },
     [queryClient],
@@ -96,7 +98,9 @@ export const PresentationProvider = ({ children }: PresentationProps) => {
     async (presentationBookmark: PresentationBookmarkRegister) => {
       try {
         await presentationApi.deletePresentationBookmark(presentationBookmark);
-        await queryClient.invalidateQueries({ queryKey: ["presentationBookmarks"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["presentationBookmarks"],
+        });
       } catch {}
     },
     [queryClient],

@@ -49,13 +49,16 @@ export const presentationApi = {
     signal?: AbortSignal,
   ): Promise<BookmarkedPresentations> => {
     if (!eventEditionId) return { bookmarkedPresentations: [] };
-    const { data } = await instance.get<BookmarkedPresentations>(`${baseUrl}/bookmarks`, {
-      params: { eventEditionId },
-      signal,
-      headers: {
-        "Content-Type": "application/json",
+    const { data } = await instance.get<BookmarkedPresentations>(
+      `${baseUrl}/bookmarks`,
+      {
+        params: { eventEditionId },
+        signal,
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     // A API atual ainda pode devolver favoritos de outras edições (issue API #2).
     return {
