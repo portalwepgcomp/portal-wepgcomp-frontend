@@ -18,7 +18,11 @@ export default function CriteriosPage() {
 
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <Button size="lg" variante="outline" onClick={() => router.push("/gerenciamento")}>
+          <Button
+            size="lg"
+            variante="outline"
+            onClick={() => router.push("/gerenciamento")}
+          >
             <ArrowLeft />
             Voltar para Gerenciamento
           </Button>
@@ -36,7 +40,9 @@ export default function CriteriosPage() {
                   Critérios de Avaliação
                 </h1>
                 <p className="mt-1 text-sm text-muted">
-                  Edição: <strong>{Edicao?.name || "WEPGCOMP"}</strong> — Defina os 5 quesitos que compõem o formulário de notas dos avaliadores.
+                  Edição: <strong>{Edicao?.name || "WEPGCOMP"}</strong> — Defina
+                  os 5 quesitos que compõem o formulário de notas dos
+                  avaliadores.
                 </p>
               </div>
             </div>
@@ -44,7 +50,10 @@ export default function CriteriosPage() {
             <div className="mt-5 flex items-start gap-3 rounded-xl bg-amber-50/70 p-4 text-amber-900 border border-amber-200/60">
               <HelpCircle className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
               <p className="text-sm leading-relaxed">
-                Cada critério cadastrado abaixo será avaliado pela banca examinadora através de uma escala de 1 a 5 estrelas. Os títulos e enunciados devem ser claros para orientar a pontuação de cada apresentação.
+                Cada critério cadastrado abaixo será avaliado pela banca
+                examinadora através de uma escala de 1 a 5 estrelas. Os títulos
+                e enunciados devem ser claros para orientar a pontuação de cada
+                apresentação.
               </p>
             </div>
           </div>

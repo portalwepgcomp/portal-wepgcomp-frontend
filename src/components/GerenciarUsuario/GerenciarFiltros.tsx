@@ -70,7 +70,8 @@ export default function GerenciarFiltros({
           userList={userList}
           onChange={(value) => onFiltroChange("profile", value)}
         />
-        <Button size="lg"
+        <Button
+          size="lg"
           type="button"
           variante={infoVisivel ? "secondary" : "outline"}
           className="self-end max-md:mt-4 max-md:self-center"
@@ -79,7 +80,7 @@ export default function GerenciarFiltros({
           aria-label="Mostrar informações"
           aria-pressed={infoVisivel}
         >
-          <Info  aria-hidden="true" />
+          <Info aria-hidden="true" />
         </Button>
       </div>
     </div>

@@ -7,7 +7,9 @@ interface TokenValidationWrapperProps {
   children: React.ReactNode;
 }
 
-export const TokenValidationWrapper = ({ children }: TokenValidationWrapperProps) => {
+export const TokenValidationWrapper = ({
+  children,
+}: TokenValidationWrapperProps) => {
   const { isValidatingToken } = useAuth();
 
   if (isValidatingToken) {

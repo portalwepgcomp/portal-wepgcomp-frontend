@@ -19,7 +19,7 @@ interface CommitterProviderData {
 }
 
 export const CommitteerContext = createContext<CommitterProviderData>(
-  {} as CommitterProviderData
+  {} as CommitterProviderData,
 );
 
 export const useCommittee = () => useContext(CommitteerContext);
@@ -27,27 +27,31 @@ export const useCommittee = () => useContext(CommitteerContext);
 export const CommitterProvider = ({ children }: CommitterProps) => {
   const [committerList, setcommitterList] = useState<Committer[]>([]);
 
-  const getCommitterAll = useCallback(async (eventEditionId?: string): Promise<Committer[]> => {
-    if (!eventEditionId) {
-      setcommitterList([]);
-      return [];
-    }
-    try {
-      const response = await committerMembersApi.getAllMembers(eventEditionId);
-      setcommitterList(response || []);
-      return response || [];
-    } catch {
-      setcommitterList([]);
-      return [];
-    }
-  }, []);
+  const getCommitterAll = useCallback(
+    async (eventEditionId?: string): Promise<Committer[]> => {
+      if (!eventEditionId) {
+        setcommitterList([]);
+        return [];
+      }
+      try {
+        const response =
+          await committerMembersApi.getAllMembers(eventEditionId);
+        setcommitterList(response || []);
+        return response || [];
+      } catch {
+        setcommitterList([]);
+        return [];
+      }
+    },
+    [],
+  );
 
   const contextValue = useMemo(
     () => ({
       committerList,
       getCommitterAll,
     }),
-    [committerList, getCommitterAll]
+    [committerList, getCommitterAll],
   );
 
   return (

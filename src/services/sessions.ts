@@ -1,6 +1,9 @@
-"use client"
-import axiosInstance from '@/utils/api';
-import { PresentationBlockParams, SwapMultiplePresentationsOnSession } from "@/models/session";
+"use client";
+import axiosInstance from "@/utils/api";
+import {
+  PresentationBlockParams,
+  SwapMultiplePresentationsOnSession,
+} from "@/models/session";
 
 const baseUrl = "/presentation-block";
 const baseUrlRoom = "/room";
@@ -8,52 +11,69 @@ const baseUrlRoom = "/room";
 const instance = axiosInstance;
 
 export const sessionApi = {
-    listSessions: async (idEdition: string) => {
-        const { data } = await instance.get(`${baseUrl}/event-edition/${idEdition}`);
+  listSessions: async (idEdition: string) => {
+    const { data } = await instance.get(
+      `${baseUrl}/event-edition/${idEdition}`,
+    );
 
-        return data;
-    },
+    return data;
+  },
 
-    getSessionById: async (idSession: string) => {
-        const { data } = await instance.get(`${baseUrl}/${idSession}`);
+  getSessionById: async (idSession: string) => {
+    const { data } = await instance.get(`${baseUrl}/${idSession}`);
 
-        return data;
-    },
+    return data;
+  },
 
-    createSession: async (body: PresentationBlockParams) => {
-        const { data } = await instance.post(`${baseUrl}`, body);
+  createSession: async (body: PresentationBlockParams) => {
+    const { data } = await instance.post(`${baseUrl}`, body);
 
-        return data;
-    },
+    return data;
+  },
 
-    updateSessionById: async (idSession: string, body: PresentationBlockParams) => {
-        const { data } = await instance.patch(`${baseUrl}/${idSession}`, body);
+  updateSessionById: async (
+    idSession: string,
+    body: PresentationBlockParams,
+  ) => {
+    const { data } = await instance.patch(`${baseUrl}/${idSession}`, body);
 
-        return data;
-    },
+    return data;
+  },
 
-    deleteSessionById: async (idSession: string) => {
-        const { data } = await instance.delete(`${baseUrl}/${idSession}`);
+  deleteSessionById: async (idSession: string) => {
+    const { data } = await instance.delete(`${baseUrl}/${idSession}`);
 
-        return data;
-    },
+    return data;
+  },
 
-    listRooms: async (idEdition: string) => {
-        const { data } = await instance.get(`${baseUrlRoom}/event-edition/${idEdition}`);
+  listRooms: async (idEdition: string) => {
+    const { data } = await instance.get(
+      `${baseUrlRoom}/event-edition/${idEdition}`,
+    );
 
-        return data;
-    },
+    return data;
+  },
 
-    swapPresentationsOnSession: async ( idSession: string,
-        body: SwapMultiplePresentationsOnSession) => {
-        const { data } = await instance.patch(`${baseUrl}/${idSession}/presentations/swap`, body);
+  swapPresentationsOnSession: async (
+    idSession: string,
+    body: SwapMultiplePresentationsOnSession,
+  ) => {
+    const { data } = await instance.patch(
+      `${baseUrl}/${idSession}/presentations/swap`,
+      body,
+    );
 
-        return data;
-    },
+    return data;
+  },
 
-    listPresentionBlockByPanelist: async (idEventEdition: string, userIdOfPanelist: string) => {
-        const { data } = await instance.get(`${baseUrl}?eventEditionId=${idEventEdition}&userIdOfPanelist=${userIdOfPanelist}`)
-       
-        return data;
-    }
-}
+  listPresentionBlockByPanelist: async (
+    idEventEdition: string,
+    userIdOfPanelist: string,
+  ) => {
+    const { data } = await instance.get(
+      `${baseUrl}?eventEditionId=${idEventEdition}&userIdOfPanelist=${userIdOfPanelist}`,
+    );
+
+    return data;
+  },
+};

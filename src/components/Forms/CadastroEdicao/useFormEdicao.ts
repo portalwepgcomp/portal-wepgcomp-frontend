@@ -10,10 +10,7 @@ import { UserContext } from "@/hooks/useUsers";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useCommittee } from "@/hooks/useCommittee";
 import { registrarErro } from "@/utils/logError";
-import {
-  formEdicaoSchema,
-  type FormEdicaoSchema,
-} from "./formEdicaoSchema";
+import { formEdicaoSchema, type FormEdicaoSchema } from "./formEdicaoSchema";
 import { Edicao, EdicaoParams } from "@/models/edicao";
 import { OptionType } from "@/models/forms";
 

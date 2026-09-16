@@ -1,8 +1,8 @@
-.rating{
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
+.rating {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
 }
-.star{
-    cursor: pointer;
+.star {
+  cursor: pointer;
 }

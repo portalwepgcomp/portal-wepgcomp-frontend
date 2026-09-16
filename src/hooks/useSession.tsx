@@ -32,23 +32,26 @@ interface SessionProviderData {
   getSessionById: (idSession: string) => Promise<void>;
   createSession: (
     eventEditionId: string,
-    body: PresentationBlockParams
+    body: PresentationBlockParams,
   ) => Promise<boolean>;
   updateSession: (
     idSession: string,
     eventEditionId: string,
-    body: PresentationBlockParams
+    body: PresentationBlockParams,
   ) => Promise<boolean>;
-  deleteSession: (idSession: string, eventEditionId?: string) => Promise<boolean>;
+  deleteSession: (
+    idSession: string,
+    eventEditionId?: string,
+  ) => Promise<boolean>;
   swapPresentationsOnSession: (
     idSession: string,
     eventEditionId?: string,
-    bodies?: SwapPresentationsOnSession[]
+    bodies?: SwapPresentationsOnSession[],
   ) => Promise<boolean>;
 }
 
 export const SessionContext = createContext<SessionProviderData>(
-  {} as SessionProviderData
+  {} as SessionProviderData,
 );
 
 export const useSession = () => useContext(SessionContext);
@@ -63,7 +66,7 @@ export const SessionProvider = ({ children }: SessionProps) => {
 
   const invalidarSessoes = useCallback(
     () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
-    [queryClient]
+    [queryClient],
   );
 
   const getSessionById = useCallback(async (idSession: string) => {
@@ -99,7 +102,7 @@ export const SessionProvider = ({ children }: SessionProps) => {
           title: "Erro ao cadastrar sessão",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!"
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -108,14 +111,14 @@ export const SessionProvider = ({ children }: SessionProps) => {
         setLoadingSessao(false);
       }
     },
-    [invalidarSessoes, showAlert]
+    [invalidarSessoes, showAlert],
   );
 
   const updateSession = useCallback(
     async (
       idSession: string,
       _eventEditionId: string,
-      body: PresentationBlockParams
+      body: PresentationBlockParams,
     ) => {
       setLoadingSessao(true);
       try {
@@ -136,7 +139,7 @@ export const SessionProvider = ({ children }: SessionProps) => {
           title: "Erro ao atualizar sessão",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!"
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -145,7 +148,7 @@ export const SessionProvider = ({ children }: SessionProps) => {
         setLoadingSessao(false);
       }
     },
-    [invalidarSessoes, showAlert]
+    [invalidarSessoes, showAlert],
   );
 
   const deleteSession = useCallback(
@@ -168,7 +171,7 @@ export const SessionProvider = ({ children }: SessionProps) => {
           title: "Erro ao deletar sessão",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante a deleção. Tente novamente mais tarde!"
+            "Ocorreu um erro durante a deleção. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -178,14 +181,14 @@ export const SessionProvider = ({ children }: SessionProps) => {
         setLoadingSessao(false);
       }
     },
-    [invalidarSessoes, showAlert]
+    [invalidarSessoes, showAlert],
   );
 
   const swapPresentationsOnSession = useCallback(
     async (
       idSession: string,
       _eventEditionId?: string,
-      presentations: SwapPresentationsOnSession[] = []
+      presentations: SwapPresentationsOnSession[] = [],
     ) => {
       setLoadingSessao(true);
       const body = { presentations };
@@ -210,7 +213,7 @@ export const SessionProvider = ({ children }: SessionProps) => {
         setLoadingSessao(false);
       }
     },
-    [invalidarSessoes, showToast]
+    [invalidarSessoes, showToast],
   );
 
   const contextValue = useMemo(
@@ -233,7 +236,7 @@ export const SessionProvider = ({ children }: SessionProps) => {
       updateSession,
       deleteSession,
       swapPresentationsOnSession,
-    ]
+    ],
   );
 
   return (

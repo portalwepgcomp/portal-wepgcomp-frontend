@@ -30,7 +30,8 @@ function BotaoAcao({
   variante: VarianteBotao;
 }) {
   return (
-    <Button size="lg"
+    <Button
+      size="lg"
       type="button"
       variante={variante}
       aria-label={title}
@@ -160,5 +161,7 @@ export default function GerenciarUsuarioAcoes({
     );
   }
 
-  return <div className="flex h-full flex-col justify-center gap-2">{acoes}</div>;
+  return (
+    <div className="flex h-full flex-col justify-center gap-2">{acoes}</div>
+  );
 }

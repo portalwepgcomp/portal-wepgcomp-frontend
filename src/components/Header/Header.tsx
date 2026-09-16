@@ -23,7 +23,8 @@ import { cn } from "@/utils/cn";
 
 type MenuItem = "inicio" | "programação do evento" | "contato" | "login";
 
-const linkBase = "block w-fit text-center text-black no-underline hover:text-black";
+const linkBase =
+  "block w-fit text-center text-black no-underline hover:text-black";
 const navItemBase = "cursor-pointer";
 
 export default function Header() {
@@ -111,7 +112,8 @@ export default function Header() {
 
   useEffect(() => {
     if (pathname === "/home") {
-      const currentHash = typeof window !== "undefined" ? window.location.hash : "";
+      const currentHash =
+        typeof window !== "undefined" ? window.location.hash : "";
       if (currentHash === "#inicio") setSelectedItem("inicio");
       else if (currentHash === "#Programacao")
         setSelectedItem("programação do evento");
@@ -175,22 +177,31 @@ export default function Header() {
                   setSelectEdition({
                     year: ed.target.value,
                     isActive:
-                      yearsOptions.find((v: { value: string; isActive: boolean }) => v.value == ed.target.value)
-                        ?.isActive ?? false,
+                      yearsOptions.find(
+                        (v: { value: string; isActive: boolean }) =>
+                          v.value == ed.target.value,
+                      )?.isActive ?? false,
                   })
                 }
               >
-                {yearsOptions?.map((op: { value: string; label: string }, i: number) => (
-                  <option id={`edicao-op${i}`} key={op.value} value={op.value}>
-                    {op.label}
-                  </option>
-                ))}
+                {yearsOptions?.map(
+                  (op: { value: string; label: string }, i: number) => (
+                    <option
+                      id={`edicao-op${i}`}
+                      key={op.value}
+                      value={op.value}
+                    >
+                      {op.label}
+                    </option>
+                  ),
+                )}
               </select>
             )}
           </div>
 
           <section className="flex w-full gap-2 min-[1001px]:hidden">
-            <Button size="lg"
+            <Button
+              size="lg"
               variante="secondary"
               className="w-1/2"
               type="button"
@@ -200,7 +211,7 @@ export default function Header() {
               aria-label="Alternar navegação"
             >
               {/* Ícone de navegação mobile moderno do lucide-react */}
-              <Home  aria-hidden="true" />
+              <Home aria-hidden="true" />
             </Button>
             <div className="flex w-1/2 items-center justify-center">
               {signed ? (
@@ -246,7 +257,10 @@ export default function Header() {
                 )}
                 onClick={() => handleItemClick("programação do evento")}
               >
-                <Link className={cn(linkBase, "w-[188px]")} href="/home#Programacao">
+                <Link
+                  className={cn(linkBase, "w-[188px]")}
+                  href="/home#Programacao"
+                >
                   Programação
                 </Link>
               </div>

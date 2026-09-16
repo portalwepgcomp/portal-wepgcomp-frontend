@@ -5,7 +5,8 @@ export const controlSelectBase =
   "box-border w-full cursor-pointer rounded-[10px] border border-[#e9ecef] bg-[#f8f9fa] px-4 py-4 text-center text-sm font-semibold text-[#495057] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.05),inset_-2px_-2px_5px_rgba(255,255,255,0.8)] transition-all duration-300 hover:border-[#007bff] hover:bg-white focus:border-[#007bff] focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,123,255,0.1)] active:shadow-[inset_3px_3px_7px_rgba(0,0,0,0.1)] disabled:cursor-not-allowed disabled:opacity-60";
 
 export const statusSelectClasses = {
-  ATIVO: "border-[#4caf50] bg-gradient-to-br from-[#e8f5e8] to-[#c8e6c9] text-[#2e7d32]",
+  ATIVO:
+    "border-[#4caf50] bg-gradient-to-br from-[#e8f5e8] to-[#c8e6c9] text-[#2e7d32]",
   ATIVO_PENDENTE:
     "border-[#ffcc02] bg-gradient-to-br from-[#fff8e1] to-[#ffecb3] text-[#e65100]",
   INATIVO:

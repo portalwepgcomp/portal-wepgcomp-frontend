@@ -53,7 +53,11 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       id="form-edicao"
     >
       <Campo
-        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Nome do evento")}</span>}
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Nome do evento")}
+          </span>
+        }
         htmlFor="nomeEvento"
         erro={errors.titulo?.message}
         className="mb-1"
@@ -68,7 +72,11 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <Campo
-        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Descrição do evento")}</span>}
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Descrição do evento")}
+          </span>
+        }
         htmlFor="descricao"
         erro={errors.descricao?.message}
         className="mb-1"
@@ -121,8 +129,10 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
                 id="ed-final-data"
                 onChange={(date) =>
                   field.onChange(
-                    dayjs(date).set("hour", 23).set("minute", 59).toISOString() ||
-                      null,
+                    dayjs(date)
+                      .set("hour", 23)
+                      .set("minute", 59)
+                      .toISOString() || null,
                   )
                 }
                 selected={field.value ? dayjs(field.value).toDate() : null}
@@ -141,7 +151,11 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <Campo
-        label={<span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Local do evento")}</span>}
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Local do evento")}
+          </span>
+        }
         htmlFor="local"
         erro={errors.local?.message}
         className="mb-1"
@@ -156,7 +170,11 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <Campo
-        label={<span className="text-sm font-semibold text-slate-700">Sala(s) do evento</span>}
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            Sala(s) do evento
+          </span>
+        }
         erro={errors.salas?.message}
         className="mb-1"
       >
@@ -191,7 +209,9 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
 
       <Campo
         label={
-          <span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Comissão organizadora")}</span>
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Comissão organizadora")}
+          </span>
         }
         erro={errors.comissao?.message}
         className="mb-1"
@@ -213,11 +233,15 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <div className="flex flex-col justify-start">
-        <div className="text-lg font-bold text-slate-800">Sessões e apresentações</div>
+        <div className="text-lg font-bold text-slate-800">
+          Sessões e apresentações
+        </div>
         <div className="mt-3 flex flex-col justify-start gap-3">
           <Campo
             label={
-              <span className="text-sm font-semibold text-slate-700">{labelObrigatorio("Número de sessões")}</span>
+              <span className="text-sm font-semibold text-slate-700">
+                {labelObrigatorio("Número de sessões")}
+              </span>
             }
             htmlFor="quantidadeSessão"
             erro={errors.sessoes?.message}
@@ -319,7 +343,9 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
       </Campo>
 
       <div className="mx-auto my-5 w-full max-w-xs">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           disabled={!Edicao?.isActive || !isValid}
           larguraTotal

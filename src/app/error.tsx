@@ -29,7 +29,8 @@ export default function ErrorPage({ error, reset }: Readonly<ErrorProps>) {
         </h1>
 
         <p className="mt-2 text-sm text-muted">
-          Desculpe pelo transtorno. Nossa equipe foi notificada e estamos trabalhando para resolver.
+          Desculpe pelo transtorno. Nossa equipe foi notificada e estamos
+          trabalhando para resolver.
         </p>
 
         {process.env.NODE_ENV === "development" && error.message && (
@@ -39,19 +40,17 @@ export default function ErrorPage({ error, reset }: Readonly<ErrorProps>) {
         )}
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Button size="lg"
+          <Button
+            size="lg"
             type="button"
             onClick={() => reset()}
             variante="primary"
           >
-            <RefreshCw  />
+            <RefreshCw />
             Tentar Novamente
           </Button>
 
-          <Link
-            href="/"
-            className={obterClassesBotao("outline")}
-          >
+          <Link href="/" className={obterClassesBotao("outline")}>
             <Home data-icon="inline-start" />
             Página Inicial
           </Link>

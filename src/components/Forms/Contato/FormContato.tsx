@@ -104,7 +104,9 @@ export function FormContato() {
       </div>
 
       <Campo
-        label={<span className="text-sm font-medium text-slate-700">Mensagem:</span>}
+        label={
+          <span className="text-sm font-medium text-slate-700">Mensagem:</span>
+        }
         htmlFor="text"
         erro={errors.text?.message}
         className="mb-1"
@@ -119,7 +121,9 @@ export function FormContato() {
       </Campo>
 
       <div className="flex justify-end pt-1">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           disabled={!Edicao?.isActive || isSubmitting}
         >
