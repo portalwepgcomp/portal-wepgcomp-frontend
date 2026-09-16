@@ -20,7 +20,11 @@ export default function MelhoresAvaliadoresPage() {
 
         <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
           <div className="mb-6 flex items-center justify-between">
-            <Button size="lg" variante="outline" onClick={() => router.push("/premiacao")}>
+            <Button
+              size="lg"
+              variante="outline"
+              onClick={() => router.push("/premiacao")}
+            >
               <ArrowLeft />
               Voltar para Premiação
             </Button>
@@ -37,7 +41,9 @@ export default function MelhoresAvaliadoresPage() {
                     Homenagem a Avaliadores Destaque
                   </h1>
                   <p className="mt-1 text-sm text-muted">
-                    Edição: <strong>{Edicao?.name || "WEPGCOMP"}</strong> — Selecione até 3 membros da banca avaliadora para receberem o reconhecimento oficial do evento.
+                    Edição: <strong>{Edicao?.name || "WEPGCOMP"}</strong> —
+                    Selecione até 3 membros da banca avaliadora para receberem o
+                    reconhecimento oficial do evento.
                   </p>
                 </div>
               </div>

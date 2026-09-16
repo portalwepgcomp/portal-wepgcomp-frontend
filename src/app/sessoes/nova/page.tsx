@@ -43,7 +43,11 @@ export default function NovaSessao() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <Button size="lg" variante="outline" onClick={() => router.push("/sessoes")}>
+          <Button
+            size="lg"
+            variante="outline"
+            onClick={() => router.push("/sessoes")}
+          >
             <ArrowLeft />
             Voltar para Sessões
           </Button>
@@ -55,9 +59,12 @@ export default function NovaSessao() {
               <CalendarPlus className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Criar Nova Sessão</h1>
+              <h1 className="text-2xl font-bold text-foreground">
+                Criar Nova Sessão
+              </h1>
               <p className="mt-1 text-sm text-muted">
-                Selecione a categoria da sessão e defina os horários, local e apresentações.
+                Selecione a categoria da sessão e defina os horários, local e
+                apresentações.
               </p>
             </div>
           </div>
@@ -69,8 +76,20 @@ export default function NovaSessao() {
             </label>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {[
-                { tipo: SessaoTipoEnum["Sessão auxiliar do evento"], titulo: "Sessão Auxiliar / Geral", descricao: "Palestras, intervalos, abertura, mesas redondas ou cerimônias.", Icone: Users },
-                { tipo: SessaoTipoEnum["Sessão de apresentações"], titulo: "Sessão de Apresentações", descricao: "Bloco com banca avaliadora e submissões vinculadas de discentes.", Icone: Presentation },
+                {
+                  tipo: SessaoTipoEnum["Sessão auxiliar do evento"],
+                  titulo: "Sessão Auxiliar / Geral",
+                  descricao:
+                    "Palestras, intervalos, abertura, mesas redondas ou cerimônias.",
+                  Icone: Users,
+                },
+                {
+                  tipo: SessaoTipoEnum["Sessão de apresentações"],
+                  titulo: "Sessão de Apresentações",
+                  descricao:
+                    "Bloco com banca avaliadora e submissões vinculadas de discentes.",
+                  Icone: Presentation,
+                },
               ].map(({ tipo, titulo, descricao, Icone }) => (
                 <div key={tipo} className="flex flex-col items-start gap-2">
                   <Button
@@ -83,7 +102,9 @@ export default function NovaSessao() {
                     <Icone data-icon="inline-start" />
                     {titulo}
                   </Button>
-                  <p className="text-xs text-muted leading-relaxed">{descricao}</p>
+                  <p className="text-xs text-muted leading-relaxed">
+                    {descricao}
+                  </p>
                 </div>
               ))}
             </div>

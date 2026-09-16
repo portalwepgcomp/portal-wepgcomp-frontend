@@ -20,7 +20,7 @@ export default function OrientacoesAvaliadores() {
         eventEditionId: eventEditionId ?? "",
         reviewerGuidance: content,
       });
-      getOrientacoes()
+      getOrientacoes();
     }
   };
 

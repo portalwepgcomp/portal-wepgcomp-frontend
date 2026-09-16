@@ -40,7 +40,10 @@ export default function ListaSessoes() {
     >
       <ContadorItens
         total={total}
-        rotulo={{ singular: "sessão cadastrada", plural: "sessões cadastradas" }}
+        rotulo={{
+          singular: "sessão cadastrada",
+          plural: "sessões cadastradas",
+        }}
       />
 
       <div className="grid gap-4">

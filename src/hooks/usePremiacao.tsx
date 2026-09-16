@@ -30,14 +30,18 @@ interface PremiacaoProviderData {
   premiacaoAvaliadores: AvaliadorParams[];
   listPanelists: PanelistsParams[];
   getPremiacoesBanca: (eventId: string) => Promise<Premiacoes[] | undefined>;
-  getPremiacoesAudiencia: (eventId: string) => Promise<Premiacoes[] | undefined>;
-  getPremiacoesAvaliadores: (eventId: string) => Promise<AuthorOrEvaluator[] | undefined>;
+  getPremiacoesAudiencia: (
+    eventId: string,
+  ) => Promise<Premiacoes[] | undefined>;
+  getPremiacoesAvaliadores: (
+    eventId: string,
+  ) => Promise<AuthorOrEvaluator[] | undefined>;
   createAwardedPanelists: (body: AvaliadorParams) => Promise<void>;
   getPanelists: (eventId: string) => Promise<void>;
 }
 
 export const PremiacaoContext = createContext<PremiacaoProviderData>(
-  {} as PremiacaoProviderData
+  {} as PremiacaoProviderData,
 );
 
 export const usePremiacao = () => useContext(PremiacaoContext);
@@ -47,7 +51,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
     useState<boolean>(false);
   const [loadingpremiacao, setLoadingpremiacao] = useState<boolean>(false);
   const [premiacaoListBanca, setPremiacaoListBanca] = useState<Premiacoes[]>(
-    []
+    [],
   );
   const [premiacaoListAudiencia, setPremiacaoListAudiencia] = useState<
     Premiacoes[]
@@ -84,7 +88,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
         setLoadingPremiacaoList(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const getPremiacoesAudiencia = useCallback(
@@ -108,7 +112,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
         setLoadingPremiacaoList(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const getPremiacoesAvaliadores = useCallback(
@@ -132,7 +136,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
         setLoadingPremiacaoList(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const createAwardedPanelists = useCallback(
@@ -154,7 +158,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
           title: "Erro ao salvar os avaliadores",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante a escolha dos avaliadores. Tente novamente mais tarde!"
+            "Ocorreu um erro durante a escolha dos avaliadores. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -162,7 +166,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
         setLoadingPremiacaoList(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const getPanelists = useCallback(async (eventId: string) => {
@@ -205,7 +209,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
       getPremiacoesAvaliadores,
       getPanelists,
       createAwardedPanelists,
-    ]
+    ],
   );
 
   return (

@@ -27,13 +27,13 @@ interface SubmissionFileProviderData {
   sendFile: (
     file: File,
     idSubmission: string,
-    desiredFilename?: string
+    desiredFilename?: string,
   ) => Promise<SubmissionFile | null>;
   deleteFile: (idFile: string) => Promise<unknown>;
 }
 
 export const SubmissionFileContext = createContext<SubmissionFileProviderData>(
-  {} as SubmissionFileProviderData
+  {} as SubmissionFileProviderData,
 );
 
 export const useSubmissionFile = () => useContext(SubmissionFileContext);
@@ -47,7 +47,7 @@ export const SubmissionFileProvider = ({ children }: SubmissionFileProps) => {
     SubmissionFile[]
   >([]);
   const [submissionFile, setSubmissionFile] = useState<SubmissionFile | null>(
-    null
+    null,
   );
 
   const { showAlert } = useSweetAlert();
@@ -92,7 +92,7 @@ export const SubmissionFileProvider = ({ children }: SubmissionFileProps) => {
         setLoadingSubmissionFile(false);
       }
     },
-    []
+    [],
   );
 
   const deleteFile = useCallback(async (idFile: string) => {
@@ -117,7 +117,7 @@ export const SubmissionFileProvider = ({ children }: SubmissionFileProps) => {
       getFiles,
       sendFile,
       deleteFile,
-    ]
+    ],
   );
 
   return (

@@ -2,7 +2,7 @@ import axiosInstance from "@/utils/api";
 import { UserProfile } from "@/models/user";
 
 export const api = axiosInstance;
- 
+
 export function setTokenLocalStorage(token: string | null) {
   if (token) {
     localStorage.setItem("@Auth:token", token);
@@ -22,8 +22,7 @@ export function setEventEditionIdStorage(eventEditionId: string) {
     const maxAge = 60 * 60 * 24 * 30;
     const value = encodeURIComponent(eventEditionId);
     document.cookie = `${COOKIE_NAME}=${value}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
-  } catch {
-  }
+  } catch {}
 }
 
 export function getTokenLocalStorage() {
@@ -66,12 +65,11 @@ export function logout() {
 
 export async function LoginRequest(
   email: string,
-  password: string
+  password: string,
 ): Promise<{
-  token: string; data: UserProfile 
+  token: string;
+  data: UserProfile;
 }> {
-
-
   const { data } = await api.post("auth/login", { email, password });
 
   return data;
@@ -80,7 +78,7 @@ export async function LoginRequest(
 export async function validateToken(): Promise<boolean> {
   try {
     const token = getTokenLocalStorage();
-    
+
     if (!token) {
       return false;
     }

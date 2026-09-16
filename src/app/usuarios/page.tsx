@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Gerenciar from "@/components/GerenciarUsuario/Gerenciar";
 import Banner from "@/components/UI/Banner";

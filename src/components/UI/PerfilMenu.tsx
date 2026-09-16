@@ -166,7 +166,12 @@ export function PerfilMenuItem({
   if (href) {
     return (
       <li role="none">
-        <Link href={href} className={className} role="menuitem" onClick={onClick}>
+        <Link
+          href={href}
+          className={className}
+          role="menuitem"
+          onClick={onClick}
+        >
           {children}
         </Link>
       </li>
@@ -175,7 +180,12 @@ export function PerfilMenuItem({
 
   return (
     <li role="none">
-      <button type="button" className={className} role="menuitem" onClick={onClick}>
+      <button
+        type="button"
+        className={className}
+        role="menuitem"
+        onClick={onClick}
+      >
         {children}
       </button>
     </li>

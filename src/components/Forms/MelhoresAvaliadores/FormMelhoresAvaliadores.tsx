@@ -38,9 +38,12 @@ export function FormMelhorAvaliador() {
   const { showAlert } = useSweetAlert();
   const { user } = useContext(AuthContext);
   const [panelistsLoaded, setPanelistsLoaded] = useState(false);
-  const { createAwardedPanelists, getPanelists, listPanelists } = usePremiacao();
+  const { createAwardedPanelists, getPanelists, listPanelists } =
+    usePremiacao();
 
-  const [avaliadoresOptions, setAvaliadoresOptions] = useState<OptionType[]>([]);
+  const [avaliadoresOptions, setAvaliadoresOptions] = useState<OptionType[]>(
+    [],
+  );
   const {
     control,
     handleSubmit,
@@ -112,7 +115,10 @@ export function FormMelhorAvaliador() {
   }, [listPanelists]);
 
   const onInvalid = () =>
-    registrarErro("Validação do formulário de melhores avaliadores falhou", null);
+    registrarErro(
+      "Validação do formulário de melhores avaliadores falhou",
+      null,
+    );
 
   return (
     <form
@@ -145,7 +151,9 @@ export function FormMelhorAvaliador() {
               {...field}
               id="melhoresAvaliadores-select"
               isMulti
-              menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
+              menuPortalTarget={
+                typeof document !== "undefined" ? document.body : undefined
+              }
               menuPosition="fixed"
               styles={{
                 menuPortal: (base) => ({ ...base, zIndex: 99999 }),
@@ -154,7 +162,9 @@ export function FormMelhorAvaliador() {
                   borderColor: state.isFocused ? "#0066ba" : "#d9dce0",
                   borderRadius: "0.5rem",
                   padding: "0.125rem",
-                  boxShadow: state.isFocused ? "0 0 0 2px rgba(0, 102, 186, 0.15)" : "none",
+                  boxShadow: state.isFocused
+                    ? "0 0 0 2px rgba(0, 102, 186, 0.15)"
+                    : "none",
                 }),
               }}
               options={avaliadoresOptions}
@@ -186,8 +196,12 @@ export function FormMelhorAvaliador() {
               >
                 <Award className="h-5 w-5 text-amber-500 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted font-medium">Destaque #{idx + 1}</p>
-                  <p className="text-sm font-bold text-foreground truncate">{av.label}</p>
+                  <p className="text-xs text-muted font-medium">
+                    Destaque #{idx + 1}
+                  </p>
+                  <p className="text-sm font-bold text-foreground truncate">
+                    {av.label}
+                  </p>
                 </div>
               </div>
             ))}
@@ -196,11 +210,13 @@ export function FormMelhorAvaliador() {
       )}
 
       <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           disabled={isSubmitting}
         >
-          <Save  />
+          <Save />
           <span>Salvar Premiação</span>
         </Button>
       </div>

@@ -75,7 +75,9 @@ export default function GerenciarUsuarioCard({
           <div className="mb-1 break-words text-xl font-semibold text-[#212529]">
             {usuario.name}
           </div>
-          <div className="break-words text-sm text-[#6c757d]">{usuario.email}</div>
+          <div className="break-words text-sm text-[#6c757d]">
+            {usuario.email}
+          </div>
         </div>
         <GerenciarUsuarioBadges user={usuario} />
       </div>

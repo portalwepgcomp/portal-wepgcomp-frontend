@@ -20,8 +20,7 @@ const buttonStyles = cva(
         link: "text-blue-800 underline-offset-4 hover:underline",
       },
       size: {
-        default:
-          "h-8 gap-1.5",
+        default: "h-8 gap-1.5",
         xs: "h-6 gap-1 rounded-[min(var(--button-radius-md),10px)] text-xs [[data-slot=button-group]_&]:rounded-[var(--button-radius-lg)] [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1 rounded-[min(var(--button-radius-md),12px)] text-[0.8rem] [[data-slot=button-group]_&]:rounded-[var(--button-radius-lg)] [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 gap-1.5",
@@ -45,8 +44,11 @@ export function buttonVariants(props?: Parameters<typeof buttonStyles>[0]) {
   return twMerge(buttonStyles(props));
 }
 
-export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
-export type VarianteBotao = "primary" | "secondary" | "outline" | "danger" | "ghost";
+export type ButtonVariant = NonNullable<
+  VariantProps<typeof buttonVariants>["variant"]
+>;
+export type VarianteBotao =
+  "primary" | "secondary" | "outline" | "danger" | "ghost";
 
 const variantes: Record<VarianteBotao, ButtonVariant> = {
   primary: "default",
@@ -56,7 +58,9 @@ const variantes: Record<VarianteBotao, ButtonVariant> = {
   ghost: "ghost",
 };
 
-export function resolverVarianteBotao(variante: VarianteBotao = "primary"): ButtonVariant {
+export function resolverVarianteBotao(
+  variante: VarianteBotao = "primary",
+): ButtonVariant {
   return variantes[variante];
 }
 

@@ -112,7 +112,9 @@ export function FormLogin() {
       </div>
 
       <div className="mx-auto mb-4 flex justify-center gap-2">
-        <Button size="lg" className="w-[224px]"
+        <Button
+          size="lg"
+          className="w-[224px]"
           type="submit"
           variante="primary"
         >

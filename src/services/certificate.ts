@@ -47,7 +47,9 @@ export const useCertificate = () => {
           reader.readAsText(responseData);
         });
       }
-      return (error as Error)?.message || "Erro desconhecido ao baixar certificado.";
+      return (
+        (error as Error)?.message || "Erro desconhecido ao baixar certificado."
+      );
     }
   };
 

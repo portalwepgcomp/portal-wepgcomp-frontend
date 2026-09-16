@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  ReactNode,
+} from "react";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { emailApi } from "@/services/emailApi";
 import { ProfileType, RoleType, SubprofileType } from "@/models/user";
@@ -24,7 +31,9 @@ interface SendGroupEmailResponse {
 }
 
 interface EmailContextData {
-  sendGroupEmail: (params: SendGroupEmailParams) => Promise<SendGroupEmailResponse | null>;
+  sendGroupEmail: (
+    params: SendGroupEmailParams,
+  ) => Promise<SendGroupEmailResponse | null>;
   sendingEmail: boolean;
 }
 
@@ -39,7 +48,9 @@ export const EmailProvider = ({ children }: EmailProviderProps) => {
   const [sendingEmail, setSendingEmail] = useState(false);
 
   const sendGroupEmail = useCallback(
-    async (params: SendGroupEmailParams): Promise<SendGroupEmailResponse | null> => {
+    async (
+      params: SendGroupEmailParams,
+    ): Promise<SendGroupEmailResponse | null> => {
       setSendingEmail(true);
 
       try {
@@ -48,12 +59,17 @@ export const EmailProvider = ({ children }: EmailProviderProps) => {
         showAlert({
           icon: "success",
           title: "E-mail Enviado!",
-          text: response.message || `E-mail enviado com sucesso para ${response.sentCount} destinatário(s).`,
+          text:
+            response.message ||
+            `E-mail enviado com sucesso para ${response.sentCount} destinatário(s).`,
         });
 
         return response;
       } catch (err: unknown) {
-        const errorMessage = getErrorMessage(err, "Ocorreu um erro ao enviar o e-mail.");
+        const errorMessage = getErrorMessage(
+          err,
+          "Ocorreu um erro ao enviar o e-mail.",
+        );
 
         showAlert({
           icon: "error",
@@ -66,7 +82,7 @@ export const EmailProvider = ({ children }: EmailProviderProps) => {
         setSendingEmail(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const contextValue = useMemo(
@@ -74,7 +90,7 @@ export const EmailProvider = ({ children }: EmailProviderProps) => {
       sendGroupEmail,
       sendingEmail,
     }),
-    [sendGroupEmail, sendingEmail]
+    [sendGroupEmail, sendingEmail],
   );
 
   return (

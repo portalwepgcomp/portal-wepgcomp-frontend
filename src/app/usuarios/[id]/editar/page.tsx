@@ -314,11 +314,7 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                 />
               </Campo>
 
-              <Campo
-                label="Link Lattes"
-                htmlFor="linkLattes"
-                className="mb-3"
-              >
+              <Campo label="Link Lattes" htmlFor="linkLattes" className="mb-3">
                 <Input
                   type="text"
                   id="linkLattes"
@@ -344,7 +340,8 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
               </Campo>
 
               <div className="mt-4 flex justify-end gap-2.5">
-                <Button size="lg"
+                <Button
+                  size="lg"
                   type="button"
                   variante="danger"
                   onClick={() => router.push("/usuarios")}
@@ -352,7 +349,12 @@ const EditarUsuario = ({ params }: { params: { id: string } }) => {
                 >
                   Cancelar
                 </Button>
-                <Button size="lg" variante="primary" type="submit" disabled={isSubmitting}>
+                <Button
+                  size="lg"
+                  variante="primary"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Salvando..." : "Salvar Alterações"}
                 </Button>
               </div>
