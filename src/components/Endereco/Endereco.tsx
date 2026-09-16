@@ -55,7 +55,7 @@ export default function Endereco() {
         </div>
       </div>
 
-      <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
+      <div className="relative h-[280px] w-full overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1 rounded-xl border border-gray-200 shadow-sm bg-white">
         <iframe
           title="Mapa do Local do Evento"
           src={mapsEmbedUrl}
