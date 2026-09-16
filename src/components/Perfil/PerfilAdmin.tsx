@@ -42,7 +42,9 @@ export default function PerfilAdmin({
         {profile === "Professor" && (
           <PerfilMenuItem href="/minhas-bancas">Bancas</PerfilMenuItem>
         )}
-        <PerfilMenuItem onClick={certificateDownload}>Certificado</PerfilMenuItem>
+        <PerfilMenuItem onClick={certificateDownload}>
+          Certificado
+        </PerfilMenuItem>
         <PerfilMenuItem href="/favoritos">Favoritos</PerfilMenuItem>
       </PerfilMenuSection>
 

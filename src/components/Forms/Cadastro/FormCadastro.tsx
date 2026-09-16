@@ -119,7 +119,9 @@ const labelObrigatorio = (texto: string) => (
 const radioLabel =
   "flex cursor-pointer items-center gap-2 text-sm font-bold text-foreground";
 
-export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>) {
+export function FormCadastro({
+  loadingCreateUser,
+}: Readonly<FormCadastroProps>) {
   const { registerUser } = useUsers();
   const {
     register,
@@ -229,7 +231,10 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
   }
 
   return (
-    <form className="w-full max-w-[540px]" onSubmit={handleSubmit(handleFormCadastro)}>
+    <form
+      className="w-full max-w-[540px]"
+      onSubmit={handleSubmit(handleFormCadastro)}
+    >
       <Campo
         label={labelObrigatorio("Nome completo")}
         htmlFor="nome"
@@ -271,8 +276,7 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
               id: "radio3",
               value: "ouvinte",
               label: "Ouvinte",
-              tooltip:
-                "Participantes que irão assistir ou expor no workshop.",
+              tooltip: "Participantes que irão assistir ou expor no workshop.",
             },
           ].map((opcao) => (
             <label
@@ -328,7 +332,11 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
               }
               ] as const).map(
               (tipo) => (
-                <label key={tipo.value} className={radioLabel} htmlFor={`sub-${tipo.value}`}>
+                <label
+                  key={tipo.value}
+                  className={radioLabel}
+                  htmlFor={`sub-${tipo.value}`}
+                >
                   <input
                     type="radio"
                     className="h-4 w-4 accent-brand-orange"
@@ -379,7 +387,12 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
         />
       </Campo>
 
-      <Campo label="Link Lattes" htmlFor="linkLattes" erro={errors.linkLattes?.message} className="mb-1">
+      <Campo
+        label="Link Lattes"
+        htmlFor="linkLattes"
+        erro={errors.linkLattes?.message}
+        className="mb-1"
+      >
         <Input
           type="text"
           id="linkLattes"
@@ -391,7 +404,9 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
       </Campo>
 
       <Campo
-        label={labelObrigatorio(`E-mail ${perfil !== "ouvinte" ? "UFBA" : ""}`.trim())}
+        label={labelObrigatorio(
+          `E-mail ${perfil !== "ouvinte" ? "UFBA" : ""}`.trim(),
+        )}
         htmlFor="email"
         erro={errors.email?.message}
         className="mb-1"
@@ -437,9 +452,15 @@ export function FormCadastro({ loadingCreateUser }: Readonly<FormCadastroProps>)
               )}
             >
               {req.ok ? (
-                <ShieldCheck className="h-3.5 w-3.5 inline mr-1 text-success" aria-hidden="true" />
+                <ShieldCheck
+                  className="h-3.5 w-3.5 inline mr-1 text-success"
+                  aria-hidden="true"
+                />
               ) : (
-                <ShieldX className="h-3.5 w-3.5 inline mr-1 text-error" aria-hidden="true" />
+                <ShieldX
+                  className="h-3.5 w-3.5 inline mr-1 text-error"
+                  aria-hidden="true"
+                />
               )}
               {req.text}
             </li>

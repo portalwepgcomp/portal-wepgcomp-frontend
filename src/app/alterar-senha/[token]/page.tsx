@@ -5,7 +5,11 @@ import { useUsers } from "@/hooks/useUsers";
 import LoadingPage from "@/components/LoadingPage";
 import { useEdicao } from "@/hooks/useEdicao";
 
-export default function AlterarSenha({ params }: { params: { token: string } }) {
+export default function AlterarSenha({
+  params,
+}: {
+  params: { token: string };
+}) {
   const { loadingResetPassword } = useUsers();
   const { Edicao } = useEdicao();
 

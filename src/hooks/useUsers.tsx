@@ -622,8 +622,6 @@ export const UserProvider = ({ children }: UserProps) => {
   );
 
   return (
-    <UserContext.Provider value={contextValue}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>
   );
 };

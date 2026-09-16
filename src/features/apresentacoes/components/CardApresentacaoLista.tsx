@@ -107,28 +107,27 @@ export default function CardApresentacaoLista({
           </a>
         ) : null}
 
-        <Button size="lg"
+        <Button
+          size="lg"
           variante="secondary"
           aria-label="Editar"
           onClick={onEditar}
-          className={cn(
-            "",
-            !edicaoAtiva && "hidden",
-          )}
+          className={cn("", !edicaoAtiva && "hidden")}
           type="button"
         >
-          <Pencil  aria-hidden="true" />
+          <Pencil aria-hidden="true" />
         </Button>
 
         {edicaoAtiva && (
-          <Button size="lg"
+          <Button
+            size="lg"
             type="button"
 
             variante="danger"
             aria-label="Excluir"
             onClick={confirmarExclusao}
           >
-            <Trash2  aria-hidden="true" />
+            <Trash2 aria-hidden="true" />
           </Button>
         )}
       </div>

@@ -20,7 +20,7 @@ export default function OrientacoesAudiencia() {
         eventEditionId: eventEditionId ?? "",
         audienceGuidance: content,
       });
-      getOrientacoes()
+      getOrientacoes();
     }
   };
 

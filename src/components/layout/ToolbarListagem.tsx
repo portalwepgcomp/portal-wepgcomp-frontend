@@ -29,13 +29,15 @@ export default function ToolbarListagem({
     <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
       <div className="flex min-w-0 max-w-full flex-wrap items-center gap-4">
         {criar ? (
-          <Button size="lg" variante="primary"
+          <Button
+            size="lg"
+            variante="primary"
             type="button"
             onClick={criar.onClick}
             disabled={criar.desabilitado}
           >
             <span>{criar.rotulo}</span>
-            <Plus  />
+            <Plus />
           </Button>
         ) : null}
 

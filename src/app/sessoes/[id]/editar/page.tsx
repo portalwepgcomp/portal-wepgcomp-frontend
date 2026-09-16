@@ -39,7 +39,8 @@ export default function EditarSessao() {
     });
   }, [sessoes, id]);
 
-  const tipoSessao = sessao?.type ?? SessaoTipoEnum["Sessão auxiliar do evento"];
+  const tipoSessao =
+    sessao?.type ?? SessaoTipoEnum["Sessão auxiliar do evento"];
 
   return (
     <ProtectedLayout>
@@ -47,7 +48,11 @@ export default function EditarSessao() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <Button size="lg" variante="outline" onClick={() => router.push("/sessoes")}>
+          <Button
+            size="lg"
+            variante="outline"
+            onClick={() => router.push("/sessoes")}
+          >
             <ArrowLeft />
             Voltar para Sessões
           </Button>
@@ -64,9 +69,12 @@ export default function EditarSessao() {
                 <Calendar className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Editar Sessão</h1>
+                <h1 className="text-2xl font-bold text-foreground">
+                  Editar Sessão
+                </h1>
                 <p className="mt-1 text-sm text-muted">
-                  Atualize os detalhes de agendamento, horários e apresentações vinculadas.
+                  Atualize os detalhes de agendamento, horários e apresentações
+                  vinculadas.
                 </p>
               </div>
             </div>

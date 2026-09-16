@@ -37,11 +37,36 @@ const labelObrigatorio = (texto: string) => (
 );
 
 const campos = [
-  { titulo: "criterio1titulo" as const, descricao: "criterio1" as const, num: 1, defaultName: "Conteúdo" },
-  { titulo: "criterio2titulo" as const, descricao: "criterio2" as const, num: 2, defaultName: "Qualidade e Clareza" },
-  { titulo: "criterio3titulo" as const, descricao: "criterio3" as const, num: 3, defaultName: "Relevância ao Tema" },
-  { titulo: "criterio4titulo" as const, descricao: "criterio4" as const, num: 4, defaultName: "Solução Proposta" },
-  { titulo: "criterio5titulo" as const, descricao: "criterio5" as const, num: 5, defaultName: "Resultados" },
+  {
+    titulo: "criterio1titulo" as const,
+    descricao: "criterio1" as const,
+    num: 1,
+    defaultName: "Conteúdo",
+  },
+  {
+    titulo: "criterio2titulo" as const,
+    descricao: "criterio2" as const,
+    num: 2,
+    defaultName: "Qualidade e Clareza",
+  },
+  {
+    titulo: "criterio3titulo" as const,
+    descricao: "criterio3" as const,
+    num: 3,
+    defaultName: "Relevância ao Tema",
+  },
+  {
+    titulo: "criterio4titulo" as const,
+    descricao: "criterio4" as const,
+    num: 4,
+    defaultName: "Solução Proposta",
+  },
+  {
+    titulo: "criterio5titulo" as const,
+    descricao: "criterio5" as const,
+    num: 5,
+    defaultName: "Resultados",
+  },
 ];
 
 export default function FormCriterios() {
@@ -67,7 +92,7 @@ export default function FormCriterios() {
 
   const handleFormCriterios = async (data: FormCriteriosSchema) => {
     const criteriaOfEdition = evaluationCriteria?.filter(
-      (v) => v.eventEditionId === eventEditionId
+      (v) => v.eventEditionId === eventEditionId,
     );
 
     const dataIndexavel = data as Record<string, string>;
@@ -123,23 +148,28 @@ export default function FormCriterios() {
     const defaultCriteria = [
       {
         title: "Conteúdo",
-        description: "Quão satisfeito(a) você ficou com o conteúdo da pesquisa apresentada?",
+        description:
+          "Quão satisfeito(a) você ficou com o conteúdo da pesquisa apresentada?",
       },
       {
         title: "Qualidade e clareza",
-        description: "Quão satisfeito(a) você ficou com a qualidade e clareza da apresentação?",
+        description:
+          "Quão satisfeito(a) você ficou com a qualidade e clareza da apresentação?",
       },
       {
         title: "Relevância ao tema",
-        description: "Quão bem a pesquisa abordou e explicou o problema central?",
+        description:
+          "Quão bem a pesquisa abordou e explicou o problema central?",
       },
       {
         title: "Solução proposta",
-        description: "Quão clara e prática você considera a solução proposta pela pesquisa?",
+        description:
+          "Quão clara e prática você considera a solução proposta pela pesquisa?",
       },
       {
         title: "Resultados",
-        description: "Como você avalia a qualidade e aplicabilidade dos resultados apresentados?",
+        description:
+          "Como você avalia a qualidade e aplicabilidade dos resultados apresentados?",
       },
     ];
 
@@ -186,7 +216,11 @@ export default function FormCriterios() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="sm:col-span-1">
                 <Campo
-                  label={<span className="text-xs font-semibold text-foreground">{labelObrigatorio("Tema do Critério")}</span>}
+                  label={
+                    <span className="text-xs font-semibold text-foreground">
+                      {labelObrigatorio("Tema do Critério")}
+                    </span>
+                  }
                   htmlFor={`criterio${num}-titulo`}
                   erro={errors[titulo]?.message}
                 >
@@ -202,7 +236,11 @@ export default function FormCriterios() {
 
               <div className="sm:col-span-2">
                 <Campo
-                  label={<span className="text-xs font-semibold text-foreground">{labelObrigatorio("Enunciado da Pergunta / Avaliação")}</span>}
+                  label={
+                    <span className="text-xs font-semibold text-foreground">
+                      {labelObrigatorio("Enunciado da Pergunta / Avaliação")}
+                    </span>
+                  }
                   htmlFor={`criterio${num}-descricao`}
                   erro={errors[descricao]?.message}
                 >
@@ -221,12 +259,14 @@ export default function FormCriterios() {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           id="sa-submit-button"
           disabled={!Edicao?.isActive || isSubmitting}
         >
-          <Save  />
+          <Save />
           <span>Salvar Todos os Critérios</span>
         </Button>
       </div>

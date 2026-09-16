@@ -27,7 +27,11 @@ export default function EditarEdicao() {
 
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <Button size="lg" variante="outline" onClick={() => router.push("/edicoes")}>
+          <Button
+            size="lg"
+            variante="outline"
+            onClick={() => router.push("/edicoes")}
+          >
             <ArrowLeft />
             Voltar para Edições
           </Button>
@@ -48,7 +52,8 @@ export default function EditarEdicao() {
                   Editar Edição do Evento
                 </h1>
                 <p className="mt-1 text-sm text-muted">
-                  Configure informações gerais, prazos de submissão, comitê e local do evento.
+                  Configure informações gerais, prazos de submissão, comitê e
+                  local do evento.
                 </p>
               </div>
             </div>

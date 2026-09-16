@@ -180,24 +180,28 @@ export function FormCadastroProfessor({
       <div className="flex items-start gap-3 rounded-xl bg-blue-50/70 p-4 text-blue-900 border border-blue-100">
         <Info className="h-5 w-5 shrink-0 text-brand-blue mt-0.5" />
         <div className="text-sm leading-relaxed">
-          <strong>Atenção:</strong> Uma senha temporária será gerada automaticamente e enviada por e-mail para o professor. O docente poderá redefini-la no primeiro acesso.
+          <strong>Atenção:</strong> Uma senha temporária será gerada
+          automaticamente e enviada por e-mail para o professor. O docente
+          poderá redefini-la no primeiro acesso.
         </div>
       </div>
 
       {showButtons && (
         <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
-          <Button size="lg" variante="primary"
+          <Button
+            size="lg"
+            variante="primary"
             type="submit"
             disabled={loadingCreateProfessor}
           >
             {loadingCreateProfessor ? (
               <>
-                <Spinner  colorClassName="text-white" />
+                <Spinner colorClassName="text-white" />
                 <span>Cadastrando...</span>
               </>
             ) : (
               <>
-                <UserPlus  />
+                <UserPlus />
                 <span>Cadastrar Professor</span>
               </>
             )}

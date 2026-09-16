@@ -20,7 +20,9 @@ export default function ModalSessaoOrdenarApresentacoes() {
       [...(sessao?.presentations ?? [])]
         .sort((a, b) => a.positionWithinBlock - b.positionWithinBlock)
         .map((p) => p.submission)
-        .filter((sub): sub is Submission => sub !== null && sub !== undefined) || [];
+        .filter(
+          (sub): sub is Submission => sub !== null && sub !== undefined,
+        ) || [];
     setListaOrdenada(listaOrdenadaSessao);
   }, [sessao]);
 
@@ -45,7 +47,11 @@ export default function ModalSessaoOrdenarApresentacoes() {
 
     if (swapPresentationBodies.length === 0) return;
 
-    await swapPresentationsOnSession(sessao.id, Edicao.id, swapPresentationBodies);
+    await swapPresentationsOnSession(
+      sessao.id,
+      Edicao.id,
+      swapPresentationBodies,
+    );
 
     setListaOrdenada(data);
     setTimeout(() => {

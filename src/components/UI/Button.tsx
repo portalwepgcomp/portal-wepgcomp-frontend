@@ -14,15 +14,24 @@ import {
 export { buttonVariants } from "@/lib/estilosBotao";
 export type { VarianteBotao } from "@/lib/estilosBotao";
 
-export type ButtonProps = ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & {
-  /** Compatibilidade com os usos existentes; novos usos podem usar variant. */
-  variante?: VarianteBotao;
-  larguraTotal?: boolean;
-};
+export type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    /** Compatibilidade com os usos existentes; novos usos podem usar variant. */
+    variante?: VarianteBotao;
+    larguraTotal?: boolean;
+  };
 
 // forwardRef mantém a referência funcional no React 18 usado pelo portal.
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant, variante, size = "lg", larguraTotal = false, type = "button", ...props },
+  {
+    className,
+    variant,
+    variante,
+    size = "lg",
+    larguraTotal = false,
+    type = "button",
+    ...props
+  },
   ref,
 ) {
   return (
@@ -30,11 +39,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       ref={ref}
       type={type}
       data-slot="button"
-      className={(state) => twMerge(cn(
-        buttonVariants({ variant: variant ?? resolverVarianteBotao(variante), size }),
-        larguraTotal && "w-full",
-        typeof className === "function" ? className(state) : className,
-      ))}
+      className={(state) =>
+        twMerge(
+          cn(
+            buttonVariants({
+              variant: variant ?? resolverVarianteBotao(variante),
+              size,
+            }),
+            larguraTotal && "w-full",
+            typeof className === "function" ? className(state) : className,
+          ),
+        )
+      }
       {...props}
     />
   );

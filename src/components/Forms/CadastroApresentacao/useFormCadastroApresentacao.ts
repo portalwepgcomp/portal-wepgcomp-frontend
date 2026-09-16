@@ -131,7 +131,10 @@ export function useFormCadastroApresentacao() {
     }
   };
 
-  const criarDadosSubmissao = (data: CadastroFormulario, arquivoPdf: string) => {
+  const criarDadosSubmissao = (
+    data: CadastroFormulario,
+    arquivoPdf: string,
+  ) => {
     return {
       ...submission,
       eventEditionId: getEventEditionIdStorage() ?? "",
@@ -152,9 +155,15 @@ export function useFormCadastroApresentacao() {
     setCarregandoEnvio(true);
     try {
       if (submission?.id) {
-        const sucesso = await updateSubmissionById(submission.id, dadosSubmissao);
+        const sucesso = await updateSubmissionById(
+          submission.id,
+          dadosSubmissao,
+        );
         if (sucesso) {
-          const destino = user?.level === "Default" ? "/minha-apresentacao" : "/apresentacoes";
+          const destino =
+            user?.level === "Default"
+              ? "/minha-apresentacao"
+              : "/apresentacoes";
           roteador.push(destino);
         }
         return sucesso;
