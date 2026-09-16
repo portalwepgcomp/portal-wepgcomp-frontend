@@ -8,9 +8,10 @@ const EVENT_LOCATION_ADDRESS =
 const MAPS_QUERY = encodeURIComponent(
   `${EVENT_LOCATION_NAME} - UFBA - ${EVENT_LOCATION_ADDRESS}`,
 );
+const EVENT_MAP_URL =
+  "https://www.openstreetmap.org/export/embed.html?bbox=-38.5112076%2C-13.0020929%2C-38.5032076%2C-12.9940929&layer=mapnik&marker=-12.9980929%2C-38.5072076";
 
 export default function Endereco() {
-  const mapsEmbedUrl = `https://www.google.com/maps/embed?hl=pt-BR&origin=mfe&pb=!1m3!2m1!1s${MAPS_QUERY}!6i16`;
   const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${MAPS_QUERY}`;
 
   return (
@@ -60,11 +61,9 @@ export default function Endereco() {
       <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:h-auto lg:min-h-0 lg:flex-1">
         <iframe
           title="Mapa do Local do Evento"
-          src={mapsEmbedUrl}
+          src={EVENT_MAP_URL}
           className="h-full w-full border-0"
           loading="eager"
-          allowFullScreen
-          referrerPolicy="no-referrer-when-downgrade"
         />
       </div>
     </div>

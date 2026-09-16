@@ -21,7 +21,7 @@ describe("Endereço do evento", () => {
     expect(screen.queryByText(/Av\. Milton Santos/i)).not.toBeInTheDocument();
   });
 
-  it("usa a mesma localização no mapa e no link Como chegar", () => {
+  it("exibe somente o mapa com marcador e mantém o link Como chegar", () => {
     render(<Endereco />);
 
     const directionsLink = screen.getByRole("link", { name: /como chegar/i });
@@ -33,12 +33,10 @@ describe("Endereço do evento", () => {
     const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
 
     expect(directionsUrl).toContain(expectedMapsQuery);
-    expect(mapUrl).toContain(expectedMapsQuery);
-    expect(map).toHaveAttribute(
-      "src",
-      expect.stringMatching(/^https:\/\/www\.google\.com\/maps\/embed\?/),
-    );
-    expect(map).toHaveAttribute("src", expect.stringContaining("hl=pt-BR"));
+    expect(directionsUrl).toContain("hl=pt-BR");
+    expect(mapUrl).toContain("openstreetmap.org/export/embed.html");
+    expect(mapUrl).toContain("marker=-12.9980929,-38.5072076");
+    expect(mapUrl).not.toContain("google.com/maps/embed");
     expect(map).toHaveAttribute("loading", "eager");
     expect(directionsLink).toHaveAttribute("target", "_blank");
     expect(directionsLink).toHaveAttribute(
