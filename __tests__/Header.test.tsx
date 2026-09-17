@@ -103,9 +103,13 @@ describe("Header no mobile", () => {
     );
 
     expect(compactProfileButton).toBeDefined();
+    expect(compactProfileButton).toHaveClass("h-9");
     expect(compactProfileButton?.parentElement).toHaveClass(
       "w-full",
       "min-w-0",
     );
+    expect(
+      compactProfileButton?.querySelector('span[aria-hidden="true"]'),
+    ).toHaveClass("h-6", "w-6");
   });
 });

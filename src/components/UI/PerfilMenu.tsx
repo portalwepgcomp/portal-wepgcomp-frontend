@@ -61,7 +61,7 @@ export function PerfilMenu({
           open
             ? "rounded-t-lg rounded-b-none border-b-0 bg-muted-light/40"
             : "rounded-lg hover:bg-muted-light/60",
-          compact && "gap-1.5 px-2 py-1",
+          compact && "h-9 gap-1.5 px-2 py-0",
         )}
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
@@ -69,7 +69,10 @@ export function PerfilMenu({
         aria-label={`Menu da conta: ${userName}`}
       >
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white"
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white",
+            compact ? "h-6 w-6" : "h-8 w-8",
+          )}
           aria-hidden
         >
           {initials}
