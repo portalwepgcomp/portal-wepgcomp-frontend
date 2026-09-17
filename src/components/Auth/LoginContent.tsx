@@ -1,6 +1,5 @@
 "use client";
 
-import { RegistrationClosedNotice } from "@/components/Auth/RegistrationClosedNotice";
 import { FormLogin } from "@/components/Forms/Login/FormLogin";
 import { useEdicao } from "@/hooks/useEdicao";
 import Link from "next/link";
@@ -30,23 +29,19 @@ export function LoginContent({ registrationOpen }: LoginContentProps) {
         </div>
       </div>
 
-      <div className="mx-auto mb-4 flex w-full max-w-[583px] justify-center">
-        <div className="w-full text-start">
-          {registrationOpen ? (
-            <p>
-              Ainda não tem conta?
-              <Link
-                href="/cadastro"
-                className="ms-1 text-blue-600 no-underline hover:underline"
-              >
-                Cadastre-se
-              </Link>
-            </p>
-          ) : (
-            <RegistrationClosedNotice compact />
-          )}
+      {registrationOpen && (
+        <div className="mx-auto mb-4 flex w-full max-w-[583px] justify-center">
+          <p className="w-full text-start">
+            Ainda não tem conta?
+            <Link
+              href="/cadastro"
+              className="ms-1 text-blue-600 no-underline hover:underline"
+            >
+              Cadastre-se
+            </Link>
+          </p>
         </div>
-      </div>
+      )}
     </div>
   );
 }
