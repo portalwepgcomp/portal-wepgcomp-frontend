@@ -24,8 +24,8 @@ import { cn } from "@/utils/cn";
 type MenuItem = "inicio" | "programação do evento" | "contato" | "login";
 
 const linkBase =
-  "block w-fit text-center text-black no-underline hover:text-black";
-const navItemBase = "cursor-pointer";
+  "block w-fit text-center text-black no-underline hover:text-black max-[1000px]:w-full max-[1000px]:rounded-md max-[1000px]:px-4 max-[1000px]:py-3 max-[1000px]:hover:bg-muted-light/60";
+const navItemBase = "cursor-pointer max-[1000px]:w-full";
 
 export default function Header() {
   const { user, signed } = useContext(AuthContext);
@@ -151,8 +151,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="h-20 md:h-24 w-full" aria-hidden="true" />
-      <nav className="fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm px-4 py-3 md:px-8">
+      <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 px-4 py-3 shadow-sm backdrop-blur-sm md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4 max-[1000px]:justify-center max-[500px]:gap-2">
           <div className="flex items-center gap-4 max-[500px]:w-full max-[500px]:justify-center">
             <Link className="flex items-center" href="/">
@@ -172,6 +171,7 @@ export default function Header() {
               <select
                 id="event-edition-select"
                 className="max-w-48 rounded-md border border-line bg-white px-3 py-2 text-sm max-[500px]:w-full max-[500px]:max-w-none max-[500px]:text-xs"
+                aria-label="Selecionar edição do evento"
                 value={selectEdition.year}
                 onChange={(ed: React.ChangeEvent<HTMLSelectElement>) =>
                   setSelectEdition({
@@ -199,23 +199,23 @@ export default function Header() {
             )}
           </div>
 
-          <section className="flex w-full gap-2 min-[1001px]:hidden">
+          <section className="flex w-full flex-col gap-2 min-[501px]:flex-row min-[1001px]:hidden">
             <Button
               size="lg"
               variante="secondary"
-              className="w-1/2"
+              className="w-full gap-2 min-[501px]:w-1/2"
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
               aria-controls="navbarSupportedContent"
               aria-expanded={menuOpen}
               aria-label="Alternar navegação"
             >
-              {/* Ícone de navegação mobile moderno do lucide-react */}
-              <Home aria-hidden="true" />
+              <Home className="h-5 w-5" aria-hidden="true" />
+              <span>Início</span>
             </Button>
-            <div className="flex w-1/2 items-center justify-center">
+            <div className="flex w-full min-w-0 items-center justify-center min-[501px]:w-1/2">
               {signed ? (
-                <div className="flex h-full items-center justify-center">
+                <div className="flex h-full w-full min-w-0 items-center justify-center">
                   {perfil(true)}
                 </div>
               ) : (
@@ -232,13 +232,13 @@ export default function Header() {
 
           <div
             className={cn(
-              "mr-5 transition-all duration-300 ease-in-out max-[1000px]:w-full",
+              "mr-5 transition-all duration-300 ease-in-out max-[1000px]:mr-0 max-[1000px]:w-full",
               menuOpen ? "block" : "hidden min-[1001px]:block",
             )}
             id="navbarSupportedContent"
           >
-            <ul className="flex list-none flex-row flex-wrap items-center gap-3.5 font-normal max-[1000px]:justify-center">
-              <div
+            <ul className="flex list-none flex-row flex-wrap items-center gap-3.5 font-normal max-[1000px]:flex-col max-[1000px]:items-stretch max-[1000px]:gap-1">
+              <li
                 className={cn(
                   navItemBase,
                   selectedItem === "inicio" && "font-bold",
@@ -248,9 +248,9 @@ export default function Header() {
                 <Link className={linkBase} href="/home">
                   Início
                 </Link>
-              </div>
+              </li>
 
-              <div
+              <li
                 className={cn(
                   navItemBase,
                   selectedItem === "programação do evento" && "font-bold",
@@ -258,12 +258,12 @@ export default function Header() {
                 onClick={() => handleItemClick("programação do evento")}
               >
                 <Link
-                  className={cn(linkBase, "w-[188px]")}
+                  className={cn(linkBase, "w-[188px] max-[1000px]:w-full")}
                   href="/home#Programacao"
                 >
                   Programação
                 </Link>
-              </div>
+              </li>
 
               {!signed && (
                 <li>
@@ -271,19 +271,24 @@ export default function Header() {
                     className={cn(linkBase, "active")}
                     aria-current="page"
                     href="/cadastro"
+                    onClick={() => setMenuOpen(false)}
                   >
                     Cadastro
                   </Link>
                 </li>
               )}
 
-              <div>
-                <Link className={linkBase} href="/orientacoes">
+              <li className={navItemBase}>
+                <Link
+                  className={linkBase}
+                  href="/orientacoes"
+                  onClick={() => setMenuOpen(false)}
+                >
                   Orientações
                 </Link>
-              </div>
+              </li>
 
-              <div
+              <li
                 className={cn(
                   navItemBase,
                   selectedItem === "contato" && "font-bold",
@@ -293,7 +298,7 @@ export default function Header() {
                 <Link className={linkBase} href="/home#Contato">
                   Contato
                 </Link>
-              </div>
+              </li>
 
               <li className="max-[1000px]:hidden">
                 {signed ? (

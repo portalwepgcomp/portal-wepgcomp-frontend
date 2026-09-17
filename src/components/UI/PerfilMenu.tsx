@@ -46,7 +46,14 @@ export function PerfilMenu({
   }, []);
 
   return (
-    <div className={cn("relative min-w-[13rem]", className)} ref={ref}>
+    <div
+      className={cn(
+        "relative",
+        compact ? "w-full min-w-0" : "min-w-[13rem]",
+        className,
+      )}
+      ref={ref}
+    >
       <button
         type="button"
         className={cn(
@@ -95,7 +102,10 @@ export function PerfilMenu({
       {open && (
         <ul
           role="menu"
-          className="absolute right-0 top-full z-40 w-full min-w-[13rem] list-none overflow-hidden rounded-b-lg border border-t-0 border-line bg-white p-0 pb-1 shadow-sm"
+          className={cn(
+            "absolute right-0 top-full z-40 w-full list-none overflow-hidden rounded-b-lg border border-t-0 border-line bg-white p-0 pb-1 shadow-sm",
+            compact ? "min-w-0" : "min-w-[13rem]",
+          )}
         >
           <li className="px-3 py-2">
             <p className="truncate text-xs text-muted">{userName}</p>
