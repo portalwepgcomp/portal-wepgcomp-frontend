@@ -29,13 +29,13 @@ interface SubmissionProviderData {
   createSubmission: (body: SubmissionParams) => Promise<boolean>;
   updateSubmissionById: (
     idSubmission: string,
-    body: SubmissionParams
+    body: SubmissionParams,
   ) => Promise<boolean>;
   deleteSubmissionById: (idSubmission: string) => Promise<void>;
 }
 
 export const SubmissionContext = createContext<SubmissionProviderData>(
-  {} as SubmissionProviderData
+  {} as SubmissionProviderData,
 );
 
 export const useSubmission = () => useContext(SubmissionContext);
@@ -49,7 +49,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
 
   const invalidarListas = useCallback(
     () => queryClient.invalidateQueries({ queryKey: ["submissions"] }),
-    [queryClient]
+    [queryClient],
   );
 
   const getSubmissionById = useCallback(
@@ -73,7 +73,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
         setLoadingSubmission(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const createSubmission = useCallback(
@@ -99,7 +99,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
           title: "Erro ao cadastrar apresentação",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!"
+            "Ocorreu um erro durante o cadastro. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -109,7 +109,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
         setLoadingSubmission(false);
       }
     },
-    [invalidarListas, showAlert]
+    [invalidarListas, showAlert],
   );
 
   const updateSubmissionById = useCallback(
@@ -119,7 +119,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
       try {
         const response = await submissionApi.updateSubmissionById(
           idSubmission,
-          body
+          body,
         );
         setSubmission(response);
         invalidarListas();
@@ -138,7 +138,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
           title: "Erro ao editar apresentação",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante a edição. Tente novamente mais tarde!"
+            "Ocorreu um erro durante a edição. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -148,7 +148,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
         setLoadingSubmission(false);
       }
     },
-    [invalidarListas, showAlert]
+    [invalidarListas, showAlert],
   );
 
   const deleteSubmissionById = useCallback(
@@ -175,7 +175,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
           title: "Erro ao remover apresentação",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante a remoção. Tente novamente mais tarde!"
+            "Ocorreu um erro durante a remoção. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -183,7 +183,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
         setLoadingSubmission(false);
       }
     },
-    [invalidarListas, showAlert]
+    [invalidarListas, showAlert],
   );
 
   const contextValue = useMemo(
@@ -204,7 +204,7 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
       createSubmission,
       updateSubmissionById,
       deleteSubmissionById,
-    ]
+    ],
   );
 
   return (

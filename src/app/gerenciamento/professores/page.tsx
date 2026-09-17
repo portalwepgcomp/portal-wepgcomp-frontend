@@ -18,7 +18,11 @@ export default function Professores() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <Button size="lg" variante="outline" onClick={() => router.push("/gerenciamento")}>
+          <Button
+            size="lg"
+            variante="outline"
+            onClick={() => router.push("/gerenciamento")}
+          >
             <ArrowLeft />
             Voltar para Gerenciamento
           </Button>
@@ -34,7 +38,8 @@ export default function Professores() {
                 Cadastrar Novo Professor
               </h1>
               <p className="mt-1 text-sm text-muted">
-                Adicione docentes ao corpo acadêmico do portal para orientação e bancas avaliadoras.
+                Adicione docentes ao corpo acadêmico do portal para orientação e
+                bancas avaliadoras.
               </p>
             </div>
           </div>

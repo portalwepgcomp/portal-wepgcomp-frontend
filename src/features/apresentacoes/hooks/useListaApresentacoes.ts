@@ -69,9 +69,7 @@ export function useListaApresentacoes({
 
   // Autor limitado a 1 submissão por edição.
   const ehLimitado =
-    escopo === "minhas"
-      ? user?.level !== "Admin"
-      : user?.level === "Default";
+    escopo === "minhas" ? user?.level !== "Admin" : user?.level === "Default";
   const criarDesabilitado = ehLimitado && possuiSubmissaoPropria;
 
   /** Abre o formulário de criação limpando qualquer submissão em contexto. */

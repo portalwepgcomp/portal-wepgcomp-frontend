@@ -60,14 +60,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const handleSessionExpired = () => {
       setUser(null);
-      
+
       showAlert({
         icon: "warning",
         title: "Sessão Expirada",
         text: "Sua sessão expirou. Por favor, faça login novamente.",
         confirmButtonText: "Ok",
       });
-      
+
       router.push("/login");
     };
 
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         singIn,
         logout,
         isValidatingToken,
-        isLoggingOut
+        isLoggingOut,
       }}
     >
       {children}

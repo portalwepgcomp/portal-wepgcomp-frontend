@@ -17,7 +17,7 @@ interface DraggableListProps<T extends DraggableItem = DraggableItem> {
   labelTitle: string;
   labelSubtitle: string;
   componentParentId?: string;
-  onChangeOrder(data: T[], draggedMovement: DraggedMovement[]): void; 
+  onChangeOrder(data: T[], draggedMovement: DraggedMovement[]): void;
 }
 
 export default function DraggableList<T extends DraggableItem = DraggableItem>({
@@ -25,7 +25,7 @@ export default function DraggableList<T extends DraggableItem = DraggableItem>({
   labelTitle,
   labelSubtitle,
   componentParentId,
-  onChangeOrder = () => {}
+  onChangeOrder = () => {},
 }: Readonly<DraggableListProps<T>>) {
   const [listedData, setListedData] = useState<T[]>([]);
   const [draggedItem, setDraggedItem] = useState<T | null>(null);
@@ -77,7 +77,7 @@ export default function DraggableList<T extends DraggableItem = DraggableItem>({
       const touch = e.changedTouches[0];
       const movement = touch.clientY;
       const componentParent = document.getElementById(componentParentId || "");
-      
+
       const scroll = (y: number) => {
         if (componentParent) {
           componentParent.scrollTo(y, y);
@@ -119,8 +119,12 @@ export default function DraggableList<T extends DraggableItem = DraggableItem>({
     }
 
     // filter out the currently dragged item
-    const fromIndex = listedData.findIndex((item) => item.id === draggedItem.id);
-    const orderedDataList = listedData.filter((item) => item.id !== draggedItem.id);
+    const fromIndex = listedData.findIndex(
+      (item) => item.id === draggedItem.id,
+    );
+    const orderedDataList = listedData.filter(
+      (item) => item.id !== draggedItem.id,
+    );
 
     // add the dragged item after the dragged over item
     orderedDataList.splice(toIndex, 0, draggedItem);
@@ -139,7 +143,8 @@ export default function DraggableList<T extends DraggableItem = DraggableItem>({
     draggedMove.forEach((m) => {
       if (
         !movements.find(
-          (movement) => movement.fromId === m.fromId && movement.toId === m.toId,
+          (movement) =>
+            movement.fromId === m.fromId && movement.toId === m.toId,
         )
       ) {
         movements.push(m);

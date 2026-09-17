@@ -61,7 +61,13 @@ export function getPaginationMeta<T>(
   isPaginated: boolean;
 } {
   if (!response) {
-    return { total: 0, page: 1, pageSize: 20, totalPages: 1, isPaginated: false };
+    return {
+      total: 0,
+      page: 1,
+      pageSize: 20,
+      totalPages: 1,
+      isPaginated: false,
+    };
   }
   if (Array.isArray(response)) {
     return {
@@ -84,4 +90,3 @@ export function getPaginationMeta<T>(
     isPaginated: true,
   };
 }
-
