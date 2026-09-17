@@ -48,8 +48,17 @@ export function buttonVariants(props?: Parameters<typeof buttonStyles>[0]) {
   return twMerge(buttonStyles(props));
 }
 
-export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
-export type VarianteBotao = "primary" | "secondary" | "outline" | "danger" | "ghost" | "activate1" | "activate2";
+export type ButtonVariant = NonNullable<
+  VariantProps<typeof buttonVariants>["variant"]
+>;
+export type VarianteBotao =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "danger"
+  | "ghost"
+  | "activate1"
+  | "activate2";
 
 const variantes: Record<VarianteBotao, ButtonVariant> = {
   primary: "default",

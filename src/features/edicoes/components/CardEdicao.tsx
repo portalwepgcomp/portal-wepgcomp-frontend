@@ -47,7 +47,6 @@ export default function CardEdicao({
       </div>
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
-
         {edicao.isActive ? (
           <Button
             size="lg"

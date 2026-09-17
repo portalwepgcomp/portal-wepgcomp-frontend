@@ -16,60 +16,58 @@ export interface ISessaoAtivaResposta {
 }
 
 export const edicaoApi = {
-    listEdicao: async (params?: string | GetEdicaoParams): Promise<Edicao[]> => {
-        const queryParams =
-            typeof params === 'string'
-                ? { search: params }
-                : params;
-        const { data } = await instance.get(`${baseUrl}`, {
-            params: queryParams,
-        });
-        return unwrapPaginatedList<Edicao>(data);
-    },
+  listEdicao: async (params?: string | GetEdicaoParams): Promise<Edicao[]> => {
+    const queryParams =
+      typeof params === "string" ? { search: params } : params;
+    const { data } = await instance.get(`${baseUrl}`, {
+      params: queryParams,
+    });
+    return unwrapPaginatedList<Edicao>(data);
+  },
 
-    getEdicaoById: async (idEdicao: string) => {
+  getEdicaoById: async (idEdicao: string) => {
+    const { data } = await instance.get(`${baseUrl}/${idEdicao}`);
 
-        const { data } = await instance.get(`${baseUrl}/${idEdicao}`);
+    return data;
+  },
 
-        return data;
-    },
+  getEdicaoByYear: async (year: string) => {
+    const { data } = await instance.get(`${baseUrl}/year/${year}`);
+    return data;
+  },
 
-    getEdicaoByYear: async (year: string) => {
+  createEdicao: async (body: EdicaoParams) => {
+    const { data } = await instance.post(
+      `${baseUrl}/create-from-event-edition-form`,
+      body,
+    );
 
-        const { data } = await instance.get(`${baseUrl}/year/${year}`);        
-        return data;
-    },
+    return data;
+  },
 
-    createEdicao: async (body: EdicaoParams) => {
+  updateEdicaoById: async (idEdicao: string, body: EdicaoParams) => {
+    const { data } = await instance.put(
+      `${baseUrl}/update-from-event-edition-form/${idEdicao}`,
+      body,
+    );
 
-        const { data } = await instance.post(`${baseUrl}/create-from-event-edition-form`, body);
+    return data;
+  },
 
-        return data;
-    },
+  updateEdicaoActivate: async (idEdicao: string) => {
+    const { data } = await instance.patch(`${baseUrl}/active/${idEdicao}`);
 
-    updateEdicaoById: async (idEdicao: string, body: EdicaoParams) => {
+    return data;
+  },
 
-        const { data } = await instance.put(`${baseUrl}/update-from-event-edition-form/${idEdicao}`, body);
+  deleteEdicaoById: async (idEdicao: string) => {
+    const { data } = await instance.delete(`${baseUrl}/${idEdicao}`);
 
-        return data;
-    },
+    return data;
+  },
 
-   updateEdicaoActivate: async (idEdicao: string) => {
-
-        const { data } = await instance.patch(`${baseUrl}/active/${idEdicao}`);
-
-        return data;
-    },
-
-    deleteEdicaoById: async (idEdicao: string) => {
-
-        const { data } = await instance.delete(`${baseUrl}/${idEdicao}`);
-
-        return data;
-    },
-
-    async getEdicaoAtiva(): Promise<ISessaoAtivaResposta> {
-        const { data } = await api.get("/event-editions/active");
-        return data;
-    },
-}
+  async getEdicaoAtiva(): Promise<ISessaoAtivaResposta> {
+    const { data } = await api.get("/event-editions/active");
+    return data;
+  },
+};

@@ -21,7 +21,7 @@ import {
  * `abrirEdicao` agora navega para a página dedicada `/edicoes/[id]/editar`.
  */
 export function useListaEdicoes() {
-  const { deleteEdicao, Edicao, updateEdicaoActivate} = useEdicao();
+  const { deleteEdicao, Edicao, updateEdicaoActivate } = useEdicao();
   const router = useRouter();
 
   const [busca, setBusca] = useState("");
@@ -51,11 +51,10 @@ export function useListaEdicoes() {
     if (status) refetch();
   };
 
-   const ativarEdicao = async (id: string) => {
+  const ativarEdicao = async (id: string) => {
     const status = await updateEdicaoActivate(id);
     if (status) refetch();
   };
-
 
   return {
     itens,
