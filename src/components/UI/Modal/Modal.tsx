@@ -38,14 +38,15 @@ export default function Modal({ content, reference }: Readonly<ModalProps>) {
             aria-hidden
           />
           <div className="fixed left-1/2 top-[50%] w-[85vw] max-w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 bg-white shadow-2xl max-[480px]:w-[95vw]">
-            <Button size="lg"
+            <Button
+              size="lg"
               type="button"
               onClick={() => closeModal()}
               variante="outline"
               className="relative left-[94%] top-5 max-[480px]:left-[88%]"
               aria-label="Fechar"
             >
-              <X  aria-hidden="true" />
+              <X aria-hidden="true" />
             </Button>
             {content}
           </div>

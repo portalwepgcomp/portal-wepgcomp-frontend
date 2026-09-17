@@ -19,8 +19,7 @@ export default function Organizacao() {
   const coordenador = useMemo(() => {
     const coord = committerList.find(
       (member) =>
-        member.level === "Coordinator" &&
-        member.role === "OrganizingCommittee",
+        member.level === "Coordinator" && member.role === "OrganizingCommittee",
     );
     return coord ? coord.userName : " ";
   }, [committerList]);

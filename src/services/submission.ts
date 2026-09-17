@@ -1,36 +1,39 @@
-import axiosInstance from '@/utils/api';
+import axiosInstance from "@/utils/api";
 import { GetSubmissionParams, SubmissionParams } from "@/models/submission";
 
 const baseUrl = "/submission";
 const instance = axiosInstance;
 
 export const submissionApi = {
-    getSubmissions: async (params: GetSubmissionParams) => {
-        const { data } = await instance.get(`${baseUrl}`, { params });
-        return data;
-    },
+  getSubmissions: async (params: GetSubmissionParams) => {
+    const { data } = await instance.get(`${baseUrl}`, { params });
+    return data;
+  },
 
-    getSubmissionById: async (idSubmission: string) => {
-        const { data } = await instance.get(`${baseUrl}/${idSubmission}`);
+  getSubmissionById: async (idSubmission: string) => {
+    const { data } = await instance.get(`${baseUrl}/${idSubmission}`);
 
-        return data;
-    },
+    return data;
+  },
 
-    createSubmission: async (body: SubmissionParams) => {
-        const { data } = await instance.post(`${baseUrl}`, body);
+  createSubmission: async (body: SubmissionParams) => {
+    const { data } = await instance.post(`${baseUrl}`, body);
 
-        return data;
-    },
+    return data;
+  },
 
-    updateSubmissionById: async (idSubmission: string, body: SubmissionParams) => {
-        const { data } = await instance.patch(`${baseUrl}/${idSubmission}`, body);
+  updateSubmissionById: async (
+    idSubmission: string,
+    body: SubmissionParams,
+  ) => {
+    const { data } = await instance.patch(`${baseUrl}/${idSubmission}`, body);
 
-        return data;
-    },
+    return data;
+  },
 
-    deleteSubmissionById: async (idSubmission: string) => {
-        const { data } = await instance.delete(`${baseUrl}/${idSubmission}`);
+  deleteSubmissionById: async (idSubmission: string) => {
+    const { data } = await instance.delete(`${baseUrl}/${idSubmission}`);
 
-        return data;
-    },
-}
+    return data;
+  },
+};

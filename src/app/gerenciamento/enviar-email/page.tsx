@@ -150,12 +150,14 @@ const SendEmail = () => {
               <Mail className="h-6 w-6" />
             </div>
             <div>
-              <h1 className="m-0 text-xl font-semibold text-foreground">Portal WePGCOMP</h1>
+              <h1 className="m-0 text-xl font-semibold text-foreground">
+                Portal WePGCOMP
+              </h1>
               <p className="m-0 text-sm text-muted">Envio de E-mails</p>
             </div>
           </div>
           <Button size="lg" variante="outline" onClick={() => router.back()}>
-            <ArrowLeft  />
+            <ArrowLeft />
             Voltar
           </Button>
         </div>
@@ -209,16 +211,24 @@ const SendEmail = () => {
               />
             </Campo>
 
-            <Button size="lg" variante="primary"
+            <Button
+              size="lg"
+              variante="primary"
               larguraTotal
               onClick={handleSendEmail}
-              disabled={!selectedGroup || !subject || !message || isSending || loadingUserList}
+              disabled={
+                !selectedGroup ||
+                !subject ||
+                !message ||
+                isSending ||
+                loadingUserList
+              }
             >
               {isSending ? (
                 <>Enviando...</>
               ) : (
                 <>
-                  <Send  />
+                  <Send />
                   Enviar E-mail para {recipientCount} destinatário(s)
                 </>
               )}
@@ -257,7 +267,11 @@ const SendEmail = () => {
               <>
                 <div className="mb-6 rounded-md border border-primary/20 bg-primary-light p-4">
                   <p className="m-0 text-sm font-medium text-foreground">
-                    Total: <strong className="font-bold text-primary">{recipientCount}</strong> destinatário(s)
+                    Total:{" "}
+                    <strong className="font-bold text-primary">
+                      {recipientCount}
+                    </strong>{" "}
+                    destinatário(s)
                   </p>
                 </div>
 

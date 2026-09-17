@@ -23,19 +23,19 @@ interface PresentationProviderData {
   presentationBookmark: PresentationBookmark;
   getPresentationAll: (eventEditionId: string) => Promise<void>;
   getPresentationBookmark: (
-    presentationBookmark: PresentationBookmarkRegister
+    presentationBookmark: PresentationBookmarkRegister,
   ) => Promise<PresentationBookmark>;
   postPresentationBookmark: (
-    presentationBookmark: PresentationBookmarkRegister
+    presentationBookmark: PresentationBookmarkRegister,
   ) => Promise<void>;
   deletePresentationBookmark: (
-    presentationBookmark: PresentationBookmarkRegister
+    presentationBookmark: PresentationBookmarkRegister,
   ) => Promise<void>;
   getPresentationById: (id: string) => Promise<Presentation>;
 }
 
 export const PresentationContext = createContext<PresentationProviderData>(
-  {} as PresentationProviderData
+  {} as PresentationProviderData,
 );
 
 export const usePresentation = () => useContext(PresentationContext);
@@ -50,7 +50,7 @@ export const PresentationProvider = ({ children }: PresentationProps) => {
     async (id: string): Promise<Presentation> => {
       return presentationApi.getPresentationById(id);
     },
-    []
+    [],
   );
 
   const getPresentationAll = useCallback(async (eventEditionId: string) => {
@@ -79,27 +79,31 @@ export const PresentationProvider = ({ children }: PresentationProps) => {
         return fallback;
       }
     },
-    []
+    [],
   );
 
   const postPresentationBookmark = useCallback(
     async (presentationBookmark: PresentationBookmarkRegister) => {
       try {
         await presentationApi.postPresentationBookmark(presentationBookmark);
-        await queryClient.invalidateQueries({ queryKey: ["presentationBookmarks"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["presentationBookmarks"],
+        });
       } catch {}
     },
-    [queryClient]
+    [queryClient],
   );
 
   const deletePresentationBookmark = useCallback(
     async (presentationBookmark: PresentationBookmarkRegister) => {
       try {
         await presentationApi.deletePresentationBookmark(presentationBookmark);
-        await queryClient.invalidateQueries({ queryKey: ["presentationBookmarks"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["presentationBookmarks"],
+        });
       } catch {}
     },
-    [queryClient]
+    [queryClient],
   );
 
   const contextValue = useMemo(
@@ -120,7 +124,7 @@ export const PresentationProvider = ({ children }: PresentationProps) => {
       deletePresentationBookmark,
       getPresentationBookmark,
       getPresentationById,
-    ]
+    ],
   );
 
   return (

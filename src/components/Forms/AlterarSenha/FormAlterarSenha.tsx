@@ -26,7 +26,9 @@ const formAlterarSenhaSchema = z
 
 type FormAlterarSenhaSchema = z.infer<typeof formAlterarSenhaSchema>;
 
-export function FormAlterarSenha({ params }: Readonly<{ params: { token: string } }>) {
+export function FormAlterarSenha({
+  params,
+}: Readonly<{ params: { token: string } }>) {
   const { resetPassword } = useUsers();
 
   const {
@@ -66,7 +68,10 @@ export function FormAlterarSenha({ params }: Readonly<{ params: { token: string 
   );
 
   return (
-    <form className="w-full max-w-[583px]" onSubmit={handleSubmit(handleFormAlterarSenha)}>
+    <form
+      className="w-full max-w-[583px]"
+      onSubmit={handleSubmit(handleFormAlterarSenha)}
+    >
       <Campo
         label={labelObrigatorio("Senha")}
         htmlFor="senha"
@@ -99,9 +104,15 @@ export function FormAlterarSenha({ params }: Readonly<{ params: { token: string 
               )}
             >
               {req.ok ? (
-                <ShieldCheck className="h-3.5 w-3.5 inline text-success" aria-hidden="true" />
+                <ShieldCheck
+                  className="h-3.5 w-3.5 inline text-success"
+                  aria-hidden="true"
+                />
               ) : (
-                <ShieldX className="h-3.5 w-3.5 inline text-error" aria-hidden="true" />
+                <ShieldX
+                  className="h-3.5 w-3.5 inline text-error"
+                  aria-hidden="true"
+                />
               )}
               {req.text}
             </li>
@@ -123,9 +134,7 @@ export function FormAlterarSenha({ params }: Readonly<{ params: { token: string 
       </Campo>
 
       <div className="mx-auto mt-4 flex justify-center">
-        <Button size="lg" variante="primary"
-          type="submit"
-        >
+        <Button size="lg" variante="primary" type="submit">
           Enviar
         </Button>
       </div>

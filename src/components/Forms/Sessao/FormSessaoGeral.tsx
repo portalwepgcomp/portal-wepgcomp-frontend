@@ -119,7 +119,10 @@ const formSessaoAuxiliarSchema = z
   .refine(
     (data) => {
       if (!data.inicio || !data.final) return true;
-      return getDurationInMinutes(data.inicio, data.final) <= MAX_SESSION_DURATION_MINUTES;
+      return (
+        getDurationInMinutes(data.inicio, data.final) <=
+        MAX_SESSION_DURATION_MINUTES
+      );
     },
     {
       message: "A sessão não pode durar mais que 12 horas.",
@@ -134,8 +137,7 @@ interface FormSessaoAuxiliarProps {
 export default function FormSessaoAuxiliar({
   disabledIntervals,
 }: Readonly<FormSessaoAuxiliarProps>) {
-  const { createSession, updateSession, sessao, setSessao } =
-    useSession();
+  const { createSession, updateSession, sessao, setSessao } = useSession();
   const { Edicao } = useEdicao();
   const router = useRouter();
   const eventEditionId = sessao?.eventEditionId || Edicao?.id;
@@ -391,7 +393,9 @@ export default function FormSessaoAuxiliar({
       </Campo>
 
       <div className="flex justify-center">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           id="sg-submit-button"
           disabled={!Edicao?.isActive}

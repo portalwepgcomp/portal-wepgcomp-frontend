@@ -1,24 +1,43 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import HtmlEditorComponent from "@/components/HtmlEditorComponent/HtmlEditorComponent";
+import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { useEdicao } from "@/hooks/useEdicao";
 import { obterClassesBotao } from "@/lib/estilosBotao";
 
-const EVENT_LOCATION_NAME = "Instituto de Geociências da UFBA";
-const EVENT_LOCATION_ADDRESS =
-  "R. Barão de Jeremoabo, s/n — Ondina, Salvador - BA, 40170-290";
-const MAPS_QUERY = encodeURIComponent(
-  `${EVENT_LOCATION_NAME} - UFBA - ${EVENT_LOCATION_ADDRESS}`,
-);
-const EVENT_MAP_URL =
-  "https://www.google.com/maps/embed?hl=pt-BR&origin=mfe&pb=!1m3!2m1!1s-12.9980929%2C-38.5072076!6i17";
+const EVENT_COORDINATES = "-12.9980929,-38.5072076";
+const EVENT_MAP_URL = `https://www.google.com/maps/embed?hl=pt-BR&origin=mfe&pb=!1m3!2m1!1s${EVENT_COORDINATES}!6i17`;
+const MAPS_EXTERNAL_URL = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${EVENT_COORDINATES}`;
 
+/**
+ * Exibe a localização cadastrada na edição e preserva sua edição administrativa.
+ */
 export default function Endereco() {
-  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${MAPS_QUERY}`;
+  const [content, setContent] = useState("");
+  const { updateEdicao, Edicao } = useEdicao();
+
+  useEffect(() => {
+    setContent(Edicao?.location ?? "");
+  }, [Edicao?.location]);
+
+  const handleEditAddress = () => {
+    if (!Edicao) return;
+
+    const eventEditionId = getEventEditionIdStorage() ?? Edicao.id;
+
+    void updateEdicao(eventEditionId, {
+      location: content,
+      name: Edicao.name,
+    });
+  };
 
   return (
     <div className="flex w-full flex-col items-start gap-4">
       <div className="flex items-center gap-3">
         <div className="h-7 w-1.5 rounded-full bg-brand-orange" />
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Local do Evento
         </h2>
       </div>
@@ -28,14 +47,16 @@ export default function Endereco() {
           <div className="flex min-w-0 items-start gap-3 sm:flex-1">
             <span className="mt-1 shrink-0 text-xl text-brand-orange">📍</span>
             <div className="min-w-0 flex-1 text-sm leading-relaxed text-slate-700">
-              <p className="text-base font-semibold text-slate-900">
-                {EVENT_LOCATION_NAME}
-              </p>
-              <p className="text-slate-500">{EVENT_LOCATION_ADDRESS}</p>
+              <HtmlEditorComponent
+                content={content}
+                onChange={setContent}
+                handleEditField={handleEditAddress}
+              />
             </div>
           </div>
+
           <a
-            href={mapsExternalUrl}
+            href={MAPS_EXTERNAL_URL}
             target="_blank"
             rel="noopener noreferrer"
             className={`${obterClassesBotao("outline")} w-full sm:w-auto sm:shrink-0`}

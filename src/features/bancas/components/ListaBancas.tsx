@@ -13,9 +13,10 @@ export default function ListaBancas() {
       <Banner title="Minhas bancas" />
       <div className="mx-[200px] mb-[100px] max-xl:mx-[100px] max-xl:mb-[50px] max-md:mx-[50px] max-md:mb-6 max-[480px]:mx-5 max-[480px]:mb-2.5">
         <p className="text-justify">
-          Esta página exibe as bancas pelas quais você, como professor avaliador,
-          é responsável. As apresentações estão organizadas por sessão, e cada
-          sessão é destacada com uma cor distinta para facilitar a identificação.
+          Esta página exibe as bancas pelas quais você, como professor
+          avaliador, é responsável. As apresentações estão organizadas por
+          sessão, e cada sessão é destacada com uma cor distinta para facilitar
+          a identificação.
         </p>
 
         <div className="mt-4 flex flex-col gap-3">

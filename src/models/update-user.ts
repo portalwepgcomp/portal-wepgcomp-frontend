@@ -1,8 +1,4 @@
-import {
-  ProfileType,
-  RoleType,
-  RegistrationNumberType,
-} from "@/models/user";
+import { ProfileType, RoleType, RegistrationNumberType } from "@/models/user";
 
 export interface UpdateUserRequest {
   name?: string;

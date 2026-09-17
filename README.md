@@ -71,6 +71,7 @@ Consulte [`.env.example`](.env.example). Em local, use `.env.local` (Next.js).
 | Variável | Descrição |
 |---|---|
 | `NEXT_PUBLIC_API_URL` | URL base da API (ex.: `http://localhost:3001`) |
+| `REGISTRATION_OPEN` | Habilita o formulário e o link de cadastro quando definida como `true`. Mantenha o mesmo valor configurado na API. |
 
 ## Guia de botões
 

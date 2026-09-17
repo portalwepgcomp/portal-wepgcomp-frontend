@@ -110,10 +110,7 @@ export function filtrarUsuarios(
   return resultado;
 }
 
-export function filtrosAtivos(
-  filters: FiltrosUsuario,
-  busca: string,
-): boolean {
+export function filtrosAtivos(filters: FiltrosUsuario, busca: string): boolean {
   return (
     !!busca.trim() ||
     !!filters.status ||

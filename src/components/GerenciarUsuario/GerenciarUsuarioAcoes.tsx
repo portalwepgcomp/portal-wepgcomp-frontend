@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useSweetAlert } from "@/hooks/useAlert";
 import Button, { VarianteBotao } from "@/components/UI/Button";
 import { User, UserProfile } from "@/models/user";
 
@@ -30,7 +31,8 @@ function BotaoAcao({
   variante: VarianteBotao;
 }) {
   return (
-    <Button size="lg"
+    <Button
+      size="lg"
       type="button"
       variante={variante}
       aria-label={title}
@@ -38,10 +40,7 @@ function BotaoAcao({
       disabled={disabled}
       title={title}
     >
-      <span className="hidden md:inline">{rotulo}</span>
-      <span className="inline md:hidden" aria-hidden>
-        •
-      </span>
+      {rotulo}
     </Button>
   );
 }
@@ -58,7 +57,23 @@ export default function GerenciarUsuarioAcoes({
   onRebaixar,
 }: GerenciarUsuarioAcoesProps) {
   const router = useRouter();
+  const { showAlert } = useSweetAlert();
   const desabilitado = !edicaoAtiva || carregando;
+
+  const confirmarExclusao = () => {
+    showAlert({
+      title: "Você tem certeza?",
+      text: `O usuário ${usuario.name} será excluído permanentemente. Essa ação não pode ser revertida.`,
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancelar",
+      showConfirmButton: true,
+      varianteConfirmacao: "primary",
+      confirmButtonText: "Excluir",
+    }).then((resultado) => {
+      if (resultado.isConfirmed) onExcluir(usuario.id);
+    });
+  };
 
   const isAdmin = usuarioAtual?.level === "Admin";
   const isSelf = usuario.id === usuarioAtual?.id;
@@ -71,7 +86,7 @@ export default function GerenciarUsuarioAcoes({
       rotulo="Excluir Usuário"
       title="Excluir Usuário"
       variante="danger"
-      onClick={() => onExcluir(usuario.id)}
+      onClick={confirmarExclusao}
       disabled={desabilitado}
     />,
   );
@@ -87,7 +102,7 @@ export default function GerenciarUsuarioAcoes({
         key="approve-teacher"
         rotulo="Aprovar Professor"
         title="Aprovar Professor"
-        variante="primary"
+        variante="success"
         onClick={() => onAprovarProfessor(usuario.id)}
         disabled={desabilitado}
       />,
@@ -105,7 +120,7 @@ export default function GerenciarUsuarioAcoes({
         key="approve-presenter"
         rotulo="Aprovar Apresentador"
         title="Aprovar Apresentador"
-        variante="primary"
+        variante="success"
         onClick={() => onAprovarApresentador(usuario.id)}
         disabled={desabilitado}
       />,
@@ -118,7 +133,7 @@ export default function GerenciarUsuarioAcoes({
         key="edit"
         rotulo="Editar usuário"
         title="Editar usuário"
-        variante="secondary"
+        variante="primary"
         onClick={() => router.push(`/usuarios/${usuario.id}/editar`)}
         disabled={desabilitado}
       />,
@@ -131,7 +146,7 @@ export default function GerenciarUsuarioAcoes({
         key="promote-admin"
         rotulo="Promover a Admin"
         title="Promover a Admin"
-        variante="secondary"
+        variante="successLight"
         onClick={() => onPromoverAdmin(usuario.id)}
         disabled={desabilitado}
       />,
@@ -145,7 +160,7 @@ export default function GerenciarUsuarioAcoes({
         key="demote"
         rotulo={rotulo}
         title={rotulo}
-        variante="danger"
+        variante="outline"
         onClick={() => onRebaixar(usuario.id)}
         disabled={desabilitado}
       />,
@@ -160,5 +175,7 @@ export default function GerenciarUsuarioAcoes({
     );
   }
 
-  return <div className="flex h-full flex-col justify-center gap-2">{acoes}</div>;
+  return (
+    <div className="flex h-full flex-col justify-center gap-2">{acoes}</div>
+  );
 }

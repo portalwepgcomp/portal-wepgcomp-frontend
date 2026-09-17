@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface IComposeProvidersProps {
   with: Array<React.ElementType>;
@@ -15,7 +15,7 @@ export const ComposeProviders = ({
         (AccProviders, Provider) => (
           <Provider>{AccProviders}</Provider>
         ),
-        children
+        children,
       )}
     </React.Fragment>
   );

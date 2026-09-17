@@ -32,10 +32,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const isModalOpen = useCallback(
-    (id: string) => openIds.has(id),
-    [openIds],
-  );
+  const isModalOpen = useCallback((id: string) => openIds.has(id), [openIds]);
 
   const value = useMemo(
     () => ({ openModal, closeModal, isModalOpen }),

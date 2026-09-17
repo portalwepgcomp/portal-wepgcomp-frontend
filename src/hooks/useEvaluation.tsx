@@ -31,15 +31,15 @@ interface EvaluationProviderData {
   makeEvaluation: (body: EvaluationParams[]) => Promise<void>;
   getEvaluationCriteria: (eventEditionId: string) => Promise<void>;
   createEvaluationCriteria: (
-    body: EvaluationCriteriaParams[]
+    body: EvaluationCriteriaParams[],
   ) => Promise<boolean>;
   updateEvaluationCriteria: (
-    body: EvaluationCriteriaParams[]
+    body: EvaluationCriteriaParams[],
   ) => Promise<boolean>;
 }
 
 export const EvaluationContext = createContext<EvaluationProviderData>(
-  {} as EvaluationProviderData
+  {} as EvaluationProviderData,
 );
 
 export const useEvaluation = () => useContext(EvaluationContext);
@@ -76,7 +76,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
           title: "Erro ao avaliar",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante a avaliação. Tente novamente mais tarde!"
+            "Ocorreu um erro durante a avaliação. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -84,7 +84,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
         setLoadingEvaluation(false);
       }
     },
-    [router, showAlert]
+    [router, showAlert],
   );
 
   const getEvaluationByUser = useCallback(async (userId: string) => {
@@ -114,7 +114,8 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
   const getEvaluationCriteria = useCallback(async (eventEditionId: string) => {
     setLoadingEvaluation(true);
     try {
-      const response = await evaluationApi.getEvaluationCriteria(eventEditionId);
+      const response =
+        await evaluationApi.getEvaluationCriteria(eventEditionId);
       setEvaluationCriteria(response);
     } catch {
       setEvaluationCriteria([]);
@@ -142,7 +143,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
           title: "Erro ao criar",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante a criação. Tente novamente mais tarde!"
+            "Ocorreu um erro durante a criação. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -151,7 +152,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
         setLoadingEvaluationCriteria(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const updateEvaluationCriteria = useCallback(
@@ -173,7 +174,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
           title: "Erro ao atualizar",
           text: getErrorMessage(
             err,
-            "Ocorreu um erro durante a atualização. Tente novamente mais tarde!"
+            "Ocorreu um erro durante a atualização. Tente novamente mais tarde!",
           ),
           confirmButtonText: "Retornar",
         });
@@ -182,7 +183,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
         setLoadingEvaluationCriteria(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const contextValue = useMemo(
@@ -209,7 +210,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
       getEvaluationCriteria,
       createEvaluationCriteria,
       updateEvaluationCriteria,
-    ]
+    ],
   );
 
   return (

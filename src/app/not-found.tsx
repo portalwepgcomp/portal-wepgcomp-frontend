@@ -18,24 +18,23 @@ export default function NotFound() {
         </h1>
 
         <p className="mt-2 text-sm text-muted">
-          A página que você está procurando não existe, foi movida ou está temporariamente indisponível.
+          A página que você está procurando não existe, foi movida ou está
+          temporariamente indisponível.
         </p>
 
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/"
-            className={obterClassesBotao("primary")}
-          >
+          <Link href="/" className={obterClassesBotao("primary")}>
             <Home data-icon="inline-start" />
             Ir para o Início
           </Link>
 
-          <Button size="lg"
+          <Button
+            size="lg"
             type="button"
             onClick={() => window.history.back()}
             variante="outline"
           >
-            <ArrowLeft  />
+            <ArrowLeft />
             Voltar
           </Button>
         </div>

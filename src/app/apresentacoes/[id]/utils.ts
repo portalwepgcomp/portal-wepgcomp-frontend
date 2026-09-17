@@ -1,12 +1,12 @@
 import dayjs from "dayjs";
 
 export const getInitials = (name: string) => {
-    return name
-        .split(' ')
-        .map(n => n[0])
-        .slice(0, 2)
-        .join('')
-        .toUpperCase();
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 };
 
 export const formatDate = (dateString: string) => {

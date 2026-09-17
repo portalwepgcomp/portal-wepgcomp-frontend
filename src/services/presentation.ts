@@ -49,13 +49,16 @@ export const presentationApi = {
     signal?: AbortSignal,
   ): Promise<BookmarkedPresentations> => {
     if (!eventEditionId) return { bookmarkedPresentations: [] };
-    const { data } = await instance.get<BookmarkedPresentations>(`${baseUrl}/bookmarks`, {
-      params: { eventEditionId },
-      signal,
-      headers: {
-        "Content-Type": "application/json",
+    const { data } = await instance.get<BookmarkedPresentations>(
+      `${baseUrl}/bookmarks`,
+      {
+        params: { eventEditionId },
+        signal,
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     // A API atual ainda pode devolver favoritos de outras edições (issue API #2).
     return {
@@ -66,38 +69,46 @@ export const presentationApi = {
   },
 
   postPresentationBookmark: async (body: PresentationBookmarkRegister) => {
-    const { data } = await instance.post(`${baseUrl}/bookmark`, body)
+    const { data } = await instance.post(`${baseUrl}/bookmark`, body);
 
-    return data
+    return data;
   },
 
   deletePresentationBookmark: async (params: PresentationBookmarkRegister) => {
-    const { data } = await instance.delete(`${baseUrl}/bookmark`, { params })
+    const { data } = await instance.delete(`${baseUrl}/bookmark`, { params });
 
-    return data
+    return data;
   },
 
   calculateAllScores: async (eventEditionId: string) => {
-    const { data } = await instance.post(`${baseUrl}/calculate-all-scores/${eventEditionId}`)
+    const { data } = await instance.post(
+      `${baseUrl}/calculate-all-scores/${eventEditionId}`,
+    );
 
-    return data
+    return data;
   },
 
   resetEvaluatorsScores: async (eventEditionId: string) => {
-    const { data } = await instance.post(`${baseUrl}/reset-evaluators-scores/${eventEditionId}`)
+    const { data } = await instance.post(
+      `${baseUrl}/reset-evaluators-scores/${eventEditionId}`,
+    );
 
-    return data
+    return data;
   },
 
   resetPublicScores: async (eventEditionId: string) => {
-    const { data } = await instance.post(`${baseUrl}/reset-public-scores/${eventEditionId}`)
+    const { data } = await instance.post(
+      `${baseUrl}/reset-public-scores/${eventEditionId}`,
+    );
 
-    return data
+    return data;
   },
 
   resetCommitteeScores: async (eventEditionId: string) => {
-    const { data } = await instance.post(`${baseUrl}/reset-committee-scores/${eventEditionId}`)
+    const { data } = await instance.post(
+      `${baseUrl}/reset-committee-scores/${eventEditionId}`,
+    );
 
-    return data
+    return data;
   },
-}
+};

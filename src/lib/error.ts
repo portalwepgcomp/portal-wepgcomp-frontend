@@ -9,7 +9,9 @@ function getDetailsMessage(data: Record<string, unknown>): string | undefined {
 
   const messages = data.details.flatMap((detail: ValidationDetail) =>
     Array.isArray(detail?.messages)
-      ? detail.messages.filter((message): message is string => typeof message === "string")
+      ? detail.messages.filter(
+          (message): message is string => typeof message === "string",
+        )
       : [],
   );
 
@@ -24,7 +26,11 @@ export function getErrorMessage(
   fallback = "Ocorreu um erro inesperado. Por favor, tente novamente.",
 ): string {
   if (isAxiosError(err)) {
-    if (err.code === "ERR_NETWORK" || err.message === "Network Error" || !err.response) {
+    if (
+      err.code === "ERR_NETWORK" ||
+      err.message === "Network Error" ||
+      !err.response
+    ) {
       return "Não foi possível estabelecer conexão. Verifique sua internet e tente novamente em instantes.";
     }
 

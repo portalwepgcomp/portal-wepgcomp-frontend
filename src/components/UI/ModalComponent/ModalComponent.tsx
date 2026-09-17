@@ -83,14 +83,15 @@ export default function ModalComponent({
         ) : (
           <>
             <div className="flex justify-end border-0 p-2">
-              <Button size="lg"
+              <Button
+                size="lg"
                 id={idCloseModal ?? "close-modal"}
                 type="button"
                 onClick={handleClose}
                 variante="outline"
                 aria-label="Fechar"
               >
-                <X  aria-hidden="true" />
+                <X aria-hidden="true" />
               </Button>
             </div>
 
@@ -100,7 +101,8 @@ export default function ModalComponent({
 
             {onConfirm && labelConfirmButton && (
               <div className="flex justify-center border-t border-line px-6 py-4">
-                <Button size="lg"
+                <Button
+                  size="lg"
                   type={formId ? "submit" : "button"}
                   form={formId}
                   disabled={disabledConfirmButton}
