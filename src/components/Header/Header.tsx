@@ -232,7 +232,7 @@ export default function Header() {
 
           <div
             className={cn(
-              "mr-5 transition-all duration-300 ease-in-out max-[1000px]:mr-0 max-[1000px]:w-full",
+              "mr-5 transition-all duration-300 ease-in-out max-[1279px]:mr-0 max-[1279px]:w-full",
               menuOpen ? "block" : "hidden min-[1001px]:block",
             )}
             id="navbarSupportedContent"
@@ -300,7 +300,7 @@ export default function Header() {
                 </Link>
               </li>
 
-              <li className="max-[1000px]:hidden">
+              <li className="max-[1279px]:ml-auto max-[1000px]:hidden">
                 {signed ? (
                   perfil(false)
                 ) : (

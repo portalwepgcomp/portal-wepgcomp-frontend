@@ -112,4 +112,25 @@ describe("Header no mobile", () => {
       compactProfileButton?.querySelector('span[aria-hidden="true"]'),
     ).toHaveClass("h-6", "w-6");
   });
+  it("ocupa a largura disponível e alinha o perfil à direita no tablet", () => {
+    renderHeader();
+
+    const navigationContainer = screen
+      .getByRole("link", { name: "Contato" })
+      .closest("ul")?.parentElement;
+    const profileButtons = screen.getAllByRole("button", {
+      name: "Menu da conta: Administrador de Teste",
+    });
+    const desktopProfileButton = profileButtons.find((button) =>
+      button.parentElement?.classList.contains("min-w-[13rem]"),
+    );
+
+    expect(navigationContainer).toHaveClass(
+      "max-[1279px]:w-full",
+      "max-[1279px]:mr-0",
+    );
+    expect(desktopProfileButton?.closest("li")).toHaveClass(
+      "max-[1279px]:ml-auto",
+    );
+  });
 });
