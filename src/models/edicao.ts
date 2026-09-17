@@ -8,7 +8,7 @@ export interface EdicaoParams {
   location?: string;
   coordinatorId?: string;
   organizingCommitteeIds?: string[];
-  roomName?: string;
+  roomName?: string[];
   itSupportIds?: string[];
   administrativeSupportIds?: string[];
   communicationIds?: string[];

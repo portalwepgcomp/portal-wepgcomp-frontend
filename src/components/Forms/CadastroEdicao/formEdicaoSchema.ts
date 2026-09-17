@@ -21,15 +21,13 @@ export const formEdicaoSchema = z.object({
     .string({ invalid_type_error: "Campo Inválido" })
     .min(1, "Local do Evento é obrigatório!"),
 
-  salas: z
-    .array(
-      z.object({
-        label: z.string(),
-        value: z.string(),
-      }),
-      { invalid_type_error: "Campo inválido" },
-    )
-    .min(1, "Pelo menos uma sala é obrigatória"),
+  salas: z.array(
+    z.object({
+      label: z.string(),
+      value: z.string(),
+    }),
+    { invalid_type_error: "Campo inválido" },
+  ),
 
   comissao: z
     .array(

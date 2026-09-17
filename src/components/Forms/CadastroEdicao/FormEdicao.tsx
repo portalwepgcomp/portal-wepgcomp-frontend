@@ -347,7 +347,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
           size="lg"
           variante="primary"
           type="submit"
-          disabled={!Edicao?.isActive || !isValid}
+          disabled={!(edicaoData?.isActive ?? Edicao?.isActive) || !isValid}
           larguraTotal
         >
           Salvar

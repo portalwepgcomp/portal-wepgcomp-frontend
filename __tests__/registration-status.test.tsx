@@ -105,16 +105,15 @@ describe("fluxo de login", () => {
     );
   });
 
-  it("mantém o login e troca o cadastro pelo aviso quando as inscrições estão fechadas", () => {
+  it("mantém somente o formulário quando as inscrições estão fechadas", () => {
     render(<LoginContent registrationOpen={false} />);
 
     expect(screen.getByTestId("form-login")).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Cadastre-se" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByText("Inscrições encerradas")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Ver programação" }),
-    ).toHaveAttribute("href", "/home#Programacao");
+      screen.queryByText("Inscrições encerradas"),
+    ).not.toBeInTheDocument();
   });
 });
