@@ -66,7 +66,12 @@ export default function ScheduleSection() {
   function formatDateLabel(date: string) {
     if (!date) return "";
     const parts = date.split("-").map(Number);
-    if (parts.length < 3 || isNaN(parts[0]) || isNaN(parts[1]) || isNaN(parts[2])) {
+    if (
+      parts.length < 3 ||
+      isNaN(parts[0]) ||
+      isNaN(parts[1]) ||
+      isNaN(parts[2])
+    ) {
       return date;
     }
     const [ano, mes, dia] = parts;
@@ -90,7 +95,8 @@ export default function ScheduleSection() {
 
         <div className="mb-10 flex flex-wrap justify-center gap-4">
           {dates.map((date) => (
-            <Button size="lg"
+            <Button
+              size="lg"
               key={date}
               type="button"
               variante={selectedDate === date ? "secondary" : "outline"}
@@ -124,7 +130,8 @@ export default function ScheduleSection() {
                       )
                       ?.filter(
                         (sessao) =>
-                          sessao.type === "General" || sessao.roomId === room.id,
+                          sessao.type === "General" ||
+                          sessao.roomId === room.id,
                       );
 
                     const sortedSessions = filteredSessions
@@ -181,7 +188,10 @@ export default function ScheduleSection() {
                                   {item.title}
                                 </h2>
                                 {group.flatMap((sess, sessIndex) =>
-                                  (sess.presentations ? [...sess.presentations] : [])
+                                  (sess.presentations
+                                    ? [...sess.presentations]
+                                    : []
+                                  )
                                     .sort(
                                       (a, b) =>
                                         (a.positionWithinBlock ?? 0) -
@@ -211,8 +221,7 @@ export default function ScheduleSection() {
                   {!sessoes?.some(
                     (sessao) =>
                       dayjs(sessao.startTime).format("YYYY-MM-DD") ===
-                        selectedDate &&
-                      sessao.roomId === room.id,
+                        selectedDate && sessao.roomId === room.id,
                   ) && (
                     <div className="flex flex-col items-center gap-4 py-12 text-[#777]">
                       <Image

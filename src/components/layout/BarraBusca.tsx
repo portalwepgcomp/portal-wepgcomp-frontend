@@ -38,13 +38,14 @@ export default function BarraBusca({
         onChange={(e) => onChange(e.target.value)}
         className="min-w-0 flex-1"
       />
-      <Button size="lg"
+      <Button
+        size="lg"
         variante="primary"
         type="button"
         id="botao-busca"
         aria-label="Buscar"
       >
-        <Search  />
+        <Search />
       </Button>
     </div>
   );

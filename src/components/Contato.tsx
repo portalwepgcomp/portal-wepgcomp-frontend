@@ -12,7 +12,8 @@ export default function Contato() {
         </h2>
       </div>
       <p className="text-sm text-slate-600">
-        Dúvidas, sugestões ou suporte? Envie sua mensagem para a coordenação do evento.
+        Dúvidas, sugestões ou suporte? Envie sua mensagem para a coordenação do
+        evento.
       </p>
       <div className="w-full">
         <FormContato />

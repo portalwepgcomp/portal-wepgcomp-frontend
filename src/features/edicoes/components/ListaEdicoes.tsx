@@ -24,7 +24,10 @@ export default function ListaEdicoes() {
   } = useListaEdicoes();
 
   const criar = edicaoAtiva
-    ? { rotulo: "Cadastrar Edição", onClick: () => router.push("/cadastro-edicao") }
+    ? {
+        rotulo: "Cadastrar Edição",
+        onClick: () => router.push("/cadastro-edicao"),
+      }
     : undefined;
 
   return (

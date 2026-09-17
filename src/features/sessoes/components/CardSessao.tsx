@@ -55,8 +55,10 @@ export default function CardSessao({
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
         {podeReordenar && edicaoAtiva && (
-          <Button size="lg"
-            variante="secondary" className="mr-2 mt-1"
+          <Button
+            size="lg"
+            variante="secondary"
+            className="mr-2 mt-1"
             onClick={onReordenar}
             type="button"
           >
@@ -64,28 +66,27 @@ export default function CardSessao({
           </Button>
         )}
 
-        <Button size="lg"
+        <Button
+          size="lg"
           variante="secondary"
           aria-label="Editar"
           onClick={onEditar}
-          className={cn(
-            "",
-            !edicaoAtiva && "hidden",
-          )}
+          className={cn("", !edicaoAtiva && "hidden")}
           type="button"
         >
-          <Pencil  aria-hidden="true" />
+          <Pencil aria-hidden="true" />
         </Button>
 
         {edicaoAtiva && (
-          <Button size="lg"
+          <Button
+            size="lg"
             type="button"
 
             variante="danger"
             aria-label="Excluir"
             onClick={confirmarExclusao}
           >
-            <Trash2  aria-hidden="true" />
+            <Trash2 aria-hidden="true" />
           </Button>
         )}
       </div>

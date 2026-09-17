@@ -28,11 +28,14 @@ interface ActiveEditionProviderData {
   >;
   loadingActiveEdition: boolean;
   setLoadingActiveEdition: Dispatch<SetStateAction<boolean>>;
-  ensureActiveEdition: () => Promise<{ year: string; isActive: boolean } | null>;
+  ensureActiveEdition: () => Promise<{
+    year: string;
+    isActive: boolean;
+  } | null>;
 }
 
 export const ActiveEditionContext = createContext<ActiveEditionProviderData>(
-  {} as ActiveEditionProviderData
+  {} as ActiveEditionProviderData,
 );
 
 export const ActiveEditionProvider = ({ children }: ActiveEditionProps) => {
@@ -70,7 +73,10 @@ export const ActiveEditionProvider = ({ children }: ActiveEditionProps) => {
       const saved = localStorage.getItem("activeEdition");
       if (saved) {
         try {
-          const parsed = JSON.parse(saved) as { year: string; isActive: boolean };
+          const parsed = JSON.parse(saved) as {
+            year: string;
+            isActive: boolean;
+          };
           if (parsed?.year) {
             setSelectEdition(parsed);
             return parsed;
@@ -104,7 +110,7 @@ export const ActiveEditionProvider = ({ children }: ActiveEditionProps) => {
       setLoadingActiveEdition,
       ensureActiveEdition,
     }),
-    [selectEdition, loadingActiveEdition, ensureActiveEdition]
+    [selectEdition, loadingActiveEdition, ensureActiveEdition],
   );
 
   return (

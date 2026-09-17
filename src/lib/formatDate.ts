@@ -49,7 +49,12 @@ export const formatDateEvent = (
     day: "numeric",
   };
 
-  if (!dateStart || !dateEnd || isNaN(new Date(dateStart).getTime()) || isNaN(new Date(dateEnd).getTime())) {
+  if (
+    !dateStart ||
+    !dateEnd ||
+    isNaN(new Date(dateStart).getTime()) ||
+    isNaN(new Date(dateEnd).getTime())
+  ) {
     return "A definir";
   }
 

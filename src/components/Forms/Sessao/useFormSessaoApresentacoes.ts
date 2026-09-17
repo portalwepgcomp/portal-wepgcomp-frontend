@@ -42,9 +42,7 @@ export function useFormSessaoApresentacoes(
   const eventEditionId = sessao?.eventEditionId || Edicao?.id;
   const { data: rooms } = useRoomsQuery(eventEditionId);
   const { data: submissoes } = useSubmissionsQuery(
-    eventEditionId
-      ? { eventEditionId, withouPresentation: true }
-      : undefined,
+    eventEditionId ? { eventEditionId, withouPresentation: true } : undefined,
   );
 
   const defaultValues = sessao?.id
@@ -100,20 +98,19 @@ export function useFormSessaoApresentacoes(
 
   useEffect(() => {
     if (sessao?.id && sessao?.presentations?.length) {
-      const loaded =
-        [...sessao.presentations]
-          .sort((a, b) => a.positionWithinBlock - b.positionWithinBlock)
-          .map((p) => {
-            const presenterName =
-              p.submission?.mainAuthor?.name || "Apresentador não informado";
-            const title = p.submission?.title || "Título não informado";
-            return {
-              value: p.submission?.id ?? "",
-              label: title,
-              title,
-              presenterName,
-            };
-          });
+      const loaded = [...sessao.presentations]
+        .sort((a, b) => a.positionWithinBlock - b.positionWithinBlock)
+        .map((p) => {
+          const presenterName =
+            p.submission?.mainAuthor?.name || "Apresentador não informado";
+          const title = p.submission?.title || "Título não informado";
+          return {
+            value: p.submission?.id ?? "",
+            label: title,
+            title,
+            presenterName,
+          };
+        });
       syncFormApresentacoes(loaded);
     } else {
       syncFormApresentacoes([]);
@@ -169,9 +166,17 @@ export function useFormSessaoApresentacoes(
     return !isTimeUnavailable;
   };
 
-  const handleFormSessaoApresentacoes = (data: FormSessaoApresentacoesSchema) => {
-    const { titulo, apresentacoes, sala, inicio, n_apresentacoes, avaliadores } =
-      data;
+  const handleFormSessaoApresentacoes = (
+    data: FormSessaoApresentacoesSchema,
+  ) => {
+    const {
+      titulo,
+      apresentacoes,
+      sala,
+      inicio,
+      n_apresentacoes,
+      avaliadores,
+    } = data;
 
     if (!Edicao?.id) return;
     if (!titulo || !sala || !inicio) {

@@ -46,8 +46,12 @@ export default function Endereco() {
             <p className="font-semibold text-slate-900 text-base">
               Instituto de Computação — UFBA
             </p>
-            <p className="text-slate-600">Pavilhão de Aulas da Federação 2 (PAF 2)</p>
-            <p className="text-slate-500">Av. Milton Santos, s/n — Ondina, Salvador - BA</p>
+            <p className="text-slate-600">
+              Pavilhão de Aulas da Federação 2 (PAF 2)
+            </p>
+            <p className="text-slate-500">
+              Av. Milton Santos, s/n — Ondina, Salvador - BA
+            </p>
           </div>
           <a
             href={mapsExternalUrl}
@@ -56,8 +60,18 @@ export default function Endereco() {
             className={obterClassesBotao("outline")}
           >
             <span>Como chegar</span>
-            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
             </svg>
           </a>
         </div>

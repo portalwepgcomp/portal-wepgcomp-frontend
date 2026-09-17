@@ -69,17 +69,17 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
   useEffect(() => {
     if (params?.id) {
       const foundPresentation = presentationList.find(
-        (presentationValue) => presentationValue?.id === params?.id
+        (presentationValue) => presentationValue?.id === params?.id,
       );
 
       if (foundPresentation) {
         const evaluationsFilterBySubmission = evaluations?.filter(
-          (value) => value.submissionId === foundPresentation?.submission?.id
+          (value) => value.submissionId === foundPresentation?.submission?.id,
         );
 
         const saveEvaluationValues = evaluationCriteria?.map((criteria) => {
           const evaluationValue = evaluationsFilterBySubmission?.find(
-            (v) => v.evaluationCriteriaId === criteria.id
+            (v) => v.evaluationCriteriaId === criteria.id,
           );
 
           return {
@@ -92,12 +92,7 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
         setSaveEvaluation(saveEvaluationValues);
       }
     }
-  }, [
-    params?.id,
-    presentationList,
-    evaluations,
-    evaluationCriteria,
-  ]);
+  }, [params?.id, presentationList, evaluations, evaluationCriteria]);
 
   return (
     <ProtectedLayout>
@@ -114,9 +109,7 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
                   {presentation?.submission?.mainAuthor?.name}
                 </div>
                 <hr className="my-2 border-line" />
-                <div className="text-xl">
-                  {presentation?.submission?.title}
-                </div>
+                <div className="text-xl">{presentation?.submission?.title}</div>
               </div>
             </div>
 
@@ -147,8 +140,8 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
                                   score: value,
                                 },
                               }
-                            : item
-                        )
+                            : item,
+                        ),
                       );
                     }}
                   />
@@ -169,13 +162,18 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
               )}
             </div>
             <div className="flex flex-row items-center">
-              <Button size="lg" variante="primary"
+              <Button
+                size="lg"
+                variante="primary"
                 onClick={sendEvaluation}
                 disabled={loadingEvaluation || !Edicao?.isActive}
               >
                 Avaliar
               </Button>
-              <span title={tooltipTexto} className="ml-4 inline-flex cursor-help">
+              <span
+                title={tooltipTexto}
+                className="ml-4 inline-flex cursor-help"
+              >
                 <Info className="h-5 w-5 text-muted" />
               </span>
             </div>

@@ -16,10 +16,8 @@ export interface EdicaoParams {
   presentationDuration?: number;
   callForPapersText?: string;
   submissionDeadline?: string;
-  partnersText?:string
-
+  partnersText?: string;
 }
-
 
 export interface GetEdicaoParams {
   /** Busca textual em nome / descrição da edição */
