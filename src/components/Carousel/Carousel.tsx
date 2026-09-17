@@ -19,7 +19,7 @@ const slide1 = {
 const slide2 = {
   backgroundUrl: "/assets/images/slide2.png",
   title: "SOBRE",
-  concept_subtitles: ["CONCEITO", "5", "CAPES"],
+  concept_subtitles: ["CONCEITO", "6", "CAPES"],
   subtitles: [
     "Workshop de Estudantes da Pós-Graduação em Ciência da Computação (WEPGCOMP) da Universidade Federal da Bahia (UFBA). O objetivo do evento é apresentar as pesquisas em andamento realizadas pelos alunos de doutorado (a partir do segundo ano), bem como propiciar um ambiente de troca de conhecimento e integração entre a comunidade.",
   ],
