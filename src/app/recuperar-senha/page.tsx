@@ -61,11 +61,12 @@ export default function RecuperarSenha() {
           /* Tela de confirmação pós-envio */
           <div className="flex flex-col items-center gap-4 text-center">
             <CheckCircle className="h-16 w-16 text-green-500" />
-            <h2 className="text-xl font-bold text-slate-800">E-mail enviado!</h2>
+            <h2 className="text-xl font-bold text-slate-800">
+              E-mail enviado!
+            </h2>
             <p className="max-w-sm text-slate-600">
-              Confira sua caixa de entrada em{" "}
-              <strong>{email}</strong>. Siga as instruções para redefinir sua
-              senha.
+              Confira sua caixa de entrada em <strong>{email}</strong>. Siga as
+              instruções para redefinir sua senha.
             </p>
             <Link
               href="/login"
@@ -111,7 +112,9 @@ export default function RecuperarSenha() {
               />
             </Campo>
 
-            <Button size="lg" variante="primary"
+            <Button
+              size="lg"
+              variante="primary"
               type="button"
               larguraTotal
               disabled={!email || !!error}
@@ -121,10 +124,7 @@ export default function RecuperarSenha() {
             </Button>
 
             <div className="mt-5 text-center">
-              <Link
-                href="/login"
-                className={obterClassesBotao("outline")}
-              >
+              <Link href="/login" className={obterClassesBotao("outline")}>
                 <ArrowLeft data-icon="inline-start" />
                 Voltar para o login
               </Link>

@@ -1,5 +1,5 @@
-"use client"
-import axiosInstance from '@/utils/api';
+"use client";
+import axiosInstance from "@/utils/api";
 import { api } from "@/context/AuthProvider/util";
 import { unwrapPaginatedList } from "@/types/api";
 import { Edicao, EdicaoParams, GetEdicaoParams } from "@/models/edicao";

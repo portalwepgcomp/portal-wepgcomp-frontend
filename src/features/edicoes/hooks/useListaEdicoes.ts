@@ -7,7 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useEdicao } from "@/hooks/useEdicao";
 import { edicaoApi } from "@/services/edicao";
 import type { Edicao as EdicaoType } from "@/models/edicao";
-import { unwrapPaginatedList, getPaginationMeta, PaginatedResponse } from "@/types/api";
+import {
+  unwrapPaginatedList,
+  getPaginationMeta,
+  PaginatedResponse,
+} from "@/types/api";
 
 /**
  * Estado + ações da listagem de edições do evento.
@@ -23,7 +27,9 @@ export function useListaEdicoes() {
   const [busca, setBusca] = useState("");
   const buscaTrim = useDeferredValue(busca).trim();
 
-  const { data, isLoading, refetch } = useQuery<EdicaoType[] | PaginatedResponse<EdicaoType>>({
+  const { data, isLoading, refetch } = useQuery<
+    EdicaoType[] | PaginatedResponse<EdicaoType>
+  >({
     queryKey: ["editions", buscaTrim],
     queryFn: () => edicaoApi.listEdicao(buscaTrim || undefined),
   });

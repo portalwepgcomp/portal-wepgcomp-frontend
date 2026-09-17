@@ -74,7 +74,11 @@ export function FormContato() {
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Campo
-          label={<span className="text-sm font-medium text-slate-700">Seu Nome:</span>}
+          label={
+            <span className="text-sm font-medium text-slate-700">
+              Seu Nome:
+            </span>
+          }
           htmlFor="name"
           erro={errors.name?.message}
           className="mb-0"
@@ -88,7 +92,11 @@ export function FormContato() {
         </Campo>
 
         <Campo
-          label={<span className="text-sm font-medium text-slate-700">Seu E-mail:</span>}
+          label={
+            <span className="text-sm font-medium text-slate-700">
+              Seu E-mail:
+            </span>
+          }
           htmlFor="email"
           erro={errors.email?.message}
           className="mb-0"
@@ -104,7 +112,9 @@ export function FormContato() {
       </div>
 
       <Campo
-        label={<span className="text-sm font-medium text-slate-700">Mensagem:</span>}
+        label={
+          <span className="text-sm font-medium text-slate-700">Mensagem:</span>
+        }
         htmlFor="text"
         erro={errors.text?.message}
         className="mb-1"
@@ -119,7 +129,9 @@ export function FormContato() {
       </Campo>
 
       <div className="flex justify-end pt-1">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           disabled={!Edicao?.isActive || isSubmitting}
         >

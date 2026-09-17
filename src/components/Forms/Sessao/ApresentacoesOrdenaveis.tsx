@@ -8,7 +8,6 @@ import type { ApresentacaoOpt } from "./useFormSessaoApresentacoes";
 const selectClasse =
   "w-full rounded-md border border-[#d9dce0] bg-white px-3 py-2.5 text-sm leading-normal text-foreground transition hover:border-[#bdc1c6] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10";
 
-
 interface ApresentacoesOrdenaveisProps {
   availableOptions: ApresentacaoOpt[];
   orderedApresentacoes: ApresentacaoOpt[];
@@ -84,7 +83,8 @@ export default function ApresentacoesOrdenaveis({
               >
                 <td className="p-2 align-middle">
                   <div className="mr-2.5 inline-flex gap-1" role="group">
-                    <Button size="lg"
+                    <Button
+                      size="lg"
                       type="button"
                       variante="secondary"
                       title="Subir"
@@ -93,7 +93,8 @@ export default function ApresentacoesOrdenaveis({
                     >
                       ↑
                     </Button>
-                    <Button size="lg"
+                    <Button
+                      size="lg"
                       type="button"
                       variante="secondary"
                       title="Descer"
@@ -108,7 +109,8 @@ export default function ApresentacoesOrdenaveis({
                 <td className="p-2 align-middle">{row.title}</td>
                 <td className="p-2 align-middle">{row.presenterName}</td>
                 <td className="p-2 align-middle">
-                  <Button size="lg"
+                  <Button
+                    size="lg"
                     type="button"
                     variante="danger"
                     title="Excluir"

@@ -149,7 +149,11 @@ export default function FormSessaoApresentacoes({
         erro={errors.sala?.message}
         className="mb-1"
       >
-        <select id="sa-sala-select" className={selectClasse} {...register("sala")}>
+        <select
+          id="sa-sala-select"
+          className={selectClasse}
+          {...register("sala")}
+        >
           <option value="" hidden>
             {formApresentacoesFields.sala.placeholder}
           </option>
@@ -225,7 +229,9 @@ export default function FormSessaoApresentacoes({
       </Campo>
 
       <div className="flex justify-center">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           id="sa-submit-button"
           disabled={!edicao?.isActive}

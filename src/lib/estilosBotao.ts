@@ -24,8 +24,7 @@ const buttonStyles = cva(
           "border border-green-600 bg-transparent text-green-700 hover:bg-green-50 px-10 focus-visible:border-green-600 focus-visible:ring-green-600/50",
       },
       size: {
-        default:
-          "h-8 gap-1.5",
+        default: "h-8 gap-1.5",
         xs: "h-6 gap-1 rounded-[min(var(--button-radius-md),10px)] text-xs [[data-slot=button-group]_&]:rounded-[var(--button-radius-lg)] [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1 rounded-[min(var(--button-radius-md),12px)] text-[0.8rem] [[data-slot=button-group]_&]:rounded-[var(--button-radius-lg)] [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 gap-1.5",
@@ -62,7 +61,9 @@ const variantes: Record<VarianteBotao, ButtonVariant> = {
   activate2: "activate2",
 };
 
-export function resolverVarianteBotao(variante: VarianteBotao = "primary"): ButtonVariant {
+export function resolverVarianteBotao(
+  variante: VarianteBotao = "primary",
+): ButtonVariant {
   return variantes[variante];
 }
 

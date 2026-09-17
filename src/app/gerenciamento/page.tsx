@@ -27,7 +27,10 @@ const Index = () => {
             <p className="mb-8 text-sm text-muted">
               Envie mensagens para grupos específicos de usuários do sistema
             </p>
-            <Button size="lg" variante="primary" className="mt-auto"
+            <Button
+              size="lg"
+              variante="primary"
+              className="mt-auto"
               larguraTotal
               onClick={() => router.push("/gerenciamento/enviar-email")}
             >
@@ -42,8 +45,13 @@ const Index = () => {
             <h3 className="mb-2 text-lg font-semibold text-foreground">
               Professores
             </h3>
-            <p className="mb-8 text-sm text-muted">Cadastre novos professores</p>
-            <Button size="lg" variante="primary" className="mt-auto"
+            <p className="mb-8 text-sm text-muted">
+              Cadastre novos professores
+            </p>
+            <Button
+              size="lg"
+              variante="primary"
+              className="mt-auto"
               larguraTotal
               onClick={() => router.push("/gerenciamento/professores")}
             >

@@ -29,7 +29,9 @@ export default function PerfilOuvinte({
       compact={compact}
     >
       <PerfilMenuSection title="Minha participação">
-        <PerfilMenuItem onClick={certificateDownload}>Certificado</PerfilMenuItem>
+        <PerfilMenuItem onClick={certificateDownload}>
+          Certificado
+        </PerfilMenuItem>
         <PerfilMenuItem href="/favoritos">Favoritos</PerfilMenuItem>
       </PerfilMenuSection>
       <PerfilMenuSection title="Conta">

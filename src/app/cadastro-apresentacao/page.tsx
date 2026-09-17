@@ -58,9 +58,14 @@ export default function CadastroApresentacao() {
 
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex items-center justify-between">
-          <Button size="lg" variante="outline" onClick={() => router.push(destinoVoltar)}>
+          <Button
+            size="lg"
+            variante="outline"
+            onClick={() => router.push(destinoVoltar)}
+          >
             <ArrowLeft />
-            Voltar para {user?.level === "Default" ? "Minha Apresentação" : "Apresentações"}
+            Voltar para{" "}
+            {user?.level === "Default" ? "Minha Apresentação" : "Apresentações"}
           </Button>
         </div>
 
@@ -81,7 +86,8 @@ export default function CadastroApresentacao() {
                     : "Formulário de Submissão"}
                 </h1>
                 <p className="mt-1 text-sm text-muted">
-                  Edição: <strong>{Edicao?.name || "WEPGCOMP"}</strong> — Preencha as informações do trabalho e anexe o slide.
+                  Edição: <strong>{Edicao?.name || "WEPGCOMP"}</strong> —
+                  Preencha as informações do trabalho e anexe o slide.
                 </p>
               </div>
             </div>

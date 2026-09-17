@@ -17,4 +17,4 @@ export const sendContactRequest = async (
       "Content-Type": "application/json",
     },
   });
-};
+};

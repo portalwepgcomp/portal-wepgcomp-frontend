@@ -37,13 +37,23 @@ export function usePerfilCertificado() {
       return;
     }
 
-    let mensagemErro = "Certificado ainda não disponível para o seu usuário nesta edição.";
+    let mensagemErro =
+      "Certificado ainda não disponível para o seu usuário nesta edição.";
     if (typeof response === "string" && response.trim()) {
       const respLower = response.toLowerCase();
-      if (respLower.includes("not found") || respLower.includes("não encontrado") || respLower.includes("404")) {
-        mensagemErro = "Nenhum certificado encontrado para o seu usuário nesta edição.";
-      } else if (respLower.includes("not generated") || respLower.includes("não gerado")) {
-        mensagemErro = "Os certificados desta edição ainda estão em fase de emissão pela comissão organizadora.";
+      if (
+        respLower.includes("not found") ||
+        respLower.includes("não encontrado") ||
+        respLower.includes("404")
+      ) {
+        mensagemErro =
+          "Nenhum certificado encontrado para o seu usuário nesta edição.";
+      } else if (
+        respLower.includes("not generated") ||
+        respLower.includes("não gerado")
+      ) {
+        mensagemErro =
+          "Os certificados desta edição ainda estão em fase de emissão pela comissão organizadora.";
       } else {
         mensagemErro = response;
       }

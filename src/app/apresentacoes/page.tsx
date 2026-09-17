@@ -9,7 +9,11 @@ export default function Apresentacoes() {
       <ListaApresentacoes
         titulo="Apresentações"
         escopo="todas"
-        criacao={{ rotulo: "Incluir Apresentação", modo: "rota", href: "/cadastro-apresentacao" }}
+        criacao={{
+          rotulo: "Incluir Apresentação",
+          modo: "rota",
+          href: "/cadastro-apresentacao",
+        }}
       />
     </ProtectedLayout>
   );

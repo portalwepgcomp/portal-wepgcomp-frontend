@@ -37,7 +37,7 @@ interface EdicaoProviderData {
 }
 
 export const EdicaoContext = createContext<EdicaoProviderData>(
-  {} as EdicaoProviderData
+  {} as EdicaoProviderData,
 );
 
 export const useEdicao = () => useContext(EdicaoContext);
@@ -144,7 +144,7 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
         setLoadingEdicao(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const updateEdicao = useCallback(
@@ -174,7 +174,7 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
         setLoadingEdicao(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const updateEdicaoActivate = useCallback(
@@ -205,7 +205,7 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
         setLoadingEdicao(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const deleteEdicao = useCallback(
@@ -237,7 +237,7 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
         setLoadingEdicao(false);
       }
     },
-    [clearEdicao, showAlert]
+    [clearEdicao, showAlert],
   );
 
   const contextValue = useMemo(
@@ -269,7 +269,7 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
       updateEdicaoActivate,
       deleteEdicao,
       clearEdicao,
-    ]
+    ],
   );
 
   return (
