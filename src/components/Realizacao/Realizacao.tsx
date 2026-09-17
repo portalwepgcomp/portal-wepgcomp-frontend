@@ -41,13 +41,12 @@ const realizacaoLogos: Logo[] = [
   },
 ];
 
-const apoioLogos: Logo[] = []
+const apoioLogos: Logo[] = [];
 
-const grupos: {titulo: string; logos: Logo[] }[] = [
-  { titulo: "Realização", logos: realizacaoLogos},
-  { titulo: "Apoio", logos: apoioLogos},
+const grupos: { titulo: string; logos: Logo[] }[] = [
+  { titulo: "Realização", logos: realizacaoLogos },
+  { titulo: "Apoio", logos: apoioLogos },
 ];
-
 
 function LogosGrupo({ logos }: { logos: Logo[] }) {
   return (
@@ -72,7 +71,6 @@ function LogosGrupo({ logos }: { logos: Logo[] }) {
 export default function Realizacao() {
   const gruposVisiveis = grupos.filter((grupo) => grupo.logos.length > 0);
   if (gruposVisiveis.length === 0) return null;
-
 
   return (
     <div className="flex w-full flex-col items-center gap-8 border-t-2 border-brand-accent bg-[#fafafa] py-12 pb-6 max-md:px-4 max-md:py-8">
