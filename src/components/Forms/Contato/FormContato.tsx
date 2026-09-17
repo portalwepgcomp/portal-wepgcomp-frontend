@@ -75,9 +75,7 @@ export function FormContato() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Campo
           label={
-            <span className="text-sm font-medium text-slate-700">
-              Seu Nome:
-            </span>
+            <span className="text-sm font-medium text-slate-700">Nome:</span>
           }
           htmlFor="name"
           erro={errors.name?.message}
@@ -93,9 +91,7 @@ export function FormContato() {
 
         <Campo
           label={
-            <span className="text-sm font-medium text-slate-700">
-              Seu E-mail:
-            </span>
+            <span className="text-sm font-medium text-slate-700">E-mail:</span>
           }
           htmlFor="email"
           erro={errors.email?.message}

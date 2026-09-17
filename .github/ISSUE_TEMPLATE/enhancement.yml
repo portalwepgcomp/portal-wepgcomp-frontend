@@ -8,7 +8,7 @@ body:
     attributes:
       label: Descrição
       description: O que deve ser feito e por quê.
-      placeholder: Ex.: Usuário autenticado edita o próprio perfil pela UI.
+      placeholder: "Ex.: Usuário autenticado edita o próprio perfil pela UI."
     validations:
       required: true
   - type: textarea
