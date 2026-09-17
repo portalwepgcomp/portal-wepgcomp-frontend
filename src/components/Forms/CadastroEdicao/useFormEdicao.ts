@@ -38,7 +38,7 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     defaultValues: { inicio: "", final: "", limite: "", salas: [] },
   });
 
-  const { setValue, handleSubmit, formState } = form;
+  const { setValue, handleSubmit, formState, trigger } = form;
 
   useEffect(() => {
     const dados = edicaoData as EdicaoFormulario | null | undefined;
@@ -63,7 +63,9 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     setValue("sessoes", dados.presentationsPerPresentationBlock ?? 0);
     setValue("submissao", dados.callForPapersText ?? "");
     setValue("limite", dados.submissionDeadline ?? "");
-  }, [edicaoData, committerList, setValue]);
+
+    void trigger();
+  }, [edicaoData, committerList, setValue, trigger]);
 
   useEffect(() => {
     getAdvisors();
@@ -93,7 +95,6 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     }
 
     const body = {
-      ...edicaoData,
       name: data.titulo,
       description: data.descricao,
       location: data.local,
