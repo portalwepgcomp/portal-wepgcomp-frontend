@@ -68,9 +68,10 @@ export default function PresentationCard({
       return;
     }
     if (presentationBookmark && presentationBookmark.bookmarked) {
-      deletePresentationBookmark(presentationBookmarkData);
       if (onDelete) {
         onDelete();
+      } else {
+        deletePresentationBookmark(presentationBookmarkData);
       }
     } else {
       postPresentationBookmark(presentationBookmarkData);
@@ -116,7 +117,8 @@ export default function PresentationCard({
         </div>
         {!!signed && (
           <div>
-            <Button size="lg"
+            <Button
+              size="lg"
               type="button"
               variante="primary"
               onClick={handleEvaluateClick}
@@ -137,9 +139,7 @@ export default function PresentationCard({
           <div onClick={handleFavorite} className="cursor-pointer">
             {presentationBookmark && (
               <Star
-                color={
-                  presentationBookmark.bookmarked ? "#F17F0C" : "#D9D9D9"
-                }
+                color={presentationBookmark.bookmarked ? "#F17F0C" : "#D9D9D9"}
               />
             )}
           </div>

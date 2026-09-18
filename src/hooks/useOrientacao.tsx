@@ -24,12 +24,15 @@ interface OrientacaoProviderData {
   getOrientacoes: () => Promise<void>;
   getOrientacaoById: (idOrientacao: string) => Promise<void>;
   postOrientacao: (body: OrientacaoParams) => Promise<void>;
-  putOrientacao: (idOrientacao: string, body: OrientacaoParams) => Promise<void>;
+  putOrientacao: (
+    idOrientacao: string,
+    body: OrientacaoParams,
+  ) => Promise<void>;
   deleteOrientacao: (idOrientacao: string) => Promise<void>;
 }
 
 export const OrientacaoContext = createContext<OrientacaoProviderData>(
-  {} as OrientacaoProviderData
+  {} as OrientacaoProviderData,
 );
 
 export const useOrientacao = () => useContext(OrientacaoContext);
@@ -93,7 +96,7 @@ export const OrientacaoProvider = ({ children }: OrientacaoProps) => {
         setLoadingOrientacao(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const putOrientacao = useCallback(
@@ -122,7 +125,7 @@ export const OrientacaoProvider = ({ children }: OrientacaoProps) => {
         setLoadingOrientacao(false);
       }
     },
-    [showAlert]
+    [showAlert],
   );
 
   const deleteOrientacao = useCallback(
@@ -152,7 +155,7 @@ export const OrientacaoProvider = ({ children }: OrientacaoProps) => {
         setLoadingOrientacao(false);
       }
     },
-    [getOrientacoes, showAlert]
+    [getOrientacoes, showAlert],
   );
 
   const contextValue = useMemo(
@@ -177,7 +180,7 @@ export const OrientacaoProvider = ({ children }: OrientacaoProps) => {
       postOrientacao,
       putOrientacao,
       deleteOrientacao,
-    ]
+    ],
   );
 
   return (

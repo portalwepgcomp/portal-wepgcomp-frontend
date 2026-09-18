@@ -1,6 +1,6 @@
-"use client"
-import axiosInstance from '@/utils/api';
-import { AvaliadorParams } from '@/models/premiacao';
+"use client";
+import axiosInstance from "@/utils/api";
+import { AvaliadorParams } from "@/models/premiacao";
 
 const baseUrlAwardedPresenters = "/awarded-presenters";
 const baseUrlAwardedPanelists = "/panelist-awards";
@@ -8,31 +8,42 @@ const baseUrlAwardedPanelists = "/panelist-awards";
 const instance = axiosInstance;
 
 export const premiacaoApi = {
-    listAwardedPanelistsById: async (idEdicao: string ) => {
-        const { data } = await instance.get(`${baseUrlAwardedPanelists}/${idEdicao}`);
+  listAwardedPanelistsById: async (idEdicao: string) => {
+    const { data } = await instance.get(
+      `${baseUrlAwardedPanelists}/${idEdicao}`,
+    );
 
-        return data;
-    },
+    return data;
+  },
 
-    listTopPanelistsById: async (idEdicao: string ) => {
-        const { data } = await instance.get(`${baseUrlAwardedPresenters}/top-panelists/${idEdicao}`);
+  listTopPanelistsById: async (idEdicao: string) => {
+    const { data } = await instance.get(
+      `${baseUrlAwardedPresenters}/top-panelists/${idEdicao}`,
+    );
 
-        return data;
-    },
+    return data;
+  },
 
-    listTopAudienceById: async (idEdicao: string ) => {
-        const { data } = await instance.get(`${baseUrlAwardedPresenters}/top-audience/${idEdicao}`);
+  listTopAudienceById: async (idEdicao: string) => {
+    const { data } = await instance.get(
+      `${baseUrlAwardedPresenters}/top-audience/${idEdicao}`,
+    );
 
-        return data;
-    },
-     createAwardedPanelists: async (body: AvaliadorParams ) => {
-        const { data } = await instance.post(`${baseUrlAwardedPanelists}/bulk`, body);
+    return data;
+  },
+  createAwardedPanelists: async (body: AvaliadorParams) => {
+    const { data } = await instance.post(
+      `${baseUrlAwardedPanelists}/bulk`,
+      body,
+    );
 
-        return data;
-    },
-    getPanelists: async (idEdicao: string) => {
-        const { data } = await instance.get(`${baseUrlAwardedPanelists}/${idEdicao}/panelists`);
+    return data;
+  },
+  getPanelists: async (idEdicao: string) => {
+    const { data } = await instance.get(
+      `${baseUrlAwardedPanelists}/${idEdicao}/panelists`,
+    );
 
-        return data;
-    },
-}
+    return data;
+  },
+};

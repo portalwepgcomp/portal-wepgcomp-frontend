@@ -8,7 +8,7 @@ body:
     attributes:
       label: Descrição
       description: O que está errado e o impacto.
-      placeholder: Ex.: Na listagem de sessões os cards não mostram editar/excluir.
+      placeholder: "Ex.: Na listagem de sessões os cards não mostram editar/excluir."
     validations:
       required: true
   - type: textarea

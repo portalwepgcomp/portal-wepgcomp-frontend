@@ -30,7 +30,9 @@ export default function PerfilApresentador({
     >
       <PerfilMenuSection title="Minha participação">
         <PerfilMenuItem href="/minha-apresentacao">Submissão</PerfilMenuItem>
-        <PerfilMenuItem onClick={certificateDownload}>Certificado</PerfilMenuItem>
+        <PerfilMenuItem onClick={certificateDownload}>
+          Certificado
+        </PerfilMenuItem>
         <PerfilMenuItem href="/favoritos">Favoritos</PerfilMenuItem>
       </PerfilMenuSection>
       <PerfilMenuSection title="Conta">

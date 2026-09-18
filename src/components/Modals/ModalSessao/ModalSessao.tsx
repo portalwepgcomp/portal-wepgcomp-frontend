@@ -68,7 +68,10 @@ export default function ModalSessao() {
           <label className="mb-2 block text-sm font-bold">{tipo.label}</label>
           <div className="flex flex-wrap gap-4">
             {tipo.options?.map((op, i) => (
-              <div className="flex items-center gap-2" key={`radio${op.value}-${i}`}>
+              <div
+                className="flex items-center gap-2"
+                key={`radio${op.value}-${i}`}
+              >
                 <input
                   type="radio"
                   className="h-4 w-4 accent-brand-blue"

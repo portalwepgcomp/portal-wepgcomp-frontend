@@ -14,7 +14,6 @@ const abas = [
   { id: 2, label: "Audiência" },
 ] as const;
 
-
 export default function Orientacoes() {
   const [secao, definirSecao] = useState<number>(0);
   const { getOrientacoes } = useOrientacao();
@@ -29,7 +28,8 @@ export default function Orientacoes() {
       <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 flex flex-col gap-6">
         <div className="flex flex-wrap items-center justify-center gap-3">
           {abas.map((aba) => (
-            <Button size="lg"
+            <Button
+              size="lg"
               key={aba.id}
               variante={secao === aba.id ? "secondary" : "outline"}
               aria-pressed={secao === aba.id}

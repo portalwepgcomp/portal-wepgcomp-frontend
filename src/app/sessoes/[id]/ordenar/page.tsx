@@ -2,10 +2,18 @@
 
 import Button from "@/components/UI/Button";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle2, GripVertical, Info, Layers } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  GripVertical,
+  Info,
+  Layers,
+} from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 
-import DraggableList, { DraggedMovement } from "@/components/DraggableList/DraggableList";
+import DraggableList, {
+  DraggedMovement,
+} from "@/components/DraggableList/DraggableList";
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
 import Banner from "@/components/UI/Banner";
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
@@ -18,7 +26,8 @@ export default function OrdenarApresentacoes() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const { getSessionById, sessao, swapPresentationsOnSession, loadingSessao } = useSession();
+  const { getSessionById, sessao, swapPresentationsOnSession, loadingSessao } =
+    useSession();
   const { Edicao } = useEdicao();
   const [listaOrdenada, setListaOrdenada] = useState<Submission[]>([]);
   const [salvo, setSalvo] = useState(false);
@@ -34,13 +43,17 @@ export default function OrdenarApresentacoes() {
       [...(sessao?.presentations ?? [])]
         .sort((a, b) => a.positionWithinBlock - b.positionWithinBlock)
         .map((p) => p.submission)
-        .filter((sub): sub is Submission => sub !== null && sub !== undefined) ?? [];
+        .filter(
+          (sub): sub is Submission => sub !== null && sub !== undefined,
+        ) ?? [];
     setListaOrdenada(sorted);
   }, [sessao]);
 
   const getPresentationId = useMemo(
-    () => (submissionId: string): string =>
-      sessao?.presentations?.find((p) => p.submissionId === submissionId)?.id ?? "",
+    () =>
+      (submissionId: string): string =>
+        sessao?.presentations?.find((p) => p.submissionId === submissionId)
+          ?.id ?? "",
     [sessao],
   );
 
@@ -62,7 +75,11 @@ export default function OrdenarApresentacoes() {
 
     if (swapBodies.length === 0) return;
 
-    const success = await swapPresentationsOnSession(sessao.id, Edicao.id, swapBodies);
+    const success = await swapPresentationsOnSession(
+      sessao.id,
+      Edicao.id,
+      swapBodies,
+    );
     if (success) {
       setListaOrdenada(data);
       setSalvo(true);
@@ -77,7 +94,11 @@ export default function OrdenarApresentacoes() {
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         {/* Navigation & Header */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <Button size="lg" variante="outline" onClick={() => router.push("/sessoes")}>
+          <Button
+            size="lg"
+            variante="outline"
+            onClick={() => router.push("/sessoes")}
+          >
             <ArrowLeft />
             Voltar para Sessões
           </Button>
@@ -85,7 +106,9 @@ export default function OrdenarApresentacoes() {
           {salvo && (
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 text-emerald-700 border border-emerald-200 shadow-sm animate-in fade-in duration-200">
               <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              <span className="text-sm font-semibold">Ordem atualizada com sucesso!</span>
+              <span className="text-sm font-semibold">
+                Ordem atualizada com sucesso!
+              </span>
             </div>
           )}
         </div>
@@ -112,7 +135,8 @@ export default function OrdenarApresentacoes() {
                     {sessao?.title || "Sessão"}
                   </h1>
                   <p className="mt-1 text-sm text-muted">
-                    Total de trabalhos: <strong>{listaOrdenada.length}</strong> apresentação(ões)
+                    Total de trabalhos: <strong>{listaOrdenada.length}</strong>{" "}
+                    apresentação(ões)
                   </p>
                 </div>
               </div>
@@ -121,7 +145,9 @@ export default function OrdenarApresentacoes() {
               <div className="mt-5 flex items-start gap-3 rounded-xl bg-blue-50/70 p-4 text-blue-900 border border-blue-100">
                 <Info className="h-5 w-5 shrink-0 text-brand-blue mt-0.5" />
                 <p className="text-sm leading-relaxed">
-                  Arraste e solte os cards na sequência desejada. A nova ordem cronológica será sincronizada automaticamente com o cronograma oficial do evento.
+                  Arraste e solte os cards na sequência desejada. A nova ordem
+                  cronológica será sincronizada automaticamente com o cronograma
+                  oficial do evento.
                 </p>
               </div>
             </div>
@@ -149,8 +175,12 @@ export default function OrdenarApresentacoes() {
                 </div>
               ) : (
                 <div className="rounded-xl border-2 border-dashed border-line p-12 text-center text-muted">
-                  <p className="text-base font-medium">Nenhuma apresentação vinculada a esta sessão.</p>
-                  <p className="mt-1 text-xs">Vincule apresentações através da edição de sessão.</p>
+                  <p className="text-base font-medium">
+                    Nenhuma apresentação vinculada a esta sessão.
+                  </p>
+                  <p className="mt-1 text-xs">
+                    Vincule apresentações através da edição de sessão.
+                  </p>
                 </div>
               )}
             </div>

@@ -44,7 +44,9 @@ export function FormCadastroApresentacao() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <IndicadorDeCarregamento />
-        <p className="mt-4 text-sm font-semibold text-muted">Processando submissão e enviando arquivos...</p>
+        <p className="mt-4 text-sm font-semibold text-muted">
+          Processando submissão e enviando arquivos...
+        </p>
       </div>
     );
   }
@@ -169,7 +171,10 @@ export function FormCadastroApresentacao() {
           <Campo
             label={
               <span className="text-sm font-semibold text-foreground">
-                Coorientador <span className="text-xs font-normal text-muted">(opcional)</span>
+                Coorientador{" "}
+                <span className="text-xs font-normal text-muted">
+                  (opcional)
+                </span>
               </span>
             }
             htmlFor="coorientador"
@@ -207,7 +212,9 @@ export function FormCadastroApresentacao() {
                   mask="(__) _____-____"
                   replacement={{ _: /\d/ }}
                   value={value ?? ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange(e.target.value)
+                  }
                   onBlur={onBlur}
                 />
               )}
@@ -228,7 +235,10 @@ export function FormCadastroApresentacao() {
         <Campo
           label={
             <span className="text-sm font-semibold text-foreground">
-              Link de Apoio / Hospedagem <span className="text-xs font-normal text-muted">(Google Drive, OneDrive, etc. - opcional)</span>
+              Link de Apoio / Hospedagem{" "}
+              <span className="text-xs font-normal text-muted">
+                (Google Drive, OneDrive, etc. - opcional)
+              </span>
             </span>
           }
           htmlFor="linkApresentacao"
@@ -285,12 +295,18 @@ export function FormCadastroApresentacao() {
 
       {/* Botões de Ação */}
       <div className="flex flex-wrap items-center justify-end gap-4 border-t border-line pt-6">
-        <Button size="lg" variante="primary"
+        <Button
+          size="lg"
+          variante="primary"
           type="submit"
           disabled={!edicaoAtiva}
         >
-          <Save  />
-          <span>{submission && submission?.id ? "Salvar Alterações" : "Concluir Submissão"}</span>
+          <Save />
+          <span>
+            {submission && submission?.id
+              ? "Salvar Alterações"
+              : "Concluir Submissão"}
+          </span>
         </Button>
       </div>
     </form>

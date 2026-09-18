@@ -16,6 +16,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV REGISTRATION_OPEN=true
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -29,5 +30,6 @@ USER nextjs
 EXPOSE 5000
 ENV PORT=5000
 ENV HOSTNAME="0.0.0.0"
+ENV REGISTRATION_OPEN=true
 
 CMD ["node", "server.js"]

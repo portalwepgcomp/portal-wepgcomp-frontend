@@ -11,7 +11,10 @@ interface GlobalErrorProps {
   reset: () => void;
 }
 
-export default function GlobalError({ error, reset }: Readonly<GlobalErrorProps>) {
+export default function GlobalError({
+  error,
+  reset,
+}: Readonly<GlobalErrorProps>) {
   useEffect(() => {
     registrarErro("Erro capturado pelo global error boundary", error);
   }, [error]);
@@ -29,16 +32,18 @@ export default function GlobalError({ error, reset }: Readonly<GlobalErrorProps>
           </h1>
 
           <p className="mt-2 text-sm text-[#64748b]">
-            Ocorreu uma falha no carregamento estrutural da aplicação. Por favor, recarregue a página.
+            Ocorreu uma falha no carregamento estrutural da aplicação. Por
+            favor, recarregue a página.
           </p>
 
           <div className="mt-6">
-            <Button size="lg"
+            <Button
+              size="lg"
               type="button"
               onClick={() => reset()}
               variante="primary"
             >
-              <RefreshCw  />
+              <RefreshCw />
               Recarregar Aplicação
             </Button>
           </div>

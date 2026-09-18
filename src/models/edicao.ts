@@ -8,7 +8,7 @@ export interface EdicaoParams {
   location?: string;
   coordinatorId?: string;
   organizingCommitteeIds?: string[];
-  roomName?: string;
+  roomName?: string[];
   itSupportIds?: string[];
   administrativeSupportIds?: string[];
   communicationIds?: string[];
@@ -16,10 +16,8 @@ export interface EdicaoParams {
   presentationDuration?: number;
   callForPapersText?: string;
   submissionDeadline?: string;
-  partnersText?:string
-
+  partnersText?: string;
 }
-
 
 export interface GetEdicaoParams {
   /** Busca textual em nome / descrição da edição */

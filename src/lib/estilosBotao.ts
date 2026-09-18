@@ -15,13 +15,16 @@ const buttonStyles = cva(
           "bg-orange-700 text-white hover:bg-orange-800 aria-expanded:bg-orange-800 aria-expanded:text-white",
         ghost:
           "bg-transparent text-gray-800 hover:bg-gray-100 hover:text-gray-600 aria-expanded:bg-gray-100 aria-expanded:text-gray-600",
+        success:
+          "bg-green-700 text-white hover:bg-green-800 focus-visible:border-green-700 focus-visible:ring-green-700/50",
+        successLight:
+          "bg-green-100 text-green-800 hover:bg-green-200 focus-visible:border-green-700 focus-visible:ring-green-700/50",
         destructive:
           "bg-red-700 text-white hover:bg-red-800 focus-visible:border-red-700 focus-visible:ring-red-700/50",
         link: "text-blue-800 underline-offset-4 hover:underline",
       },
       size: {
-        default:
-          "h-8 gap-1.5",
+        default: "h-8 gap-1.5",
         xs: "h-6 gap-1 rounded-[min(var(--button-radius-md),10px)] text-xs [[data-slot=button-group]_&]:rounded-[var(--button-radius-lg)] [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1 rounded-[min(var(--button-radius-md),12px)] text-[0.8rem] [[data-slot=button-group]_&]:rounded-[var(--button-radius-lg)] [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 gap-1.5",
@@ -45,18 +48,31 @@ export function buttonVariants(props?: Parameters<typeof buttonStyles>[0]) {
   return twMerge(buttonStyles(props));
 }
 
-export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
-export type VarianteBotao = "primary" | "secondary" | "outline" | "danger" | "ghost";
+export type ButtonVariant = NonNullable<
+  VariantProps<typeof buttonVariants>["variant"]
+>;
+export type VarianteBotao =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "success"
+  | "successLight"
+  | "danger"
+  | "ghost";
 
 const variantes: Record<VarianteBotao, ButtonVariant> = {
   primary: "default",
   secondary: "secondary",
   outline: "outline",
+  success: "success",
+  successLight: "successLight",
   danger: "destructive",
   ghost: "ghost",
 };
 
-export function resolverVarianteBotao(variante: VarianteBotao = "primary"): ButtonVariant {
+export function resolverVarianteBotao(
+  variante: VarianteBotao = "primary",
+): ButtonVariant {
   return variantes[variante];
 }
 

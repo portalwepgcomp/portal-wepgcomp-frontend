@@ -12,65 +12,65 @@ import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { cn } from "@/utils/cn";
 
 export default function Orientacao() {
-	const { postOrientacao, putOrientacao, getOrientacoes, orientacoes } =
-		useOrientacao();
+  const { postOrientacao, putOrientacao, getOrientacoes, orientacoes } =
+    useOrientacao();
 
-	const [content, setContent] = useState(orientacoes?.summary || "");
+  const [content, setContent] = useState(orientacoes?.summary || "");
 
-	const handleEditOrientacao = () => {
-		const idOrientacao = orientacoes?.id;
-		const eventEditionId = getEventEditionIdStorage();
+  const handleEditOrientacao = () => {
+    const idOrientacao = orientacoes?.id;
+    const eventEditionId = getEventEditionIdStorage();
 
-		if (idOrientacao) {
-			putOrientacao(idOrientacao, {
-				eventEditionId: eventEditionId ?? "",
-				summary: content,
-			});
-		} else {
-			postOrientacao({
-				eventEditionId: eventEditionId ?? "",
-				summary: content,
-			});
-		}
-	};
+    if (idOrientacao) {
+      putOrientacao(idOrientacao, {
+        eventEditionId: eventEditionId ?? "",
+        summary: content,
+      });
+    } else {
+      postOrientacao({
+        eventEditionId: eventEditionId ?? "",
+        summary: content,
+      });
+    }
+  };
 
-	useEffect(() => {
-		getOrientacoes();
-	}, [getOrientacoes]);
+  useEffect(() => {
+    getOrientacoes();
+  }, [getOrientacoes]);
 
-	useEffect(() => {
-		setContent(orientacoes?.summary || "");
-	}, [orientacoes?.summary]);
+  useEffect(() => {
+    setContent(orientacoes?.summary || "");
+  }, [orientacoes?.summary]);
 
-	return (
-		<div
-			id="Orientacao"
-			className={cn(
-				"relative flex w-full min-h-[600px] flex-col items-center justify-center",
-				"bg-[#ea8b2b] p-8 text-white",
-				"max-[480px]:w-inherit max-[480px]:ml-0 max-[480px]:px-8 max-[480px]:py-4",
-			)}
-		>
-			<div className="orientacao-titulo mb-4 text-center text-4xl font-bold text-white max-[480px]:mb-4">
-				Orientações
-			</div>
+  return (
+    <div
+      id="Orientacao"
+      className={cn(
+        "relative flex w-full min-h-[600px] flex-col items-center justify-center",
+        "bg-[#ea8b2b] p-8 text-white",
+        "max-[480px]:w-inherit max-[480px]:ml-0 max-[480px]:px-8 max-[480px]:py-4",
+      )}
+    >
+      <div className="orientacao-titulo mb-4 text-center text-4xl font-bold text-white max-[480px]:mb-4">
+        Orientações
+      </div>
 
-			<HtmlEditorComponent
-				content={content}
-				onChange={(newValue) => setContent(newValue)}
-				handleEditField={handleEditOrientacao}
-			/>
+      <HtmlEditorComponent
+        content={content}
+        onChange={(newValue) => setContent(newValue)}
+        handleEditField={handleEditOrientacao}
+      />
 
-			<Link
-				className={cn(
-					"orientacao-link mt-10",
-					obterClassesBotao("secondary"),
-					"max-[480px]:mt-5",
-				)}
-				href="/orientacoes"
-			>
-				Ver todas as orientações
-			</Link>
-		</div>
-	);
+      <Link
+        className={cn(
+          "orientacao-link mt-10",
+          obterClassesBotao("secondary"),
+          "max-[480px]:mt-5",
+        )}
+        href="/orientacoes"
+      >
+        Ver todas as orientações
+      </Link>
+    </div>
+  );
 }

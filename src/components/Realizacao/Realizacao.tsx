@@ -41,14 +41,11 @@ const realizacaoLogos: Logo[] = [
   },
 ];
 
-const apoioLogos: Logo[] = [
-  {
-    src: "/assets/images/WEX_Logo_Red_Vector.svg",
-    alt: "WEX Logo",
-    width: 150,
-    height: 150,
-    priority: true,
-  },
+const apoioLogos: Logo[] = [];
+
+const grupos: { titulo: string; logos: Logo[] }[] = [
+  { titulo: "Realização", logos: realizacaoLogos },
+  { titulo: "Apoio", logos: apoioLogos },
 ];
 
 function LogosGrupo({ logos }: { logos: Logo[] }) {
@@ -72,22 +69,20 @@ function LogosGrupo({ logos }: { logos: Logo[] }) {
 }
 
 export default function Realizacao() {
+  const gruposVisiveis = grupos.filter((grupo) => grupo.logos.length > 0);
+  if (gruposVisiveis.length === 0) return null;
+
   return (
     <div className="flex w-full flex-col items-center gap-8 border-t-2 border-brand-accent bg-[#fafafa] py-12 pb-6 max-md:px-4 max-md:py-8">
-      <div className="flex w-[90%] flex-wrap items-start justify-between gap-16 max-md:flex-col max-md:items-center max-md:gap-12">
-        <div className="flex flex-col items-center gap-6">
-          <h3 className="relative mb-2 text-2xl font-bold uppercase tracking-wide text-brand-navy after:mx-auto after:mt-2 after:block after:h-[3px] after:w-10 after:rounded after:bg-brand-accent max-md:text-[1.3rem]">
-            Realização
-          </h3>
-          <LogosGrupo logos={realizacaoLogos} />
-        </div>
-
-        <div className="flex flex-col items-center gap-6">
-          <h3 className="relative mb-2 text-2xl font-bold uppercase tracking-wide text-brand-navy after:mx-auto after:mt-2 after:block after:h-[3px] after:w-10 after:rounded after:bg-brand-accent max-md:text-[1.3rem]">
-            Apoio
-          </h3>
-          <LogosGrupo logos={apoioLogos} />
-        </div>
+      <div className="flex w-[90%] flex-wrap items-start justify-center gap-16 max-md:flex-col max-md:items-center max-md:gap-12">
+        {gruposVisiveis.map(({ titulo, logos }) => (
+          <div key={titulo} className="flex flex-col items-center gap-6">
+            <h3 className="relative mb-2 text-2xl font-bold uppercase tracking-wide text-brand-navy after:mx-auto after:mt-2 after:block after:h-[3px] after:w-10 after:rounded after:bg-brand-accent max-md:text-[1.3rem]">
+              {titulo}
+            </h3>
+            <LogosGrupo logos={logos} />
+          </div>
+        ))}
       </div>
     </div>
   );

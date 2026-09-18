@@ -158,12 +158,12 @@ export default function Premiacao() {
                   placeholder="Pesquise pelo nome da apresentação"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-
                 />
-                <Button variante="primary" size="lg"
+                <Button
+                  variante="primary"
+                  size="lg"
                   type="button"
                   aria-label="Buscar apresentações"
-
                 >
                   <Image
                     src="/assets/images/search.svg"
@@ -174,7 +174,9 @@ export default function Premiacao() {
                 </Button>
               </div>
 
-              <Button size="lg" variante="primary"
+              <Button
+                size="lg"
+                variante="primary"
                 type="button"
 
                 onClick={handleRecalculateScores}
@@ -184,7 +186,8 @@ export default function Premiacao() {
               </Button>
 
               <div className="relative" ref={resetRef}>
-                <Button size="lg"
+                <Button
+                  size="lg"
                   type="button"
                   variante="danger"
                   aria-expanded={resetOpen}
@@ -196,7 +199,10 @@ export default function Premiacao() {
                   {isResetting ? "Resetando..." : "Resetar ▾"}
                 </Button>
                 {resetOpen && (
-                  <ul id="opcoes-reset" className="absolute right-0 z-50 mt-1 min-w-[14rem] list-none rounded-md border border-line bg-white py-1 shadow-lg">
+                  <ul
+                    id="opcoes-reset"
+                    className="absolute right-0 z-50 mt-1 min-w-[14rem] list-none rounded-md border border-line bg-white py-1 shadow-lg"
+                  >
                     {[
                       {
                         label: "Resetar Scores da Banca",
@@ -227,7 +233,8 @@ export default function Premiacao() {
               </div>
 
               {(["banca", "avaliadores", "publico"] as const).map((cat) => (
-                <Button size="lg"
+                <Button
+                  size="lg"
                   key={cat}
                   type="button"
                   variante={activeCategory === cat ? "secondary" : "outline"}

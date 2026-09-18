@@ -19,7 +19,7 @@ const slide1 = {
 const slide2 = {
   backgroundUrl: "/assets/images/slide2.png",
   title: "SOBRE",
-  concept_subtitles: ["CONCEITO", "5", "CAPES"],
+  concept_subtitles: ["CONCEITO", "6", "CAPES"],
   subtitles: [
     "Workshop de Estudantes da Pós-Graduação em Ciência da Computação (WEPGCOMP) da Universidade Federal da Bahia (UFBA). O objetivo do evento é apresentar as pesquisas em andamento realizadas pelos alunos de doutorado (a partir do segundo ano), bem como propiciar um ambiente de troca de conhecimento e integração entre a comunidade.",
   ],
@@ -65,11 +65,10 @@ export default function Carousel() {
         imageUrl={slide1.backgroundUrl}
         isActive={activeIndex === 0}
       >
-        <h2 className={titulo}>
-          {Edicao?.name || "WEPGCOMP"}
-        </h2>
+        <h2 className={titulo}>{Edicao?.name || "WEPGCOMP"}</h2>
         <p className={paragrafo}>
-          {Edicao?.description || "Workshop de Estudantes da Pós-Graduação em Ciência da Computação"}
+          {Edicao?.description ||
+            "Workshop de Estudantes da Pós-Graduação em Ciência da Computação"}
         </p>
         <p className={cn(paragrafo, "font-semibold text-amber-300")}>
           {Edicao?.startDate
@@ -113,14 +112,19 @@ export default function Carousel() {
         <h2 className={titulo}>{slide3.title}</h2>
         <div className="flex flex-col items-center gap-2 my-2">
           <p className={paragrafo}>
-            <span className="font-semibold text-amber-300">Inscrições:</span> até {formatDateUniq(Edicao?.startDate)}
+            <span className="font-semibold text-amber-300">Inscrições:</span>{" "}
+            até {formatDateUniq(Edicao?.startDate)}
           </p>
           <p className={paragrafo}>
-            <span className="font-semibold text-amber-300">Data do evento:</span>{" "}
+            <span className="font-semibold text-amber-300">
+              Data do evento:
+            </span>{" "}
             {formatDateEvent(Edicao?.startDate, Edicao?.endDate)}
           </p>
           <p className={paragrafo}>
-            <span className="font-semibold text-amber-300">Data limite para submissão:</span>{" "}
+            <span className="font-semibold text-amber-300">
+              Data limite para submissão:
+            </span>{" "}
             {formatDateUniq(Edicao?.submissionDeadline)}
           </p>
         </div>
