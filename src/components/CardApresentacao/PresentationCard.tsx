@@ -5,6 +5,7 @@ import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useContext, useEffect, useState } from "react";
 
 import Star from "@/components/UI/Star";
+import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { usePresentation } from "@/hooks/usePresentation";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -13,6 +14,7 @@ import { PresentationBookmark } from "@/models/presentation";
 interface PresentationCardProps {
   key?: string;
   id: string;
+  submissionId?: string;
   title: string;
   subtitle: string;
   name: string;
@@ -27,6 +29,7 @@ interface PresentationCardProps {
 export default function PresentationCard({
   key,
   id,
+  submissionId,
   title,
   subtitle,
   name,
@@ -47,6 +50,7 @@ export default function PresentationCard({
   const [presentationBookmark, setpresentationBookmark] =
     useState<PresentationBookmark>();
 
+  const { baixarPdf, baixandoPdf } = useApresentacaoPdf();
   const { signed } = useContext(AuthContext);
   const router = useRouter();
 
@@ -141,15 +145,14 @@ export default function PresentationCard({
           </div>
         )}
         <div className="flex items-center">
-          <a
-            className="rounded-[20px] bg-white px-5 py-0.5 font-semibold text-brand-orange no-underline"
-            href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${pdfFile}`}
-            download
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            className="rounded-[20px] bg-white px-5 py-0.5 font-semibold text-brand-orange disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => baixarPdf(submissionId, pdfFile)}
+            disabled={baixandoPdf || !pdfFile}
           >
             Baixar apresentação
-          </a>
+          </button>
         </div>
       </div>
 

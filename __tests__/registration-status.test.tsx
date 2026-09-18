@@ -112,8 +112,6 @@ describe("fluxo de login", () => {
     expect(
       screen.queryByRole("link", { name: "Cadastre-se" }),
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Inscrições encerradas"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Inscrições encerradas")).not.toBeInTheDocument();
   });
 });

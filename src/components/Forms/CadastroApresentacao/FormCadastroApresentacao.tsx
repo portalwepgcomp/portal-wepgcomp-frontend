@@ -8,6 +8,7 @@ import { FileUp, Save, Sparkles, UserCheck } from "lucide-react";
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
 import { Campo, Input, Textarea } from "@/components/UI/Input";
 import { cn } from "@/utils/cn";
+import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { useFormCadastroApresentacao } from "./useFormCadastroApresentacao";
 
 const labelObrigatorio = (texto: string) => (
@@ -36,6 +37,8 @@ export function FormCadastroApresentacao() {
     aoMudarArquivo,
     aoMudarTextarea,
   } = useFormCadastroApresentacao();
+
+  const { baixarPdf, baixandoPdf } = useApresentacaoPdf();
 
   if (carregandoEnvio) {
     return (
@@ -275,14 +278,14 @@ export function FormCadastroApresentacao() {
                   Arquivo selecionado: <strong>{nomeArquivo}</strong>
                 </span>
                 {submission?.id && (
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${nomeArquivo}`}
-                    download
-                    target="_blank"
-                    className="ml-auto text-xs font-semibold text-brand-blue hover:underline"
+                  <button
+                    type="button"
+                    onClick={() => baixarPdf(submission.id, nomeArquivo)}
+                    disabled={baixandoPdf}
+                    className="ml-auto text-xs font-semibold text-brand-blue hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Baixar atual
-                  </a>
+                  </button>
                 )}
               </div>
             )}

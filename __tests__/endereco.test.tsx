@@ -54,7 +54,9 @@ describe("Endereço do evento", () => {
     expect(screen.getByLabelText("Localização da edição")).toHaveValue(
       mockLocation,
     );
-    expect(screen.queryByText(/Instituto de Computação/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Instituto de Computação/i),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/Pavilhão de Aulas/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Av\. Milton Santos/i)).not.toBeInTheDocument();
   });
@@ -66,9 +68,7 @@ describe("Endereço do evento", () => {
     fireEvent.change(screen.getByLabelText("Localização da edição"), {
       target: { value: newLocation },
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Salvar localização" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Salvar localização" }));
 
     expect(mockUpdateEdicao).toHaveBeenCalledWith("edition-2026", {
       location: newLocation,

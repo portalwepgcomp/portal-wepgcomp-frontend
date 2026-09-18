@@ -27,6 +27,7 @@ export default function ListaBancas() {
                 <PresentationCard
                   key={pres.id}
                   id={pres.id}
+                  submissionId={pres?.submission?.id}
                   title={pres?.submission?.title ?? ""}
                   subtitle={pres?.submission?.abstract ?? ""}
                   name={pres?.submission?.mainAuthor?.name ?? ""}
