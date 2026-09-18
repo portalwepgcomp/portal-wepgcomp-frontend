@@ -56,11 +56,25 @@ export function useListaEdicoes() {
 
     try {
       await edicaoApi.setRegistrationOpen(id, abrir);
-      await refetch();
+
+      // O refetch do react-query v5 resolve com isError em vez de lançar, então
+      // sem checar aqui a lista seguiria desatualizada sob um alerta de sucesso.
+      const recarga = await refetch();
+      const titulo = abrir ? "Inscrições abertas!" : "Inscrições fechadas!";
+
+      if (recarga.isError) {
+        showAlert({
+          icon: "warning",
+          title: titulo,
+          text: "A alteração foi salva, mas a lista não pôde ser atualizada. Recarregue a página para ver o estado atual.",
+          confirmButtonText: "Entendido",
+        });
+        return;
+      }
 
       showAlert({
         icon: "success",
-        title: abrir ? "Inscrições abertas!" : "Inscrições fechadas!",
+        title: titulo,
         timer: 3000,
         showConfirmButton: false,
       });
