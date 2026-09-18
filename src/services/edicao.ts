@@ -54,6 +54,15 @@ export const edicaoApi = {
     return data;
   },
 
+  setRegistrationOpen: async (idEdicao: string, registrationOpen: boolean) => {
+    const { data } = await instance.patch(
+      `${baseUrl}/registration-open/${idEdicao}`,
+      { registrationOpen },
+    );
+
+    return data;
+  },
+
   updateEdicaoActivate: async (idEdicao: string, body: EdicaoParams) => {
     const { data } = await instance.patch(
       `${baseUrl}/activate/${idEdicao}`,

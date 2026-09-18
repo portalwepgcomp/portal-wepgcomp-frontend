@@ -4,8 +4,11 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import { useSweetAlert } from "@/hooks/useAlert";
 import { useEdicao } from "@/hooks/useEdicao";
 import { edicaoApi } from "@/services/edicao";
+import { getErrorMessage } from "@/utils/error";
+import { registrarErro } from "@/utils/logError";
 import type { Edicao as EdicaoType } from "@/models/edicao";
 import {
   unwrapPaginatedList,
@@ -22,7 +25,9 @@ import {
  */
 export function useListaEdicoes() {
   const { deleteEdicao, Edicao } = useEdicao();
+  const { showAlert } = useSweetAlert();
   const router = useRouter();
+  const [alternandoInscricoes, setAlternandoInscricoes] = useState(false);
 
   const [busca, setBusca] = useState("");
   const buscaTrim = useDeferredValue(busca).trim();
@@ -46,6 +51,36 @@ export function useListaEdicoes() {
     router.push(`/edicoes/${id}/editar`);
   };
 
+  const alternarInscricoes = async (id: string, abrir: boolean) => {
+    setAlternandoInscricoes(true);
+
+    try {
+      await edicaoApi.setRegistrationOpen(id, abrir);
+      await refetch();
+
+      showAlert({
+        icon: "success",
+        title: abrir ? "Inscrições abertas!" : "Inscrições fechadas!",
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    } catch (err: unknown) {
+      registrarErro("Erro ao alternar inscrições", err);
+
+      showAlert({
+        icon: "error",
+        title: "Erro ao alterar inscrições",
+        text: getErrorMessage(
+          err,
+          "Não foi possível alterar o período de inscrições.",
+        ),
+        confirmButtonText: "Retornar",
+      });
+    } finally {
+      setAlternandoInscricoes(false);
+    }
+  };
+
   const excluir = async (id: string) => {
     const status = await deleteEdicao(id);
     if (status) refetch();
@@ -59,7 +94,9 @@ export function useListaEdicoes() {
     busca,
     setBusca,
     edicaoAtiva,
+    alternandoInscricoes,
     abrirEdicao,
+    alternarInscricoes,
     excluir,
     recarregar: refetch,
   };

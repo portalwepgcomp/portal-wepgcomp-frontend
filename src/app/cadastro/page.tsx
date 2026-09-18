@@ -1,7 +1,10 @@
 import { CadastroContent } from "@/components/Auth/CadastroContent";
-import { isRegistrationOpen } from "@/lib/registration";
+import { obterStatusInscricoes } from "@/lib/registration";
 
 export const dynamic = "force-dynamic";
-export default function Cadastro() {
-  return <CadastroContent registrationOpen={isRegistrationOpen()} />;
+
+export default async function Cadastro() {
+  const { registrationOpen } = await obterStatusInscricoes();
+
+  return <CadastroContent registrationOpen={registrationOpen} />;
 }
