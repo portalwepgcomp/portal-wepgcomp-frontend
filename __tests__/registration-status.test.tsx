@@ -72,7 +72,10 @@ describe("status das inscrições", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://api.test/event/registration-status",
-      { cache: "no-store" },
+      expect.objectContaining({
+        cache: "no-store",
+        signal: expect.any(AbortSignal),
+      }),
     );
   });
 
@@ -106,6 +109,28 @@ describe("status das inscrições", () => {
     });
   });
 
+  it("aborta e considera fechado quando a API não responde a tempo", async () => {
+    jest.useFakeTimers();
+
+    fetchMock.mockImplementation(
+      (_url: unknown, init: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          init.signal.addEventListener("abort", () =>
+            reject(new Error("The operation was aborted.")),
+          );
+        }),
+    );
+
+    const promessa = obterStatusInscricoes();
+    jest.advanceTimersByTime(5000);
+
+    await expect(promessa).resolves.toEqual({
+      registrationOpen: false,
+      eventEditionId: null,
+    });
+
+    jest.useRealTimers();
+  });
   it("não consulta a API quando a URL não está configurada", async () => {
     delete process.env.NEXT_PUBLIC_API_URL;
 

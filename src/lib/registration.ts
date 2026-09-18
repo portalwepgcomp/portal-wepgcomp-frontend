@@ -3,6 +3,8 @@ export interface StatusInscricoes {
   eventEditionId: string | null;
 }
 
+const TIMEOUT_MS = 5000;
+
 const STATUS_FECHADO: StatusInscricoes = {
   registrationOpen: false,
   eventEditionId: null,
@@ -19,9 +21,16 @@ export async function obterStatusInscricoes(): Promise<StatusInscricoes> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!baseUrl) return STATUS_FECHADO;
 
+  // AbortController em vez de AbortSignal.timeout: o segundo não existe em
+  // todo runtime (o jsdom não implementa), e ausente ele derrubaria a consulta
+  // para o fallback fechado sem que nada indicasse o motivo.
+  const controlador = new AbortController();
+  const disparo = setTimeout(() => controlador.abort(), TIMEOUT_MS);
+
   try {
     const resposta = await fetch(`${baseUrl}/event/registration-status`, {
       cache: "no-store",
+      signal: controlador.signal,
     });
 
     if (!resposta.ok) return STATUS_FECHADO;
@@ -34,5 +43,7 @@ export async function obterStatusInscricoes(): Promise<StatusInscricoes> {
     };
   } catch {
     return STATUS_FECHADO;
+  } finally {
+    clearTimeout(disparo);
   }
 }
