@@ -1,9 +1,9 @@
-import { describe, expect, it } from "@jest/globals";
+import { afterAll, beforeEach, describe, expect, it } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 
 import { CadastroContent } from "@/components/Auth/CadastroContent";
 import { LoginContent } from "@/components/Auth/LoginContent";
-import { isRegistrationOpen } from "@/lib/registration";
+import { obterStatusInscricoes } from "@/lib/registration";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -39,29 +39,119 @@ jest.mock("@/components/LoadingPage", () => ({
 }));
 
 describe("status das inscrições", () => {
-  it("considera o valor true como inscrições abertas", () => {
-    expect(isRegistrationOpen("true")).toBe(true);
+  const fetchMock = jest.fn();
+  const apiUrlOriginal = process.env.NEXT_PUBLIC_API_URL;
+
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_API_URL = "http://api.test";
+    global.fetch = fetchMock as unknown as typeof fetch;
+    fetchMock.mockReset();
   });
 
-  it("mantém as inscrições fechadas quando a variável não está definida", () => {
-    const previousValue = process.env.REGISTRATION_OPEN;
-    delete process.env.REGISTRATION_OPEN;
-
-    try {
-      expect(isRegistrationOpen()).toBe(false);
-    } finally {
-      if (previousValue === undefined) {
-        delete process.env.REGISTRATION_OPEN;
-      } else {
-        process.env.REGISTRATION_OPEN = previousValue;
-      }
+  afterAll(() => {
+    if (apiUrlOriginal === undefined) {
+      delete process.env.NEXT_PUBLIC_API_URL;
+    } else {
+      process.env.NEXT_PUBLIC_API_URL = apiUrlOriginal;
     }
   });
 
-  it.each(["", "false", "TRUE", " true ", "1", "sim"])(
-    "mantém as inscrições fechadas para o valor %s",
-    (value) => {
-      expect(isRegistrationOpen(value)).toBe(false);
+  it("considera aberto quando a API responde registrationOpen true", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        registrationOpen: true,
+        eventEditionId: "edicao-1",
+      }),
+    });
+
+    await expect(obterStatusInscricoes()).resolves.toEqual({
+      registrationOpen: true,
+      eventEditionId: "edicao-1",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://api.test/event/registration-status",
+      expect.objectContaining({
+        cache: "no-store",
+        signal: expect.any(AbortSignal),
+      }),
+    );
+  });
+
+  it("considera fechado quando a API responde registrationOpen false", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ registrationOpen: false, eventEditionId: null }),
+    });
+
+    await expect(obterStatusInscricoes()).resolves.toEqual({
+      registrationOpen: false,
+      eventEditionId: null,
+    });
+  });
+
+  it("considera fechado quando a API responde erro", async () => {
+    fetchMock.mockResolvedValue({ ok: false, json: async () => ({}) });
+
+    await expect(obterStatusInscricoes()).resolves.toEqual({
+      registrationOpen: false,
+      eventEditionId: null,
+    });
+  });
+
+  it("considera fechado quando a API está inacessível", async () => {
+    fetchMock.mockRejectedValue(new Error("Network Error"));
+
+    await expect(obterStatusInscricoes()).resolves.toEqual({
+      registrationOpen: false,
+      eventEditionId: null,
+    });
+  });
+
+  it("aborta e considera fechado quando a API não responde a tempo", async () => {
+    jest.useFakeTimers();
+
+    fetchMock.mockImplementation(
+      (_url: unknown, init: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          init.signal.addEventListener("abort", () =>
+            reject(new Error("The operation was aborted.")),
+          );
+        }),
+    );
+
+    const promessa = obterStatusInscricoes();
+    jest.advanceTimersByTime(5000);
+
+    await expect(promessa).resolves.toEqual({
+      registrationOpen: false,
+      eventEditionId: null,
+    });
+
+    jest.useRealTimers();
+  });
+  it("não consulta a API quando a URL não está configurada", async () => {
+    delete process.env.NEXT_PUBLIC_API_URL;
+
+    await expect(obterStatusInscricoes()).resolves.toEqual({
+      registrationOpen: false,
+      eventEditionId: null,
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it.each([undefined, null, "true", 1])(
+    "considera fechado para o valor %s vindo da API",
+    async (valor) => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: async () => ({ registrationOpen: valor }),
+      });
+
+      await expect(obterStatusInscricoes()).resolves.toMatchObject({
+        registrationOpen: false,
+      });
     },
   );
 });

@@ -1,8 +1,10 @@
 import { LoginContent } from "@/components/Auth/LoginContent";
-import { isRegistrationOpen } from "@/lib/registration";
+import { obterStatusInscricoes } from "@/lib/registration";
 
 export const dynamic = "force-dynamic";
 
-export default function Login() {
-  return <LoginContent registrationOpen={isRegistrationOpen()} />;
+export default async function Login() {
+  const { registrationOpen } = await obterStatusInscricoes();
+
+  return <LoginContent registrationOpen={registrationOpen} />;
 }
