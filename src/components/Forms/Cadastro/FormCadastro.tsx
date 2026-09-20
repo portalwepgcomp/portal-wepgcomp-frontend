@@ -226,6 +226,15 @@ export function FormCadastro({
     setValue("matricula", "");
   }, [perfil, setValue]);
 
+  useEffect(() => {
+    if (subperfil !== "outro") {
+      const numbersOnly = watch("matricula")?.replace(/\D/g, "");
+      setValue("matricula", numbersOnly);
+    } else {
+      setValue("matricula", maskCPF(watch("matricula") ?? ""));
+    }
+  }, [subperfil, setValue, watch]);
+
   if (loadingCreateUser) {
     return <Loading />;
   }
