@@ -179,12 +179,27 @@ export function FormCadastroApresentacao() {
             }
             htmlFor="coorientador"
           >
-            <Input
-              type="text"
-              id="coorientador"
-              placeholder="Nome do coorientador"
-              className="text-sm rounded-lg"
-              {...register("coorientador")}
+            <Controller
+              name="coorientador"
+              control={control}
+              render={({ field: { onChange, onBlur, value, ref } }) => (
+                <Input
+                  ref={ref}
+                  type="text"
+                  id="coorientador"
+                  placeholder="Nome do coorientador"
+                  className="text-sm rounded-lg"
+                  value={value ?? ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const apenasLetras = e.target.value.replace(
+                      /[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g,
+                      "",
+                    );
+                    onChange(apenasLetras);
+                  }}
+                  onBlur={onBlur}
+                />
+              )}
             />
           </Campo>
         </div>
