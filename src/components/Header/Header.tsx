@@ -268,7 +268,11 @@ export default function Header() {
               {!signed && (
                 <li>
                   <Link
-                    className={cn(linkBase, "active")}
+                    className={cn(
+                      linkBase,
+                      "active",
+                      pathname === "/cadastro" && "font-bold",
+                    )}
                     aria-current="page"
                     href="/cadastro"
                     onClick={() => setMenuOpen(false)}
@@ -280,7 +284,10 @@ export default function Header() {
 
               <li className={navItemBase}>
                 <Link
-                  className={linkBase}
+                  className={cn(
+                    linkBase,
+                    pathname === "/orientacoes" && "font-bold",
+                  )}
                   href="/orientacoes"
                   onClick={() => setMenuOpen(false)}
                 >
@@ -305,7 +312,11 @@ export default function Header() {
                   perfil(false)
                 ) : (
                   <Link
-                    className={cn(linkBase, "active")}
+                    className={cn(
+                      linkBase,
+                      "active",
+                      pathname === "/login" && "font-bold",
+                    )}
                     aria-current="page"
                     href="/login"
                   >
