@@ -19,6 +19,9 @@ describe("Celular de contato da apresentação", () => {
     ["(71) 99999-9999", "O celular não pode ter todos os números iguais"],
     ["(26) 90000-0000", "O celular não pode ter todos os números iguais"],
     ["(71) 9888-7777", "Informe um celular com DDD e 9 dígitos"],
+    ["contato: (71) 98888-7777", "Informe um celular com DDD e 9 dígitos"],
+    ["(71) 98888-7777 ramal 2", "Informe um celular com DDD e 9 dígitos"],
+    ["(71)98888-7777", "Informe um celular com DDD e 9 dígitos"],
   ])("rejeita %s", (numero, mensagem) => {
     const resultado = celular.safeParse(numero);
     expect(resultado.success).toBe(false);

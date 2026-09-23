@@ -23,7 +23,9 @@ export const esquemaCadastro = z.object({
     const digitos = value.replace(/\D/g, "");
     let message: string | undefined;
 
-    if (digitos.length !== 11) {
+    const formatoValido = /^(?:\d{11}|\(\d{2}\) \d{5}-\d{4})$/.test(value);
+
+    if (digitos.length !== 11 || !formatoValido) {
       message = "Informe um celular com DDD e 9 dígitos";
     } else if (digitos[2] !== "9") {
       message = "O celular deve começar com 9 após o DDD";
