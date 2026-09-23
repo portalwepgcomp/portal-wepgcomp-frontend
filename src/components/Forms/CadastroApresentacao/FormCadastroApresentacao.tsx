@@ -207,25 +207,10 @@ export function FormCadastroApresentacao() {
                   component={Input}
                   ref={ref}
                   id="celular"
-                  placeholder="(71) 99999-9999"
+                  placeholder="(XX) 9XXXX-XXXX"
                   className="text-sm rounded-lg"
-                  mask="(ab) c____-____"
-                  replacement={{ a: /7/, b: /1/, c: /9/, _: /\d/ }}
-                  track={({
-                    inputType,
-                    value,
-                    data,
-                    selectionStart,
-                    selectionEnd,
-                  }) => {
-                    if (inputType !== "insert" || !data) return data;
-                    const digitos = (
-                      value.slice(0, selectionStart) +
-                      data +
-                      value.slice(selectionEnd)
-                    ).replace(/\D/g, "");
-                    return "719".startsWith(digitos.slice(0, 3)) ? data : false;
-                  }}
+                  mask="(__) c____-____"
+                  replacement={{ _: /\d/, c: /9/ }}
                   inputMode="numeric"
                   autoComplete="tel-national"
                   aria-describedby="celular-ajuda"
@@ -239,7 +224,8 @@ export function FormCadastroApresentacao() {
             />
           </div>
           <p id="celular-ajuda" className="text-xs text-muted">
-            Informe um celular com DDD 71. Números repetidos não são aceitos.
+            Informe o DDD e um celular com 9 dígitos. Números repetidos não são
+            aceitos.
           </p>
         </Campo>
       </div>

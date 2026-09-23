@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * Schema de validação do cadastro/edição de apresentação (submissão).
  * Extraído de `FormCadastroApresentacao.tsx` (mesma quebra feita em FormEdicao).
- * Valida título/resumo, orientador, celular com DDD 71, slide PDF e link.
+ * Valida título/resumo, orientador, celular com DDD, slide PDF e link.
  */
 export const esquemaCadastro = z.object({
   id: z.string().optional(),
@@ -25,8 +25,6 @@ export const esquemaCadastro = z.object({
 
     if (digitos.length !== 11) {
       message = "Informe um celular com DDD e 9 dígitos";
-    } else if (!digitos.startsWith("71")) {
-      message = "O DDD deve ser 71";
     } else if (digitos[2] !== "9") {
       message = "O celular deve começar com 9 após o DDD";
     } else if (
