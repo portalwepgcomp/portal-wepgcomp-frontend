@@ -110,15 +110,14 @@ export default function CardApresentacaoLista({
         {item.pdfFile ? (
           <DicaAcao texto="Download">
             <Button
-              size="icon-lg"
+              size="lg"
               variante="primary"
               type="button"
               onClick={() => baixarPdf(item.id, item.pdfFile)}
               disabled={baixandoPdf}
               aria-label={"Download de " + (nomeArquivo || "apresentação")}
-              className="h-11 w-11 p-0"
             >
-              <Download aria-hidden="true" className="size-6" />
+              <Download aria-hidden="true" />
             </Button>
           </DicaAcao>
         ) : null}
