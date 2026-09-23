@@ -3,13 +3,11 @@
 import React from "react";
 
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import "dayjs/locale/pt-br";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-dayjs.extend(utc);
-
+import { gerarDatasDoEvento } from "@/utils/formatDate";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useSessoesQuery } from "@/features/sessoes/hooks/useSessoesQuery";
 import { useRoomsQuery } from "@/features/sessoes/hooks/useRoomsQuery";
@@ -39,14 +37,14 @@ export default function ScheduleSection() {
     dayjs.locale("pt-br");
 
     if (Edicao?.startDate && Edicao?.endDate) {
-      const generatedDates = generateDatesBetween(
+      const generatedDates = gerarDatasDoEvento(
         Edicao.startDate,
         Edicao.endDate,
       );
 
       setDates(generatedDates);
 
-      const today = dayjs.utc().format("YYYY-MM-DD");
+      const today = dayjs().format("YYYY-MM-DD");
       const todayInsideEvent = generatedDates.includes(today);
 
       setSelectedDate(todayInsideEvent ? today : generatedDates[0]);
@@ -60,18 +58,6 @@ export default function ScheduleSection() {
       ensureActiveEdition?.();
     }
   }, [Edicao?.id, ensureActiveEdition]);
-
-  function generateDatesBetween(startDate: string, endDate: string): string[] {
-    const datesArray: string[] = [];
-    let currentDate = dayjs.utc(startDate).startOf("day");
-    const finalDate = dayjs.utc(endDate).startOf("day");
-
-    while (!currentDate.isAfter(finalDate, "day")) {
-      datesArray.push(currentDate.format("YYYY-MM-DD"));
-      currentDate = currentDate.add(1, "day");
-    }
-    return datesArray;
-  }
 
   function changeDate(date: string) {
     setSelectedDate(date);
@@ -139,7 +125,7 @@ export default function ScheduleSection() {
                     const filteredSessions = sessoes
                       ?.filter(
                         (sessao) =>
-                          dayjs.utc(sessao.startTime).format("YYYY-MM-DD") ===
+                          dayjs(sessao.startTime).format("YYYY-MM-DD") ===
                           selectedDate,
                       )
                       ?.filter(
@@ -234,7 +220,7 @@ export default function ScheduleSection() {
 
                   {!sessoes?.some(
                     (sessao) =>
-                      dayjs.utc(sessao.startTime).format("YYYY-MM-DD") ===
+                      dayjs(sessao.startTime).format("YYYY-MM-DD") ===
                         selectedDate && sessao.roomId === room.id,
                   ) && (
                     <div className="flex flex-col items-center gap-4 py-12 text-[#777]">

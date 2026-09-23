@@ -31,6 +31,7 @@ function renderizar(
       edicao={edicao(dados)}
       onEditar={() => {}}
       onExcluir={() => {}}
+      onAtivar={() => {}}
       {...props}
     />,
   );

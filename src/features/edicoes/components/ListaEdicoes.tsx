@@ -22,6 +22,7 @@ export default function ListaEdicoes() {
     alternandoInscricoes,
     abrirEdicao,
     alternarInscricoes,
+    ativarEdicao,
     excluir,
   } = useListaEdicoes();
 
@@ -63,6 +64,7 @@ export default function ListaEdicoes() {
                 edicao={edicao}
                 onEditar={() => abrirEdicao(edicao.id)}
                 onExcluir={() => excluir(edicao.id)}
+                onAtivar={() => ativarEdicao(edicao.id)}
                 onAlternarInscricoes={(abrir) =>
                   alternarInscricoes(edicao.id, abrir)
                 }

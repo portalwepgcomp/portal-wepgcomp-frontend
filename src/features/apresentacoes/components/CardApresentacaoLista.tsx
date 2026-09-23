@@ -5,6 +5,7 @@ import Button from "@/components/UI/Button";
 import { Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
+import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { cn } from "@/utils/cn";
 import { convertDriveLinkToDownload } from "@/utils/convertDriveLink";
@@ -29,15 +30,13 @@ export default function CardApresentacaoLista({
   onExcluir,
 }: Readonly<CardApresentacaoListaProps>) {
   const { showAlert } = useSweetAlert();
+  const { baixarPdf, baixandoPdf } = useApresentacaoPdf();
 
   const apresentador = item.mainAuthor?.name?.trim() || "Sem nome";
   const orientador = item.advisor?.name?.trim() || "";
   const resumo = item.abstract ?? item.abstractText ?? "";
 
   const nomeArquivo = item.pdfFile ? obterNomeArquivoViaUrl(item.pdfFile) : "";
-  const urlDownload = item.pdfFile
-    ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/${nomeArquivo}`
-    : "";
   const linkHospedado = convertDriveLinkToDownload(item.linkHostedFile);
 
   const confirmarExclusao = () => {
@@ -91,12 +90,13 @@ export default function CardApresentacaoLista({
           </a>
         ) : null}
 
-        {urlDownload ? (
-          <a
-            href={urlDownload}
-            download
-            target="_blank"
-            rel="noopener noreferrer"
+        {item.pdfFile ? (
+          <button
+            type="button"
+            onClick={() => baixarPdf(item.id, item.pdfFile)}
+            disabled={baixandoPdf}
+            aria-label={`Baixar ${nomeArquivo || "arquivo"}`}
+            className="disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Image
               src="/assets/images/download.svg.svg"
@@ -104,7 +104,7 @@ export default function CardApresentacaoLista({
               width={40}
               height={40}
             />
-          </a>
+          </button>
         ) : null}
 
         <Button

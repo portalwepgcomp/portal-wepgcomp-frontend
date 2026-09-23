@@ -19,6 +19,26 @@ export const getDurationInMinutes = (dateStart: string, dateEnd: string) => {
   return d_final.diff(d_inicio, "minute");
 };
 
+export const gerarDatasDoEvento = (
+  dateStart: string | undefined,
+  dateEnd: string | undefined,
+): string[] => {
+  if (!dateStart || !dateEnd) return [];
+
+  let atual = dayjs(dateStart).startOf("day");
+  const fim = dayjs(dateEnd).startOf("day");
+
+  if (!atual.isValid() || !fim.isValid()) return [];
+
+  const datas: string[] = [];
+  while (!atual.isAfter(fim, "day")) {
+    datas.push(atual.format("YYYY-MM-DD"));
+    atual = atual.add(1, "day");
+  }
+
+  return datas;
+};
+
 export const formatDateEvent = (
   dateStart: string | undefined,
   dateEnd: string | undefined,

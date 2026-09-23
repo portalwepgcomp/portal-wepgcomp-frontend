@@ -24,7 +24,7 @@ import {
  * `abrirEdicao` agora navega para a página dedicada `/edicoes/[id]/editar`.
  */
 export function useListaEdicoes() {
-  const { deleteEdicao, Edicao } = useEdicao();
+  const { deleteEdicao, Edicao, updateEdicaoActivate } = useEdicao();
   const { showAlert } = useSweetAlert();
   const router = useRouter();
   const [alternandoInscricoes, setAlternandoInscricoes] = useState(false);
@@ -100,6 +100,11 @@ export function useListaEdicoes() {
     if (status) refetch();
   };
 
+  const ativarEdicao = async (id: string) => {
+    const status = await updateEdicaoActivate(id);
+    if (status) refetch();
+  };
+
   return {
     itens,
     total: metaPaginacao.total,
@@ -112,6 +117,7 @@ export function useListaEdicoes() {
     abrirEdicao,
     alternarInscricoes,
     excluir,
+    ativarEdicao,
     recarregar: refetch,
   };
 }

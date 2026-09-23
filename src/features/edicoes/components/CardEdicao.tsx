@@ -11,6 +11,7 @@ interface CardEdicaoProps {
   edicao: Edicao;
   onEditar: () => void;
   onExcluir: () => void;
+  onAtivar: (id: string) => void;
   onAlternarInscricoes?: (abrir: boolean) => void;
   alternandoInscricoes?: boolean;
 }
@@ -19,6 +20,7 @@ export default function CardEdicao({
   edicao,
   onEditar,
   onExcluir,
+  onAtivar,
   onAlternarInscricoes,
   alternandoInscricoes = false,
 }: Readonly<CardEdicaoProps>) {
@@ -49,6 +51,28 @@ export default function CardEdicao({
       </div>
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
+        {edicao.isActive ? (
+          <Button
+            size="lg"
+            variante="activate1"
+            aria-label="Ativo"
+            type="button"
+            disabled
+          >
+            Ativo
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            variante="activate2"
+            aria-label="Ativar"
+            onClick={() => onAtivar(edicao.id)}
+            type="button"
+          >
+            Ativar
+          </Button>
+        )}
+
         {edicao.isActive && onAlternarInscricoes && (
           <Button
             size="lg"
@@ -70,6 +94,7 @@ export default function CardEdicao({
             )}
           </Button>
         )}
+
         <Button
           size="lg"
           variante="outline"
