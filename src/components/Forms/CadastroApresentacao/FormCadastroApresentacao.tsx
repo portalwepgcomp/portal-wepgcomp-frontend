@@ -266,7 +266,7 @@ export function FormCadastroApresentacao() {
             <input
               type="file"
               id="slide"
-              accept=".pdf"
+              accept="application/pdf,.pdf"
               className="block w-full text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-brand-blue/10 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-blue hover:file:bg-brand-blue/20 cursor-pointer"
               onChange={aoMudarArquivo}
             />
