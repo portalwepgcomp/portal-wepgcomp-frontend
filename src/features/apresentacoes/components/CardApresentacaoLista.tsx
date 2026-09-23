@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import Button from "@/components/UI/Button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Download, Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { useSweetAlert } from "@/hooks/useAlert";
-import { cn } from "@/utils/cn";
 import { convertDriveLinkToDownload } from "@/utils/convertDriveLink";
 import { obterNomeArquivoViaUrl } from "@/utils/obterNomeArquivoUrl";
 import type { ApresentacaoLista } from "../types";
@@ -17,6 +17,20 @@ interface CardApresentacaoListaProps {
   edicaoAtiva: boolean;
   onEditar: () => void;
   onExcluir: () => void;
+}
+
+function DicaAcao({ texto, children }: { texto: string; children: ReactNode }) {
+  return (
+    <span className="group relative inline-flex">
+      {children}
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg group-hover:block group-focus-within:block"
+      >
+        {texto}
+      </span>
+    </span>
+  );
 }
 
 /**
@@ -75,60 +89,66 @@ export default function CardApresentacaoLista({
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
         {linkHospedado ? (
-          <a
-            href={linkHospedado}
-            download
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/assets/images/link.svg"
-              alt={`Link externo ${nomeArquivo || "arquivo"}`}
-              width={40}
-              height={40}
-            />
-          </a>
+          <DicaAcao texto="Abrir link da apresentação">
+            <a
+              href={linkHospedado}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Abrir link da apresentação"
+            >
+              <Image
+                src="/assets/images/link.svg"
+                alt=""
+                width={40}
+                height={40}
+              />
+            </a>
+          </DicaAcao>
         ) : null}
 
         {item.pdfFile ? (
-          <button
-            type="button"
-            onClick={() => baixarPdf(item.id, item.pdfFile)}
-            disabled={baixandoPdf}
-            aria-label={`Baixar ${nomeArquivo || "arquivo"}`}
-            className="disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Image
-              src="/assets/images/download.svg.svg"
-              alt={`Download ${nomeArquivo || "arquivo"}`}
-              width={40}
-              height={40}
-            />
-          </button>
+          <DicaAcao texto="Download">
+            <Button
+              size="icon-lg"
+              variante="primary"
+              type="button"
+              onClick={() => baixarPdf(item.id, item.pdfFile)}
+              disabled={baixandoPdf}
+              aria-label={"Download de " + (nomeArquivo || "apresentação")}
+              className="h-11 w-11 p-0"
+            >
+              <Download aria-hidden="true" className="size-6" />
+            </Button>
+          </DicaAcao>
         ) : null}
 
-        <Button
-          size="lg"
-          variante="secondary"
-          aria-label="Editar"
-          onClick={onEditar}
-          className={cn("", !edicaoAtiva && "hidden")}
-          type="button"
-        >
-          <Pencil aria-hidden="true" />
-        </Button>
+        {edicaoAtiva && (
+          <DicaAcao texto="Editar">
+            <Button
+              size="lg"
+              variante="secondary"
+              aria-label="Editar"
+              onClick={onEditar}
+              type="button"
+            >
+              <Pencil aria-hidden="true" />
+            </Button>
+          </DicaAcao>
+        )}
 
         {edicaoAtiva && (
-          <Button
-            size="lg"
-            type="button"
-
-            variante="danger"
-            aria-label="Excluir"
-            onClick={confirmarExclusao}
-          >
-            <Trash2 aria-hidden="true" />
-          </Button>
+          <DicaAcao texto="Excluir">
+            <Button
+              size="lg"
+              type="button"
+              variante="danger"
+              aria-label="Excluir"
+              onClick={confirmarExclusao}
+            >
+              <Trash2 aria-hidden="true" />
+            </Button>
+          </DicaAcao>
         )}
       </div>
     </div>
