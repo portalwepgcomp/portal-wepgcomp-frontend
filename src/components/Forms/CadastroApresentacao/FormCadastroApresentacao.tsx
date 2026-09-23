@@ -207,10 +207,13 @@ export function FormCadastroApresentacao() {
                   component={Input}
                   ref={ref}
                   id="celular"
-                  placeholder="(71) 99999-9999"
+                  placeholder="(XX) 9XXXX-XXXX"
                   className="text-sm rounded-lg"
-                  mask="(__) _____-____"
-                  replacement={{ _: /\d/ }}
+                  mask="(__) c____-____"
+                  replacement={{ _: /\d/, c: /9/ }}
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  aria-describedby="celular-ajuda"
                   value={value ?? ""}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     onChange(e.target.value)
@@ -220,6 +223,10 @@ export function FormCadastroApresentacao() {
               )}
             />
           </div>
+          <p id="celular-ajuda" className="text-xs text-muted">
+            Informe o DDD e um celular com 9 dígitos. Números repetidos não são
+            aceitos.
+          </p>
         </Campo>
       </div>
 
