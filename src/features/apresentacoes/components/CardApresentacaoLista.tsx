@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Button from "@/components/UI/Button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Download, Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
@@ -91,20 +91,17 @@ export default function CardApresentacaoLista({
         ) : null}
 
         {item.pdfFile ? (
-          <button
+          <Button
+            size="lg"
             type="button"
+            variante="primary"
+            aria-label={`Baixar ${nomeArquivo || "arquivo"}`}
+            title={`Baixar ${nomeArquivo || "arquivo"}`}
             onClick={() => baixarPdf(item.id, item.pdfFile)}
             disabled={baixandoPdf}
-            aria-label={`Baixar ${nomeArquivo || "arquivo"}`}
-            className="disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Image
-              src="/assets/images/download.svg.svg"
-              alt={`Download ${nomeArquivo || "arquivo"}`}
-              width={40}
-              height={40}
-            />
-          </button>
+            <Download aria-hidden="true" />
+          </Button>
         ) : null}
 
         <Button
