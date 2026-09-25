@@ -3,7 +3,7 @@
 import Button from "@/components/UI/Button";
 import { Controller } from "react-hook-form";
 import { InputMask } from "@react-input/mask";
-import { FileUp, Save, Sparkles, UserCheck } from "lucide-react";
+import { CalendarDays, FileUp, Save, Sparkles, UserCheck } from "lucide-react";
 
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
 import { Campo, Input, Textarea } from "@/components/UI/Input";
@@ -30,6 +30,13 @@ export function FormCadastroApresentacao() {
     loadingUserList,
     opcoesApresentadoresSelect,
     advisors,
+    sessoesDisponiveis,
+    carregandoSessoes,
+    erroSessoes,
+    recarregarSessoes,
+    haSessoesDeApresentacao,
+    sessaoAnteriorIndisponivel,
+    eventEditionId,
     nomeArquivo,
     submission,
     carregandoEnvio,
@@ -135,7 +142,103 @@ export function FormCadastroApresentacao() {
         </Campo>
       </div>
 
-      {/* Seção 2: Orientação e Contato */}
+      {/* Seção 2: Sessão de apresentação */}
+      <div className="space-y-5">
+        <div className="flex items-center gap-2 border-b border-line pb-2">
+          <CalendarDays className="h-5 w-5 text-brand-blue" />
+          <h2 className="text-base font-bold text-foreground">
+            Sessão de Apresentação
+          </h2>
+        </div>
+
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-foreground">
+              {labelObrigatorio("Escolha uma sessão disponível")}
+            </span>
+          }
+          htmlFor="sessao-select"
+          erro={errors.sessao?.message}
+        >
+          <select
+            id="sessao-select"
+            className={selectClasse}
+            aria-describedby="sessao-ajuda"
+            disabled={
+              !eventEditionId ||
+              carregandoSessoes ||
+              !!erroSessoes ||
+              sessoesDisponiveis.length === 0
+            }
+            {...register("sessao")}
+          >
+            <option value="">Selecione uma sessão</option>
+            {sessoesDisponiveis.map((sessao) => {
+              const vagas = sessao.availablePositionsWithInBlock?.length ?? 0;
+              const disponibilidade =
+                vagas > 0
+                  ? vagas + (vagas === 1 ? " vaga" : " vagas")
+                  : "sessão atual, sem novas vagas";
+
+              return (
+                <option key={sessao.id} value={sessao.id}>
+                  {(sessao.title || "Sessão de apresentações") +
+                    " — " +
+                    new Date(sessao.startTime).toLocaleString("pt-BR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }) +
+                    " — " +
+                    disponibilidade}
+                </option>
+              );
+            })}
+          </select>
+          <p id="sessao-ajuda" className="mt-2 text-xs text-muted">
+            Escolha uma sessão desta edição com vaga para sua apresentação.
+          </p>
+          {!eventEditionId && (
+            <p role="alert" className="mt-2 text-sm text-error">
+              Não foi possível identificar a edição atual.
+            </p>
+          )}
+          {eventEditionId && carregandoSessoes && (
+            <p role="status" className="mt-2 text-sm text-muted">
+              Carregando sessões disponíveis...
+            </p>
+          )}
+          {eventEditionId && erroSessoes && (
+            <div role="alert" className="mt-2 text-sm text-error">
+              Não foi possível carregar as sessões.{" "}
+              <button
+                type="button"
+                className="font-semibold underline"
+                onClick={() => void recarregarSessoes()}
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
+          {eventEditionId &&
+            !carregandoSessoes &&
+            !erroSessoes &&
+            sessoesDisponiveis.length === 0 && (
+              <p role="status" className="mt-2 text-sm text-error">
+                {haSessoesDeApresentacao
+                  ? "As sessões desta edição estão sem vagas no momento."
+                  : "Nenhuma sessão de apresentação cadastrada para esta edição."}
+              </p>
+            )}
+          {sessaoAnteriorIndisponivel && (
+            <p role="status" className="mt-2 text-sm text-error">
+              A sessão escolhida anteriormente não possui mais vagas. Selecione
+              outra sessão.
+            </p>
+          )}
+        </Campo>
+      </div>
+
+      {/* Seção 3: Orientação e Contato */}
       <div className="space-y-5">
         <div className="flex items-center gap-2 border-b border-line pb-2">
           <UserCheck className="h-5 w-5 text-brand-blue" />
@@ -245,7 +348,7 @@ export function FormCadastroApresentacao() {
         </Campo>
       </div>
 
-      {/* Seção 3: Slides e Links */}
+      {/* Seção 4: Slides e Links */}
       <div className="space-y-5">
         <div className="flex items-center gap-2 border-b border-line pb-2">
           <FileUp className="h-5 w-5 text-brand-orange" />
@@ -321,7 +424,13 @@ export function FormCadastroApresentacao() {
           size="lg"
           variante="primary"
           type="submit"
-          disabled={!edicaoAtiva}
+          disabled={
+            !edicaoAtiva ||
+            !eventEditionId ||
+            carregandoSessoes ||
+            !!erroSessoes ||
+            sessoesDisponiveis.length === 0
+          }
         >
           <Save />
           <span>
