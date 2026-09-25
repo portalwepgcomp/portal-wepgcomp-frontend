@@ -17,7 +17,11 @@ export function sessoesDisponiveisParaCadastro(
       (sessao) =>
         sessao.eventEditionId === eventEditionId &&
         sessao.type === "Presentation" &&
-        ((sessao.availablePositionsWithInBlock?.length ?? 0) > 0 ||
+        ((sessao.availableSubmissionSlots ??
+          sessao.availablePositionsWithInBlock?.length ??
+          0) > 0 ||
+          (submission?.status !== "Rejected" &&
+            submission?.proposedPresentationBlockId === sessao.id) ||
           (submission?.presentationId != null &&
             submission.block?.id === sessao.id)),
     )

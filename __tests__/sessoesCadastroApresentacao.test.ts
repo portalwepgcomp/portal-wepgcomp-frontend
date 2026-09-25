@@ -30,6 +30,7 @@ describe("sessões disponíveis no cadastro de apresentação", () => {
         sessao("geral", { type: "General" }),
         sessao("outra-edicao", { eventEditionId: "outra-edicao" }),
         sessao("lotada", { availablePositionsWithInBlock: [] }),
+        sessao("propostas-lotaram", { availableSubmissionSlots: 0 }),
         sessao("mais-cedo"),
       ],
       edicaoAtual,
@@ -52,6 +53,12 @@ describe("sessões disponíveis no cadastro de apresentação", () => {
     expect(
       sessoesDisponiveisParaCadastro([atual], edicaoAtual, {
         proposedPresentationBlockId: "atual",
+      } as Submission),
+    ).toEqual([atual]);
+    expect(
+      sessoesDisponiveisParaCadastro([atual], edicaoAtual, {
+        proposedPresentationBlockId: "atual",
+        status: "Rejected",
       } as Submission),
     ).toEqual([]);
   });

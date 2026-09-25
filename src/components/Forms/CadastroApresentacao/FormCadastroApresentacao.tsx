@@ -174,7 +174,10 @@ export function FormCadastroApresentacao() {
           >
             <option value="">Selecione uma sessão</option>
             {sessoesDisponiveis.map((sessao) => {
-              const vagas = sessao.availablePositionsWithInBlock?.length ?? 0;
+              const vagas =
+                sessao.availableSubmissionSlots ??
+                sessao.availablePositionsWithInBlock?.length ??
+                0;
               const disponibilidade =
                 vagas > 0
                   ? vagas + (vagas === 1 ? " vaga" : " vagas")
