@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 
 import CardApresentacaoLista from "@/features/apresentacoes/components/CardApresentacaoLista";
-import { Submission } from "@/models/submission";
+import type { ApresentacaoLista } from "@/features/apresentacoes/types";
 
 jest.mock("@/hooks/useAlert", () => ({
   useSweetAlert: () => ({ showAlert: jest.fn() }),
@@ -19,12 +19,12 @@ const item = {
   pdfFile: "slides.pdf",
   mainAuthor: { name: "Fulano" },
   advisor: { name: "Orientador" },
-} as unknown as Submission;
+} as unknown as ApresentacaoLista;
 
-function renderizar() {
+function renderizar(dados: Partial<ApresentacaoLista> = {}) {
   return render(
     <CardApresentacaoLista
-      item={item}
+      item={{ ...item, ...dados } as ApresentacaoLista}
       edicaoAtiva
       onEditar={() => {}}
       onExcluir={() => {}}
@@ -33,39 +33,39 @@ function renderizar() {
 }
 
 describe("CardApresentacaoLista — ações", () => {
-  it("deve usar o mesmo componente de botão em baixar, editar e excluir", () => {
+  it("deve dar ao botão de download o mesmo tamanho de editar e excluir", () => {
     renderizar();
 
-    const baixar = screen.getByRole("button", { name: /Baixar/i });
+    const baixar = screen.getByRole("button", { name: /Download de/i });
     const editar = screen.getByRole("button", { name: "Editar" });
     const excluir = screen.getByRole("button", { name: "Excluir" });
 
-    for (const botao of [editar, excluir]) {
-      expect(baixar.className).toContain("h-9");
+    for (const botao of [baixar, editar, excluir]) {
       expect(botao.className).toContain("h-9");
     }
   });
 
-  it("deve manter o botão de baixar acessível por nome", () => {
+  it("deve nomear o arquivo no rótulo acessível do download", () => {
     renderizar();
 
     expect(
-      screen.getByRole("button", { name: /Baixar slides\.pdf/i }),
+      screen.getByRole("button", { name: /Download de slides\.pdf/i }),
     ).toBeInTheDocument();
   });
 
+  it("deve manter uma dica visível em cada ação", () => {
+    renderizar();
+
+    for (const dica of ["Download", "Editar", "Excluir"]) {
+      expect(screen.getByText(dica)).toBeInTheDocument();
+    }
+  });
+
   it("não deve oferecer download quando não há PDF", () => {
-    render(
-      <CardApresentacaoLista
-        item={{ ...item, pdfFile: "" } as Submission}
-        edicaoAtiva
-        onEditar={() => {}}
-        onExcluir={() => {}}
-      />,
-    );
+    renderizar({ pdfFile: "" });
 
     expect(
-      screen.queryByRole("button", { name: /Baixar/i }),
+      screen.queryByRole("button", { name: /Download de/i }),
     ).not.toBeInTheDocument();
   });
 });

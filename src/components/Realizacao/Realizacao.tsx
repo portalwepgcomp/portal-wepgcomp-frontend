@@ -5,6 +5,8 @@ import Image from "next/image";
 type Logo = {
   src: string;
   alt: string;
+  href: string;
+  linkLabel: string;
   width: number;
   height: number;
   priority?: boolean;
@@ -14,6 +16,8 @@ const realizacaoLogos: Logo[] = [
   {
     src: "/assets/images/ic_logo_padrao.png",
     alt: "Computação UFBA Logo",
+    href: "https://computacao.ufba.br/",
+    linkLabel: "Visitar site da Computação UFBA (abre em nova aba)",
     width: 150,
     height: 150,
     priority: true,
@@ -21,6 +25,8 @@ const realizacaoLogos: Logo[] = [
   {
     src: "/assets/images/brasao-ufba.svg",
     alt: "UFBA Logo",
+    href: "https://ufba.br/",
+    linkLabel: "Visitar site da UFBA (abre em nova aba)",
     width: 100,
     height: 130,
     priority: true,
@@ -28,6 +34,8 @@ const realizacaoLogos: Logo[] = [
   {
     src: "/assets/images/logo-capes-fundo-claro.jpg",
     alt: "Capes Logo",
+    href: "https://www.gov.br/capes/pt-br",
+    linkLabel: "Visitar site da CAPES (abre em nova aba)",
     width: 100,
     height: 130,
     priority: true,
@@ -35,6 +43,8 @@ const realizacaoLogos: Logo[] = [
   {
     src: "/assets/images/logo-proext.png",
     alt: "Proext Logo",
+    href: "https://proext.ufba.br/",
+    linkLabel: "Visitar site da PROEXT (abre em nova aba)",
     width: 100,
     height: 130,
     priority: true,
@@ -52,17 +62,25 @@ function LogosGrupo({ logos }: { logos: Logo[] }) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-8 max-md:gap-6">
       {logos.map((logo) => (
-        <Image
+        <a
           key={logo.src}
-          src={logo.src}
-          alt={logo.alt}
-          width={logo.width}
-          height={logo.height}
-          priority={logo.priority}
-          className="grayscale-[30%] transition duration-300 hover:scale-105 hover:grayscale-0"
-          sizes="(max-width: 768px) 100px, 150px"
-          style={{ height: "auto" }}
-        />
+          href={logo.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={logo.linkLabel}
+          className="group inline-flex rounded-lg transition-transform duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-4"
+        >
+          <Image
+            src={logo.src}
+            alt={logo.alt}
+            width={logo.width}
+            height={logo.height}
+            priority={logo.priority}
+            className="grayscale-[30%] transition duration-300 group-hover:grayscale-0"
+            sizes="(max-width: 768px) 100px, 150px"
+            style={{ height: "auto" }}
+          />
+        </a>
       ))}
     </div>
   );
