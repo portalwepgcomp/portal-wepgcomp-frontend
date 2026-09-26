@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/UI/Button";
-import { Pencil, Trash2 } from "lucide-react";
+import { DoorClosed, DoorOpen, Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useSweetAlert } from "@/hooks/useAlert";
@@ -12,6 +12,8 @@ interface CardEdicaoProps {
   onEditar: () => void;
   onExcluir: () => void;
   onAtivar: (id: string) => void;
+  onAlternarInscricoes?: (abrir: boolean) => void;
+  alternandoInscricoes?: boolean;
 }
 
 export default function CardEdicao({
@@ -19,6 +21,8 @@ export default function CardEdicao({
   onEditar,
   onExcluir,
   onAtivar,
+  onAlternarInscricoes,
+  alternandoInscricoes = false,
 }: Readonly<CardEdicaoProps>) {
   const { showAlert } = useSweetAlert();
 
@@ -66,6 +70,28 @@ export default function CardEdicao({
             type="button"
           >
             Ativar
+          </Button>
+        )}
+
+        {edicao.isActive && onAlternarInscricoes && (
+          <Button
+            size="lg"
+            type="button"
+            variante={edicao.registrationOpen ? "success" : "successLight"}
+            aria-label={
+              edicao.registrationOpen ? "Fechar inscrições" : "Abrir inscrições"
+            }
+            title={
+              edicao.registrationOpen ? "Fechar inscrições" : "Abrir inscrições"
+            }
+            disabled={alternandoInscricoes}
+            onClick={() => onAlternarInscricoes(!edicao.registrationOpen)}
+          >
+            {edicao.registrationOpen ? (
+              <DoorOpen aria-hidden="true" />
+            ) : (
+              <DoorClosed aria-hidden="true" />
+            )}
           </Button>
         )}
 

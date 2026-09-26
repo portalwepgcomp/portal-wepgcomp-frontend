@@ -36,4 +36,5 @@ export interface Edicao extends EdicaoParams {
   deletedAt: string;
   updatedAt: string;
   isActive: boolean;
+  registrationOpen?: boolean;
 }
