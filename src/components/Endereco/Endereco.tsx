@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
 import HtmlEditorComponent from "@/components/HtmlEditorComponent/HtmlEditorComponent";
@@ -7,63 +8,46 @@ import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useEdicao } from "@/hooks/useEdicao";
 import { obterClassesBotao } from "@/lib/estilosBotao";
 
-function extrairTextoEndereco(html: string): string {
-  const addressElement = document.createElement("div");
-  addressElement.innerHTML = html;
-  addressElement.querySelectorAll("br").forEach((element) => {
-    element.replaceWith(" ");
-  });
-  addressElement.querySelectorAll("p, div, li").forEach((element) => {
-    element.append(" ");
-  });
+import { coordenadasValidas, montarUrlComoChegar } from "./enderecoMapa";
 
-  return addressElement.textContent?.replace(/\s+/g, " ").trim() ?? "";
-}
-
-function normalizarEnderecoParaMapa(address: string): string {
-  return address
-    .replace(/^\d+\s*,\s*(?=(?:R\.|Rua|Av\.|Avenida)\s+)/i, "")
-    .replace(/\bR\.\s*/gi, "Rua ")
-    .replace(/\bAv\.\s*/gi, "Avenida ")
-    .replace(/\s+-\s+/g, ", ")
-    .trim();
-}
+const MapaEvento = dynamic(() => import("./MapaEvento"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center text-sm text-slate-500">
+      Carregando mapa...
+    </div>
+  ),
+});
 
 /**
  * Exibe a localização cadastrada na edição e preserva sua edição administrativa.
+ * O pin do mapa usa exclusivamente latitude/longitude cadastradas.
  */
 export default function Endereco() {
-  const [content, setContent] = useState("");
-  const [mapQuery, setMapQuery] = useState("");
   const { updateEdicao, Edicao } = useEdicao();
-
-  const hasCoordinates =
-    typeof Edicao?.locationLatitude === "number" &&
-    typeof Edicao?.locationLongitude === "number" &&
-    Number.isFinite(Edicao.locationLatitude) &&
-    Number.isFinite(Edicao.locationLongitude);
-
-  const mapTarget = useMemo(() => {
-    if (hasCoordinates && Edicao) {
-      return `${Edicao.locationLatitude},${Edicao.locationLongitude}`;
-    }
-    return mapQuery;
-  }, [Edicao, hasCoordinates, mapQuery]);
+  const [content, setContent] = useState(Edicao?.location ?? "");
 
   useEffect(() => {
     setContent(Edicao?.location ?? "");
   }, [Edicao?.location]);
 
-  useEffect(() => {
-    const address = extrairTextoEndereco(Edicao?.location ?? "");
-    setMapQuery(normalizarEnderecoParaMapa(address));
-  }, [Edicao?.location]);
+  const coordenadas = useMemo(() => {
+    const latitude = Edicao?.locationLatitude;
+    const longitude = Edicao?.locationLongitude;
+    if (!coordenadasValidas(latitude, longitude)) return null;
+    return {
+      latitude: latitude as number,
+      longitude: longitude as number,
+    };
+  }, [Edicao?.locationLatitude, Edicao?.locationLongitude]);
 
-  const encodedMapTarget = encodeURIComponent(mapTarget);
-  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${encodedMapTarget}`;
-  const mapUrl = mapTarget
-    ? `https://maps.google.com/maps?q=${encodedMapTarget}&ll=${encodedMapTarget}&z=17&output=embed&hl=pt-BR`
-    : null;
+  const mapsExternalUrl = useMemo(
+    () =>
+      coordenadas
+        ? montarUrlComoChegar(coordenadas.latitude, coordenadas.longitude)
+        : null,
+    [coordenadas],
+  );
 
   const handleEditAddress = () => {
     if (!Edicao) return;
@@ -98,7 +82,7 @@ export default function Endereco() {
             </div>
           </div>
 
-          {mapTarget && (
+          {mapsExternalUrl && (
             <a
               href={mapsExternalUrl}
               target="_blank"
@@ -125,17 +109,15 @@ export default function Endereco() {
       </div>
 
       <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:h-auto lg:min-h-0 lg:flex-1">
-        {mapUrl ? (
-          <iframe
-            title="Mapa do Local do Evento"
-            src={mapUrl}
-            className="h-full w-full border-0"
-            loading="eager"
-            referrerPolicy="strict-origin-when-cross-origin"
+        {coordenadas ? (
+          <MapaEvento
+            latitude={coordenadas.latitude}
+            longitude={coordenadas.longitude}
           />
         ) : (
           <div className="flex h-full items-center justify-center p-5 text-center text-sm text-slate-500">
-            Endereço do evento não informado.
+            Informe latitude e longitude no cadastro da edição para exibir o
+            mapa com o pin exato.
           </div>
         )}
       </div>

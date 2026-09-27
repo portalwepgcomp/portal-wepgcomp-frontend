@@ -49,6 +49,8 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     setValue("inicio", dados.startDate ?? "");
     setValue("final", dados.endDate ?? "");
     setValue("local", dados.location ?? "");
+    setValue("latitude", dados.locationLatitude ?? null);
+    setValue("longitude", dados.locationLongitude ?? null);
     setValue(
       "salas",
       dados.roomName?.map((nome) => ({ label: nome, value: nome })) ?? [],
@@ -98,6 +100,8 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
       name: data.titulo,
       description: data.descricao,
       location: data.local,
+      locationLatitude: data.latitude ?? null,
+      locationLongitude: data.longitude ?? null,
       roomName: data.salas.map((s) => s.value),
       coordinatorId: user.id,
       organizingCommitteeIds: data.comissao?.map((v) => v.value) || [],

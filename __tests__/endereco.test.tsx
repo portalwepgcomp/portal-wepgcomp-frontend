@@ -54,6 +54,23 @@ jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
   ),
 }));
 
+jest.mock("next/dynamic", () => () => {
+  const MockMapa = ({
+    latitude,
+    longitude,
+  }: {
+    latitude: number;
+    longitude: number;
+  }) => (
+    <div
+      data-testid="mapa-evento"
+      data-latitude={latitude}
+      data-longitude={longitude}
+    />
+  );
+  return MockMapa;
+});
+
 import Endereco from "@/components/Endereco/Endereco";
 
 describe("Endereço do evento", () => {
@@ -70,9 +87,6 @@ describe("Endereço do evento", () => {
     expect(screen.getByLabelText("Localização da edição")).toHaveValue(
       mockLocation,
     );
-    expect(
-      screen.queryByText(/Instituto de Computação/i),
-    ).not.toBeInTheDocument();
   });
 
   it("salva a localização alterada na edição ativa", () => {
@@ -90,70 +104,28 @@ describe("Endereço do evento", () => {
     });
   });
 
-  it("prioriza coordenadas geocodificadas para pin e centralização", () => {
-    mockEdicao.location =
-      "<p>1154, R. Barão de Jeremoabo, 668 - Ondina, Salvador - BA</p>";
+  it("renderiza o mapa Leaflet com as coordenadas cadastradas", () => {
     mockEdicao.locationLatitude = -13.0020509;
     mockEdicao.locationLongitude = -38.5098765;
     render(<Endereco />);
 
-    const directionsLink = screen.getByRole("link", { name: /como chegar/i });
-    const map = screen.getByTitle("Mapa do Local do Evento");
-    const directionsUrl = decodeURIComponent(
-      directionsLink.getAttribute("href") ?? "",
-    );
-    const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
-
-    expect(directionsUrl).toContain("-13.0020509,-38.5098765");
-    expect(mapUrl).toContain("q=-13.0020509,-38.5098765");
-    expect(mapUrl).toContain("ll=-13.0020509,-38.5098765");
-    expect(mapUrl).toContain("z=17");
-    expect(mapUrl).not.toContain("1154");
-    expect(map).toHaveAttribute("loading", "eager");
-  });
-
-  it("usa o endereço normalizado quando ainda não há coordenadas", () => {
-    mockEdicao.location =
-      "<p>1154, R. Barão de Jeremoabo, 668 - Ondina, Salvador - BA, 40170-115</p>";
-    render(<Endereco />);
-
-    const mapUrl = decodeURIComponent(
-      screen.getByTitle("Mapa do Local do Evento").getAttribute("src") ?? "",
-    );
-
-    expect(mapUrl).toContain("q=Rua Barão de Jeremoabo, 668");
-    expect(mapUrl).not.toContain("q=1154");
-  });
-
-  it("atualiza o mapa quando a edição recebe outro endereço", () => {
-    const { rerender } = render(<Endereco />);
-
-    mockEdicao.location = "<p>Av. Exemplo, 123 &amp; Centro</p>";
-    mockEdicao.locationLatitude = null;
-    mockEdicao.locationLongitude = null;
-    rerender(<Endereco />);
+    const mapa = screen.getByTestId("mapa-evento");
+    expect(mapa).toHaveAttribute("data-latitude", "-13.0020509");
+    expect(mapa).toHaveAttribute("data-longitude", "-38.5098765");
 
     const directionsLink = screen.getByRole("link", { name: /como chegar/i });
-    const map = screen.getByTitle("Mapa do Local do Evento");
-
-    expect(
-      decodeURIComponent(directionsLink.getAttribute("href") ?? ""),
-    ).toContain("Avenida Exemplo, 123 & Centro");
-    expect(decodeURIComponent(map.getAttribute("src") ?? "")).toContain(
-      "q=Avenida Exemplo, 123 & Centro",
+    expect(directionsLink.getAttribute("href")).toContain(
+      "destination=-13.0020509%2C-38.5098765",
     );
   });
 
-  it("não mostra mapa nem trajeto sem endereço cadastrado", () => {
-    mockEdicao.location = "";
+  it("não mostra mapa nem trajeto sem coordenadas cadastradas", () => {
     render(<Endereco />);
 
     expect(
-      screen.getByText("Endereço do evento não informado."),
+      screen.getByText(/Informe latitude e longitude/i),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByTitle("Mapa do Local do Evento"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("mapa-evento")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /como chegar/i }),
     ).not.toBeInTheDocument();

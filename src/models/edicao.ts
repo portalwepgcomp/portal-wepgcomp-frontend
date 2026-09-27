@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 export interface EdicaoParams {
   name: string;
   description?: string;
   startDate?: string;
   endDate?: string;
   location?: string;
+  locationLatitude?: number | null;
+  locationLongitude?: number | null;
   coordinatorId?: string;
   organizingCommitteeIds?: string[];
   roomName?: string[];
@@ -37,8 +37,6 @@ export interface Edicao extends EdicaoParams {
   updatedAt: string;
   isActive: boolean;
   registrationOpen?: boolean;
-  locationLatitude?: number | null;
-  locationLongitude?: number | null;
   locationApproximate?: boolean;
   locationGeocodedAddress?: string | null;
 }

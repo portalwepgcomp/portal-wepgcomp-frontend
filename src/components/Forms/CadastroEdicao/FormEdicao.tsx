@@ -169,6 +169,63 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
         />
       </Campo>
 
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-slate-700">
+              Latitude (mapa)
+            </span>
+          }
+          htmlFor="latitude"
+          erro={errors.latitude?.message}
+          className="mb-1"
+        >
+          <Input
+            type="number"
+            id="latitude"
+            step="any"
+            placeholder="Ex.: -13.0020509"
+            className="text-sm"
+            {...register("latitude", {
+              setValueAs: (value) =>
+                value === "" || value === null || value === undefined
+                  ? null
+                  : Number(value),
+            })}
+          />
+        </Campo>
+
+        <Campo
+          label={
+            <span className="text-sm font-semibold text-slate-700">
+              Longitude (mapa)
+            </span>
+          }
+          htmlFor="longitude"
+          erro={errors.longitude?.message}
+          className="mb-1"
+        >
+          <Input
+            type="number"
+            id="longitude"
+            step="any"
+            placeholder="Ex.: -38.5098765"
+            className="text-sm"
+            {...register("longitude", {
+              setValueAs: (value) =>
+                value === "" || value === null || value === undefined
+                  ? null
+                  : Number(value),
+            })}
+          />
+        </Campo>
+      </div>
+      <p className="mb-1 -mt-2 text-xs text-slate-500">
+        Use as coordenadas exatas do local (Google Maps → clique com o botão
+        direito no ponto → copiar coordenadas). Sem lat/lng o mapa não é
+        exibido.
+      </p>
+
       <Campo
         label={
           <span className="text-sm font-semibold text-slate-700">
