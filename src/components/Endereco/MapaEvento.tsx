@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
-import "leaflet/dist/css/leaflet.css";
+import "leaflet/dist/leaflet.css";
 
 const marcadorIcone = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
