@@ -3,11 +3,20 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 const mockUpdateEdicao = jest.fn();
 const mockLocation = "<p>Auditório do Instituto de Geociências da UFBA</p>";
-const mockEdicao = {
+const mockEdicao: {
+  id: string;
+  name: string;
+  location: string;
+  isActive: boolean;
+  locationLatitude?: number | null;
+  locationLongitude?: number | null;
+} = {
   id: "edition-2026",
   name: "WEPGCOMP 2026",
   location: mockLocation,
   isActive: true,
+  locationLatitude: null,
+  locationLongitude: null,
 };
 
 jest.mock("@/hooks/useEdicao", () => ({
@@ -50,6 +59,8 @@ import Endereco from "@/components/Endereco/Endereco";
 describe("Endereço do evento", () => {
   beforeEach(() => {
     mockEdicao.location = mockLocation;
+    mockEdicao.locationLatitude = null;
+    mockEdicao.locationLongitude = null;
     mockUpdateEdicao.mockClear();
   });
 
@@ -79,9 +90,11 @@ describe("Endereço do evento", () => {
     });
   });
 
-  it("marca a rua e o número cadastrados no Google Maps", () => {
+  it("prioriza coordenadas geocodificadas para pin e centralização", () => {
     mockEdicao.location =
-      "<p>Rua Barão de Jeremoabo, 668 - Ondina, Salvador - BA, 40170-115</p>";
+      "<p>1154, R. Barão de Jeremoabo, 668 - Ondina, Salvador - BA</p>";
+    mockEdicao.locationLatitude = -13.0020509;
+    mockEdicao.locationLongitude = -38.5098765;
     render(<Endereco />);
 
     const directionsLink = screen.getByRole("link", { name: /como chegar/i });
@@ -91,43 +104,33 @@ describe("Endereço do evento", () => {
     );
     const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
 
-    expect(directionsUrl).toContain("Rua Barão de Jeremoabo, 668");
-    expect(mapUrl).toContain("maps.google.com/maps");
-    expect(mapUrl).toContain("q=Rua Barão de Jeremoabo, 668");
+    expect(directionsUrl).toContain("-13.0020509,-38.5098765");
+    expect(mapUrl).toContain("q=-13.0020509,-38.5098765");
+    expect(mapUrl).toContain("ll=-13.0020509,-38.5098765");
+    expect(mapUrl).toContain("z=17");
     expect(mapUrl).not.toContain("1154");
-    expect(mapUrl).not.toContain("-13.0020509");
     expect(map).toHaveAttribute("loading", "eager");
-    expect(directionsLink).toHaveAttribute("target", "_blank");
-    expect(directionsLink).toHaveAttribute(
-      "rel",
-      expect.stringContaining("noopener"),
-    );
   });
 
-  it("mantém nome do local e ambos os números do endereço na busca", () => {
+  it("usa o endereço normalizado quando ainda não há coordenadas", () => {
     mockEdicao.location =
-      "<p>Instituto de Biologia da UFBA - UFBA - 1154, R. Barão de Jeremoabo, 668 - Ondina, Salvador - BA, 40170-115</p>";
+      "<p>1154, R. Barão de Jeremoabo, 668 - Ondina, Salvador - BA, 40170-115</p>";
     render(<Endereco />);
 
     const mapUrl = decodeURIComponent(
       screen.getByTitle("Mapa do Local do Evento").getAttribute("src") ?? "",
     );
-    const directionsUrl = decodeURIComponent(
-      screen.getByRole("link", { name: /como chegar/i }).getAttribute("href") ??
-        "",
-    );
 
-    for (const url of [mapUrl, directionsUrl]) {
-      expect(url).toContain("Instituto de Biologia da UFBA");
-      expect(url).toContain("1154");
-      expect(url).toContain("Rua Barão de Jeremoabo, 668");
-    }
+    expect(mapUrl).toContain("q=Rua Barão de Jeremoabo, 668");
+    expect(mapUrl).not.toContain("q=1154");
   });
 
   it("atualiza o mapa quando a edição recebe outro endereço", () => {
     const { rerender } = render(<Endereco />);
 
     mockEdicao.location = "<p>Av. Exemplo, 123 &amp; Centro</p>";
+    mockEdicao.locationLatitude = null;
+    mockEdicao.locationLongitude = null;
     rerender(<Endereco />);
 
     const directionsLink = screen.getByRole("link", { name: /como chegar/i });

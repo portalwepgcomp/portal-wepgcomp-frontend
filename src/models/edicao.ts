@@ -37,4 +37,8 @@ export interface Edicao extends EdicaoParams {
   updatedAt: string;
   isActive: boolean;
   registrationOpen?: boolean;
+  locationLatitude?: number | null;
+  locationLongitude?: number | null;
+  locationApproximate?: boolean;
+  locationGeocodedAddress?: string | null;
 }

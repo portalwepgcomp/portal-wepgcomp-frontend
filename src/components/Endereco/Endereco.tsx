@@ -1,11 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import HtmlEditorComponent from "@/components/HtmlEditorComponent/HtmlEditorComponent";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useEdicao } from "@/hooks/useEdicao";
 import { obterClassesBotao } from "@/lib/estilosBotao";
+
+function extrairTextoEndereco(html: string): string {
+  const addressElement = document.createElement("div");
+  addressElement.innerHTML = html;
+  addressElement.querySelectorAll("br").forEach((element) => {
+    element.replaceWith(" ");
+  });
+  addressElement.querySelectorAll("p, div, li").forEach((element) => {
+    element.append(" ");
+  });
+
+  return addressElement.textContent?.replace(/\s+/g, " ").trim() ?? "";
+}
+
+function normalizarEnderecoParaMapa(address: string): string {
+  return address
+    .replace(/^\d+\s*,\s*(?=(?:R\.|Rua|Av\.|Avenida)\s+)/i, "")
+    .replace(/\bR\.\s*/gi, "Rua ")
+    .replace(/\bAv\.\s*/gi, "Avenida ")
+    .replace(/\s+-\s+/g, ", ")
+    .trim();
+}
 
 /**
  * Exibe a localização cadastrada na edição e preserva sua edição administrativa.
@@ -15,35 +37,32 @@ export default function Endereco() {
   const [mapQuery, setMapQuery] = useState("");
   const { updateEdicao, Edicao } = useEdicao();
 
+  const hasCoordinates =
+    typeof Edicao?.locationLatitude === "number" &&
+    typeof Edicao?.locationLongitude === "number" &&
+    Number.isFinite(Edicao.locationLatitude) &&
+    Number.isFinite(Edicao.locationLongitude);
+
+  const mapTarget = useMemo(() => {
+    if (hasCoordinates && Edicao) {
+      return `${Edicao.locationLatitude},${Edicao.locationLongitude}`;
+    }
+    return mapQuery;
+  }, [Edicao, hasCoordinates, mapQuery]);
+
   useEffect(() => {
     setContent(Edicao?.location ?? "");
   }, [Edicao?.location]);
 
   useEffect(() => {
-    const addressElement = document.createElement("div");
-    addressElement.innerHTML = Edicao?.location ?? "";
-    addressElement.querySelectorAll("br").forEach((element) => {
-      element.replaceWith(" ");
-    });
-    addressElement.querySelectorAll("p, div, li").forEach((element) => {
-      element.append(" ");
-    });
-
-    const address =
-      addressElement.textContent?.replace(/\s+/g, " ").trim() ?? "";
-    setMapQuery(
-      address
-        .replace(/\bR\.\s*/gi, "Rua ")
-        .replace(/\bAv\.\s*/gi, "Avenida ")
-        .replace(/\s+-\s+/g, ", ")
-        .trim(),
-    );
+    const address = extrairTextoEndereco(Edicao?.location ?? "");
+    setMapQuery(normalizarEnderecoParaMapa(address));
   }, [Edicao?.location]);
 
-  const encodedMapQuery = encodeURIComponent(mapQuery);
-  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${encodedMapQuery}`;
-  const mapUrl = mapQuery
-    ? `https://maps.google.com/maps?q=${encodedMapQuery}&z=17&output=embed&hl=pt-BR`
+  const encodedMapTarget = encodeURIComponent(mapTarget);
+  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${encodedMapTarget}`;
+  const mapUrl = mapTarget
+    ? `https://maps.google.com/maps?q=${encodedMapTarget}&ll=${encodedMapTarget}&z=17&output=embed&hl=pt-BR`
     : null;
 
   const handleEditAddress = () => {
@@ -79,7 +98,7 @@ export default function Endereco() {
             </div>
           </div>
 
-          {mapQuery && (
+          {mapTarget && (
             <a
               href={mapsExternalUrl}
               target="_blank"
