@@ -30,6 +30,22 @@ jest.mock("@/context/AuthProvider/util", () => ({
   getEventEditionIdStorage: () => "edition-2026",
 }));
 
+jest.mock("@/context/AuthProvider/authProvider", () => ({
+  AuthContext: {
+    Provider: ({ children }: { children: React.ReactNode }) => children,
+  },
+}));
+
+jest.mock("react", () => {
+  const actual = jest.requireActual("react");
+  return {
+    ...actual,
+    useContext: () => ({
+      user: { level: "Admin", name: "Admin" },
+    }),
+  };
+});
+
 jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
   __esModule: true,
   default: ({
@@ -54,23 +70,6 @@ jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
   ),
 }));
 
-jest.mock("next/dynamic", () => () => {
-  const MockMapa = ({
-    latitude,
-    longitude,
-  }: {
-    latitude: number;
-    longitude: number;
-  }) => (
-    <div
-      data-testid="mapa-evento"
-      data-latitude={latitude}
-      data-longitude={longitude}
-    />
-  );
-  return MockMapa;
-});
-
 import Endereco from "@/components/Endereco/Endereco";
 
 describe("Endereço do evento", () => {
@@ -81,53 +80,54 @@ describe("Endereço do evento", () => {
     mockUpdateEdicao.mockClear();
   });
 
-  it("exibe somente a localização cadastrada na edição", () => {
+  it("exibe campos de latitude e longitude para o admin", () => {
     render(<Endereco />);
 
-    expect(screen.getByLabelText("Localização da edição")).toHaveValue(
-      mockLocation,
-    );
+    expect(screen.getByLabelText("Latitude")).toBeInTheDocument();
+    expect(screen.getByLabelText("Longitude")).toBeInTheDocument();
   });
 
-  it("salva a localização alterada na edição ativa", () => {
+  it("salva endereço junto com as coordenadas", () => {
     render(<Endereco />);
 
-    const newLocation = "<p>Novo local cadastrado</p>";
     fireEvent.change(screen.getByLabelText("Localização da edição"), {
-      target: { value: newLocation },
+      target: { value: "<p>Novo local</p>" },
+    });
+    fireEvent.change(screen.getByLabelText("Latitude"), {
+      target: { value: "-13.0020509" },
+    });
+    fireEvent.change(screen.getByLabelText("Longitude"), {
+      target: { value: "-38.5098765" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Salvar localização" }));
 
     expect(mockUpdateEdicao).toHaveBeenCalledWith("edition-2026", {
-      location: newLocation,
+      location: "<p>Novo local</p>",
       name: "WEPGCOMP 2026",
+      locationLatitude: -13.0020509,
+      locationLongitude: -38.5098765,
     });
   });
 
-  it("renderiza o mapa Leaflet com as coordenadas cadastradas", () => {
+  it("monta o embed do Google Maps com as coordenadas", () => {
     mockEdicao.locationLatitude = -13.0020509;
     mockEdicao.locationLongitude = -38.5098765;
     render(<Endereco />);
 
-    const mapa = screen.getByTestId("mapa-evento");
-    expect(mapa).toHaveAttribute("data-latitude", "-13.0020509");
-    expect(mapa).toHaveAttribute("data-longitude", "-38.5098765");
-
-    const directionsLink = screen.getByRole("link", { name: /como chegar/i });
-    expect(directionsLink.getAttribute("href")).toContain(
-      "destination=-13.0020509%2C-38.5098765",
-    );
+    const map = screen.getByTitle("Mapa do Local do Evento");
+    const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
+    expect(mapUrl).toContain("q=-13.0020509,-38.5098765");
+    expect(mapUrl).toContain("ll=-13.0020509,-38.5098765");
   });
 
-  it("não mostra mapa nem trajeto sem coordenadas cadastradas", () => {
+  it("não mostra mapa sem coordenadas", () => {
     render(<Endereco />);
 
     expect(
       screen.getByText(/Informe latitude e longitude/i),
     ).toBeInTheDocument();
-    expect(screen.queryByTestId("mapa-evento")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /como chegar/i }),
+      screen.queryByTitle("Mapa do Local do Evento"),
     ).not.toBeInTheDocument();
   });
 });

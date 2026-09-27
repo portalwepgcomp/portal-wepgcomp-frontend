@@ -1,35 +1,43 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 
 import HtmlEditorComponent from "@/components/HtmlEditorComponent/HtmlEditorComponent";
+import { isAdminLevel } from "@/components/Perfil/perfilLabels";
+import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useEdicao } from "@/hooks/useEdicao";
 import { obterClassesBotao } from "@/lib/estilosBotao";
 
-import { coordenadasValidas, montarUrlComoChegar } from "./enderecoMapa";
-
-const MapaEvento = dynamic(() => import("./MapaEvento"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center text-sm text-slate-500">
-      Carregando mapa...
-    </div>
-  ),
-});
+import {
+  coordenadasValidas,
+  montarUrlComoChegar,
+  montarUrlMapaEmbed,
+  parseCoordenada,
+} from "./enderecoMapa";
 
 /**
- * Exibe a localização cadastrada na edição e preserva sua edição administrativa.
- * O pin do mapa usa exclusivamente latitude/longitude cadastradas.
+ * Exibe a localização cadastrada na edição.
+ * O pin do Google Maps usa apenas latitude/longitude cadastradas.
  */
 export default function Endereco() {
+  const { user } = useContext(AuthContext);
   const { updateEdicao, Edicao } = useEdicao();
+  const isAdm = isAdminLevel(user?.level);
+
   const [content, setContent] = useState(Edicao?.location ?? "");
+  const [latitudeInput, setLatitudeInput] = useState(
+    Edicao?.locationLatitude?.toString() ?? "",
+  );
+  const [longitudeInput, setLongitudeInput] = useState(
+    Edicao?.locationLongitude?.toString() ?? "",
+  );
 
   useEffect(() => {
     setContent(Edicao?.location ?? "");
-  }, [Edicao?.location]);
+    setLatitudeInput(Edicao?.locationLatitude?.toString() ?? "");
+    setLongitudeInput(Edicao?.locationLongitude?.toString() ?? "");
+  }, [Edicao?.location, Edicao?.locationLatitude, Edicao?.locationLongitude]);
 
   const coordenadas = useMemo(() => {
     const latitude = Edicao?.locationLatitude;
@@ -49,14 +57,26 @@ export default function Endereco() {
     [coordenadas],
   );
 
+  const mapUrl = useMemo(
+    () =>
+      coordenadas
+        ? montarUrlMapaEmbed(coordenadas.latitude, coordenadas.longitude)
+        : null,
+    [coordenadas],
+  );
+
   const handleEditAddress = () => {
     if (!Edicao) return;
 
     const eventEditionId = getEventEditionIdStorage() ?? Edicao.id;
+    const locationLatitude = parseCoordenada(latitudeInput);
+    const locationLongitude = parseCoordenada(longitudeInput);
 
     void updateEdicao(eventEditionId, {
       location: content,
       name: Edicao.name,
+      locationLatitude,
+      locationLongitude,
     });
   };
 
@@ -79,6 +99,42 @@ export default function Endereco() {
                 onChange={setContent}
                 handleEditField={handleEditAddress}
               />
+
+              {isAdm && (
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                    Latitude
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={latitudeInput}
+                      onChange={(event) => setLatitudeInput(event.target.value)}
+                      placeholder="Ex.: -13.0020509"
+                      disabled={!Edicao?.isActive}
+                      className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                    Longitude
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={longitudeInput}
+                      onChange={(event) =>
+                        setLongitudeInput(event.target.value)
+                      }
+                      placeholder="Ex.: -38.5098765"
+                      disabled={!Edicao?.isActive}
+                      className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                    />
+                  </label>
+                  <p className="sm:col-span-2 text-xs text-slate-500">
+                    Preencha as coordenadas e clique em Salvar no editor do
+                    endereço. Google Maps → botão direito no ponto → copiar
+                    coordenadas.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -109,15 +165,17 @@ export default function Endereco() {
       </div>
 
       <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:h-auto lg:min-h-0 lg:flex-1">
-        {coordenadas ? (
-          <MapaEvento
-            latitude={coordenadas.latitude}
-            longitude={coordenadas.longitude}
+        {mapUrl ? (
+          <iframe
+            title="Mapa do Local do Evento"
+            src={mapUrl}
+            className="h-full w-full border-0"
+            loading="eager"
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         ) : (
           <div className="flex h-full items-center justify-center p-5 text-center text-sm text-slate-500">
-            Informe latitude e longitude no cadastro da edição para exibir o
-            mapa com o pin exato.
+            Informe latitude e longitude para exibir o mapa com o pin exato.
           </div>
         )}
       </div>

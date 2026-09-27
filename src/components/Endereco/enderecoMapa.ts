@@ -19,3 +19,18 @@ export function montarUrlComoChegar(
   const destino = encodeURIComponent(`${latitude},${longitude}`);
   return `https://www.google.com/maps/dir/?api=1&hl=pt-BR&destination=${destino}`;
 }
+
+export function montarUrlMapaEmbed(
+  latitude: number,
+  longitude: number,
+): string {
+  const ponto = encodeURIComponent(`${latitude},${longitude}`);
+  return `https://maps.google.com/maps?q=${ponto}&ll=${ponto}&z=17&output=embed&hl=pt-BR`;
+}
+
+export function parseCoordenada(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed.replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+}
