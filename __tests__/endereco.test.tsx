@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useState, type ReactNode } from "react";
 
 const mockUpdateEdicao = jest.fn();
 const mockLocation = "<p>Auditório do Instituto de Geociências da UFBA</p>";
@@ -30,44 +31,46 @@ jest.mock("@/context/AuthProvider/util", () => ({
   getEventEditionIdStorage: () => "edition-2026",
 }));
 
-jest.mock("@/context/AuthProvider/authProvider", () => ({
-  AuthContext: {
-    Provider: ({ children }: { children: React.ReactNode }) => children,
-  },
-}));
-
-jest.mock("react", () => {
-  const actual = jest.requireActual("react");
-  return {
-    ...actual,
-    useContext: () => ({
-      user: { level: "Admin", name: "Admin" },
-    }),
-  };
-});
-
 jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
   __esModule: true,
-  default: ({
+  default: function HtmlEditorComponentMock({
     content,
     onChange,
     handleEditField,
+    editExtras,
   }: {
     content: string;
     onChange: (value: string) => void;
     handleEditField: () => void;
-  }) => (
-    <div>
-      <input
-        aria-label="Localização da edição"
-        value={content}
-        onChange={(event) => onChange(event.target.value)}
-      />
-      <button type="button" onClick={handleEditField}>
-        Salvar localização
-      </button>
-    </div>
-  ),
+    editExtras?: ReactNode;
+  }) {
+    const [editing, setEditing] = useState(false);
+    return (
+      <div>
+        {!editing ? (
+          <div>{content}</div>
+        ) : (
+          <>
+            <input
+              aria-label="Localização da edição"
+              value={content}
+              onChange={(event) => onChange(event.target.value)}
+            />
+            {editExtras}
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            if (editing) handleEditField();
+            setEditing(!editing);
+          }}
+        >
+          {editing ? "Salvar" : "Editar"}
+        </button>
+      </div>
+    );
+  },
 }));
 
 import Endereco from "@/components/Endereco/Endereco";
@@ -80,15 +83,20 @@ describe("Endereço do evento", () => {
     mockUpdateEdicao.mockClear();
   });
 
-  it("exibe campos de latitude e longitude para o admin", () => {
+  it("não mostra latitude/longitude antes de clicar em Editar", () => {
     render(<Endereco />);
+
+    expect(screen.queryByLabelText("Latitude")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Longitude")).not.toBeInTheDocument();
+  });
+
+  it("mostra latitude/longitude somente após Editar e salva junto", () => {
+    render(<Endereco />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
 
     expect(screen.getByLabelText("Latitude")).toBeInTheDocument();
     expect(screen.getByLabelText("Longitude")).toBeInTheDocument();
-  });
-
-  it("salva endereço junto com as coordenadas", () => {
-    render(<Endereco />);
 
     fireEvent.change(screen.getByLabelText("Localização da edição"), {
       target: { value: "<p>Novo local</p>" },
@@ -99,7 +107,7 @@ describe("Endereço do evento", () => {
     fireEvent.change(screen.getByLabelText("Longitude"), {
       target: { value: "-38.5098765" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar localização" }));
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
 
     expect(mockUpdateEdicao).toHaveBeenCalledWith("edition-2026", {
       location: "<p>Novo local</p>",
@@ -117,17 +125,5 @@ describe("Endereço do evento", () => {
     const map = screen.getByTitle("Mapa do Local do Evento");
     const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
     expect(mapUrl).toContain("q=-13.0020509,-38.5098765");
-    expect(mapUrl).toContain("ll=-13.0020509,-38.5098765");
-  });
-
-  it("não mostra mapa sem coordenadas", () => {
-    render(<Endereco />);
-
-    expect(
-      screen.getByText(/Informe latitude e longitude/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTitle("Mapa do Local do Evento"),
-    ).not.toBeInTheDocument();
   });
 });

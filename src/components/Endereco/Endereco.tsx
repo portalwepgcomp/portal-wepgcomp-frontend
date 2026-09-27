@@ -1,10 +1,8 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import HtmlEditorComponent from "@/components/HtmlEditorComponent/HtmlEditorComponent";
-import { isAdminLevel } from "@/components/Perfil/perfilLabels";
-import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useEdicao } from "@/hooks/useEdicao";
 import { obterClassesBotao } from "@/lib/estilosBotao";
@@ -21,9 +19,7 @@ import {
  * O pin do Google Maps usa apenas latitude/longitude cadastradas.
  */
 export default function Endereco() {
-  const { user } = useContext(AuthContext);
   const { updateEdicao, Edicao } = useEdicao();
-  const isAdm = isAdminLevel(user?.level);
 
   const [content, setContent] = useState(Edicao?.location ?? "");
   const [latitudeInput, setLatitudeInput] = useState(
@@ -98,43 +94,42 @@ export default function Endereco() {
                 content={content}
                 onChange={setContent}
                 handleEditField={handleEditAddress}
+                editExtras={
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                      Latitude
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={latitudeInput}
+                        onChange={(event) =>
+                          setLatitudeInput(event.target.value)
+                        }
+                        placeholder="Ex.: -13.0020509"
+                        disabled={!Edicao?.isActive}
+                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                      Longitude
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={longitudeInput}
+                        onChange={(event) =>
+                          setLongitudeInput(event.target.value)
+                        }
+                        placeholder="Ex.: -38.5098765"
+                        disabled={!Edicao?.isActive}
+                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                      />
+                    </label>
+                    <p className="sm:col-span-2 text-xs text-slate-500">
+                      Google Maps → botão direito no ponto → copiar coordenadas.
+                    </p>
+                  </div>
+                }
               />
-
-              {isAdm && (
-                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-                    Latitude
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={latitudeInput}
-                      onChange={(event) => setLatitudeInput(event.target.value)}
-                      placeholder="Ex.: -13.0020509"
-                      disabled={!Edicao?.isActive}
-                      className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-                    Longitude
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={longitudeInput}
-                      onChange={(event) =>
-                        setLongitudeInput(event.target.value)
-                      }
-                      placeholder="Ex.: -38.5098765"
-                      disabled={!Edicao?.isActive}
-                      className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
-                    />
-                  </label>
-                  <p className="sm:col-span-2 text-xs text-slate-500">
-                    Preencha as coordenadas e clique em Salvar no editor do
-                    endereço. Google Maps → botão direito no ponto → copiar
-                    coordenadas.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
 
