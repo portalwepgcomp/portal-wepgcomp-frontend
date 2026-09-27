@@ -6,10 +6,6 @@ export interface EdicaoParams {
   startDate?: string;
   endDate?: string;
   location?: string;
-  locationLatitude?: number | null;
-  locationLongitude?: number | null;
-  locationApproximate?: boolean;
-  locationGeocodedAddress?: string | null;
   coordinatorId?: string;
   organizingCommitteeIds?: string[];
   roomName?: string[];
