@@ -1,4 +1,4 @@
-import { describe, expect, it } from "@jest/globals";
+import { beforeEach, describe, expect, it } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const mockUpdateEdicao = jest.fn();
@@ -48,6 +48,11 @@ jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
 import Endereco from "@/components/Endereco/Endereco";
 
 describe("Endereço do evento", () => {
+  beforeEach(() => {
+    mockEdicao.location = mockLocation;
+    mockUpdateEdicao.mockClear();
+  });
+
   it("exibe somente a localização cadastrada na edição", () => {
     render(<Endereco />);
 
@@ -57,8 +62,6 @@ describe("Endereço do evento", () => {
     expect(
       screen.queryByText(/Instituto de Computação/i),
     ).not.toBeInTheDocument();
-    expect(screen.queryByText(/Pavilhão de Aulas/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Av\. Milton Santos/i)).not.toBeInTheDocument();
   });
 
   it("salva a localização alterada na edição ativa", () => {
@@ -76,7 +79,9 @@ describe("Endereço do evento", () => {
     });
   });
 
-  it("exibe o mapa limpo e mantém o link Como chegar", () => {
+  it("marca a rua e o número cadastrados no Google Maps", () => {
+    mockEdicao.location =
+      "<p>Rua Barão de Jeremoabo, 668 - Ondina, Salvador - BA, 40170-115</p>";
     render(<Endereco />);
 
     const directionsLink = screen.getByRole("link", { name: /como chegar/i });
@@ -86,15 +91,68 @@ describe("Endereço do evento", () => {
     );
     const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
 
-    expect(directionsUrl).toContain("-12.9980929,-38.5072076");
-    expect(directionsUrl).toContain("hl=pt-BR");
-    expect(mapUrl).toContain("google.com/maps/embed");
-    expect(mapUrl).toContain("-12.9980929,-38.5072076");
+    expect(directionsUrl).toContain("Rua Barão de Jeremoabo, 668");
+    expect(mapUrl).toContain("maps.google.com/maps");
+    expect(mapUrl).toContain("q=Rua Barão de Jeremoabo, 668");
+    expect(mapUrl).not.toContain("1154");
+    expect(mapUrl).not.toContain("-13.0020509");
     expect(map).toHaveAttribute("loading", "eager");
     expect(directionsLink).toHaveAttribute("target", "_blank");
     expect(directionsLink).toHaveAttribute(
       "rel",
       expect.stringContaining("noopener"),
     );
+  });
+
+  it("mantém nome do local e ambos os números do endereço na busca", () => {
+    mockEdicao.location =
+      "<p>Instituto de Biologia da UFBA - UFBA - 1154, R. Barão de Jeremoabo, 668 - Ondina, Salvador - BA, 40170-115</p>";
+    render(<Endereco />);
+
+    const mapUrl = decodeURIComponent(
+      screen.getByTitle("Mapa do Local do Evento").getAttribute("src") ?? "",
+    );
+    const directionsUrl = decodeURIComponent(
+      screen.getByRole("link", { name: /como chegar/i }).getAttribute("href") ??
+        "",
+    );
+
+    for (const url of [mapUrl, directionsUrl]) {
+      expect(url).toContain("Instituto de Biologia da UFBA");
+      expect(url).toContain("1154");
+      expect(url).toContain("Rua Barão de Jeremoabo, 668");
+    }
+  });
+
+  it("atualiza o mapa quando a edição recebe outro endereço", () => {
+    const { rerender } = render(<Endereco />);
+
+    mockEdicao.location = "<p>Av. Exemplo, 123 &amp; Centro</p>";
+    rerender(<Endereco />);
+
+    const directionsLink = screen.getByRole("link", { name: /como chegar/i });
+    const map = screen.getByTitle("Mapa do Local do Evento");
+
+    expect(
+      decodeURIComponent(directionsLink.getAttribute("href") ?? ""),
+    ).toContain("Avenida Exemplo, 123 & Centro");
+    expect(decodeURIComponent(map.getAttribute("src") ?? "")).toContain(
+      "q=Avenida Exemplo, 123 & Centro",
+    );
+  });
+
+  it("não mostra mapa nem trajeto sem endereço cadastrado", () => {
+    mockEdicao.location = "";
+    render(<Endereco />);
+
+    expect(
+      screen.getByText("Endereço do evento não informado."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTitle("Mapa do Local do Evento"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /como chegar/i }),
+    ).not.toBeInTheDocument();
   });
 });

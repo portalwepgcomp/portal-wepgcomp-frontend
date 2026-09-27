@@ -29,8 +29,9 @@ const navItemBase = "cursor-pointer max-[1000px]:w-full";
 
 export default function Header() {
   const menuRef = useRef<HTMLElement>(null);
+  const refreshedYearRef = useRef<string | null>(null);
   const { user, signed } = useContext(AuthContext);
-  const { listEdicao, edicoesList, getEdicaoByYear, Edicao } = useEdicao();
+  const { listEdicao, edicoesList, getEdicaoByYear } = useEdicao();
   const { setSelectEdition, selectEdition } = useActiveEdition();
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
@@ -129,12 +130,14 @@ export default function Header() {
 
   useEffect(() => {
     if (
-      selectEdition.year &&
-      (!Edicao || getYearFromEdicao(Edicao) !== selectEdition.year)
+      !selectEdition.year ||
+      refreshedYearRef.current === selectEdition.year
     ) {
-      getEdicaoByYear(selectEdition.year);
+      return;
     }
-  }, [selectEdition.year, Edicao, getEdicaoByYear]);
+    refreshedYearRef.current = selectEdition.year;
+    void getEdicaoByYear(selectEdition.year);
+  }, [selectEdition.year, getEdicaoByYear]);
 
   useEffect(() => {
     if (edicoesList?.length && !selectEdition.year) {
