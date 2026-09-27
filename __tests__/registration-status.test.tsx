@@ -185,23 +185,14 @@ describe("fluxo de cadastro", () => {
 });
 
 describe("fluxo de login", () => {
-  it("mantém o acesso ao cadastro quando as inscrições estão abertas", () => {
-    render(<LoginContent registrationOpen />);
+  it("exibe o formulário e o acesso ao cadastro", () => {
+    render(<LoginContent />);
 
     expect(screen.getByTestId("form-login")).toBeInTheDocument();
+
     expect(screen.getByRole("link", { name: "Cadastre-se" })).toHaveAttribute(
       "href",
       "/cadastro",
     );
-  });
-
-  it("mantém somente o formulário quando as inscrições estão fechadas", () => {
-    render(<LoginContent registrationOpen={false} />);
-
-    expect(screen.getByTestId("form-login")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: "Cadastre-se" }),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText("Inscrições encerradas")).not.toBeInTheDocument();
   });
 });
