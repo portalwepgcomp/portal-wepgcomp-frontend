@@ -1,14 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 export interface EdicaoParams {
   name: string;
   description?: string;
   startDate?: string;
   endDate?: string;
   location?: string;
+  locationLatitude?: number | null;
+  locationLongitude?: number | null;
   coordinatorId?: string;
   organizingCommitteeIds?: string[];
-  roomName?: string;
+  roomName?: string[];
   itSupportIds?: string[];
   administrativeSupportIds?: string[];
   communicationIds?: string[];
@@ -36,4 +36,7 @@ export interface Edicao extends EdicaoParams {
   deletedAt: string;
   updatedAt: string;
   isActive: boolean;
+  registrationOpen?: boolean;
+  locationApproximate?: boolean;
+  locationGeocodedAddress?: string | null;
 }

@@ -1,101 +1,178 @@
 "use client";
 
-import { obterClassesBotao } from "@/lib/estilosBotao";
-import { useEdicao } from "@/hooks/useEdicao";
-import { useEffect, useState } from "react";
-import HtmlEditorComponent from "../HtmlEditorComponent/HtmlEditorComponent";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { useEffect, useMemo, useState } from "react";
 
+import HtmlEditorComponent from "@/components/HtmlEditorComponent/HtmlEditorComponent";
+import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { useEdicao } from "@/hooks/useEdicao";
+import { obterClassesBotao } from "@/lib/estilosBotao";
+
+import {
+  coordenadasValidas,
+  montarUrlComoChegar,
+  montarUrlMapaEmbed,
+  parseCoordenada,
+} from "./enderecoMapa";
+
+/**
+ * Exibe a localização cadastrada na edição.
+ * O pin do Google Maps usa apenas latitude/longitude cadastradas.
+ */
 export default function Endereco() {
-  const [content, setContent] = useState("");
   const { updateEdicao, Edicao } = useEdicao();
 
-  const handleEditAdress = () => {
-    const eventEditionId = getEventEditionIdStorage();
-
-    if (Edicao) {
-      updateEdicao(eventEditionId ?? "", {
-        location: content,
-        name: Edicao.name,
-      });
-    }
-  };
-
-  const latitude = -13.002843214882326;
-  const longitude = -38.50717484672244;
-  const mapsEmbedUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&z=16&output=embed`;
-  const mapsExternalUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  const [content, setContent] = useState(Edicao?.location ?? "");
+  const [latitudeInput, setLatitudeInput] = useState(
+    Edicao?.locationLatitude?.toString() ?? "",
+  );
+  const [longitudeInput, setLongitudeInput] = useState(
+    Edicao?.locationLongitude?.toString() ?? "",
+  );
 
   useEffect(() => {
     setContent(Edicao?.location ?? "");
-  }, [Edicao?.location]);
+    setLatitudeInput(Edicao?.locationLatitude?.toString() ?? "");
+    setLongitudeInput(Edicao?.locationLongitude?.toString() ?? "");
+  }, [Edicao?.location, Edicao?.locationLatitude, Edicao?.locationLongitude]);
+
+  const coordenadas = useMemo(() => {
+    const latitude = Edicao?.locationLatitude;
+    const longitude = Edicao?.locationLongitude;
+    if (!coordenadasValidas(latitude, longitude)) return null;
+    return {
+      latitude: latitude as number,
+      longitude: longitude as number,
+    };
+  }, [Edicao?.locationLatitude, Edicao?.locationLongitude]);
+
+  const mapsExternalUrl = useMemo(
+    () =>
+      coordenadas
+        ? montarUrlComoChegar(coordenadas.latitude, coordenadas.longitude)
+        : null,
+    [coordenadas],
+  );
+
+  const mapUrl = useMemo(
+    () =>
+      coordenadas
+        ? montarUrlMapaEmbed(coordenadas.latitude, coordenadas.longitude)
+        : null,
+    [coordenadas],
+  );
+
+  const handleEditAddress = () => {
+    if (!Edicao) return;
+
+    const eventEditionId = getEventEditionIdStorage() ?? Edicao.id;
+    const locationLatitude = parseCoordenada(latitudeInput);
+    const locationLongitude = parseCoordenada(longitudeInput);
+
+    void updateEdicao(eventEditionId, {
+      location: content,
+      name: Edicao.name,
+      locationLatitude,
+      locationLongitude,
+    });
+  };
 
   return (
     <div className="flex w-full flex-col items-start gap-4">
       <div className="flex items-center gap-3">
         <div className="h-7 w-1.5 rounded-full bg-brand-orange" />
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Local do Evento
         </h2>
       </div>
 
-      <div className="flex w-full flex-col gap-2 rounded-xl bg-white p-5 border border-gray-200 shadow-sm">
-        <div className="flex items-start gap-3">
-          <span className="mt-1 text-xl text-brand-orange">📍</span>
-          <div className="flex-1 text-sm text-slate-700 leading-relaxed">
-            <p className="font-semibold text-slate-900 text-base">
-              Instituto de Computação — UFBA
-            </p>
-            <p className="text-slate-600">
-              Pavilhão de Aulas da Federação 2 (PAF 2)
-            </p>
-            <p className="text-slate-500">
-              Av. Milton Santos, s/n — Ondina, Salvador - BA
-            </p>
-          </div>
-          <a
-            href={mapsExternalUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={obterClassesBotao("outline")}
-          >
-            <span>Como chegar</span>
-            <svg
-              className="h-3.5 w-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+      <div className="flex w-full flex-col gap-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="flex min-w-0 items-start gap-3 sm:flex-1">
+            <span className="mt-1 shrink-0 text-xl text-brand-orange">📍</span>
+            <div className="min-w-0 flex-1 text-sm leading-relaxed text-slate-700">
+              <HtmlEditorComponent
+                content={content}
+                onChange={setContent}
+                handleEditField={handleEditAddress}
+                editExtras={
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                      Latitude
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={latitudeInput}
+                        onChange={(event) =>
+                          setLatitudeInput(event.target.value)
+                        }
+                        placeholder="Ex.: -13.0020509"
+                        disabled={!Edicao?.isActive}
+                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+                      Longitude
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={longitudeInput}
+                        onChange={(event) =>
+                          setLongitudeInput(event.target.value)
+                        }
+                        placeholder="Ex.: -38.5098765"
+                        disabled={!Edicao?.isActive}
+                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                      />
+                    </label>
+                    <p className="sm:col-span-2 text-xs text-slate-500">
+                      Google Maps → botão direito no ponto → copiar coordenadas.
+                    </p>
+                  </div>
+                }
               />
-            </svg>
-          </a>
-        </div>
-
-        {content && (
-          <div className="mt-2 border-t border-gray-100 pt-2 text-slate-700">
-            <HtmlEditorComponent
-              content={content}
-              onChange={(newValue) => setContent(newValue)}
-              handleEditField={handleEditAdress}
-            />
+            </div>
           </div>
-        )}
+
+          {mapsExternalUrl && (
+            <a
+              href={mapsExternalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${obterClassesBotao("outline")} w-full sm:w-auto sm:shrink-0`}
+            >
+              <span>Como chegar</span>
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+          )}
+        </div>
       </div>
 
-      <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
-        <iframe
-          title="Mapa do Local do Evento"
-          src={mapsEmbedUrl}
-          className="h-full w-full border-0"
-          loading="lazy"
-          allowFullScreen
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+      <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:h-auto lg:min-h-0 lg:flex-1">
+        {mapUrl ? (
+          <iframe
+            title="Mapa do Local do Evento"
+            src={mapUrl}
+            className="h-full w-full border-0"
+            loading="eager"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center p-5 text-center text-sm text-slate-500">
+            Informe latitude e longitude para exibir o mapa com o pin exato.
+          </div>
+        )}
       </div>
     </div>
   );

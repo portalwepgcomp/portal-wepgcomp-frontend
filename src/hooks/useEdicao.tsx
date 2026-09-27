@@ -31,7 +31,7 @@ interface EdicaoProviderData {
   getEdicaoByYear: (year: string) => Promise<Edicao | null>;
   createEdicao: (body: EdicaoParams) => Promise<boolean>;
   updateEdicao: (idEdicao: string, body: EdicaoParams) => Promise<void>;
-  updateEdicaoActivate: (idEdicao: string, body: EdicaoParams) => Promise<void>;
+  updateEdicaoActivate: (idEdicao: string) => Promise<boolean>;
   deleteEdicao: (idEdicao: string) => Promise<boolean>;
   clearEdicao: () => void;
 }
@@ -178,10 +178,10 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
   );
 
   const updateEdicaoActivate = useCallback(
-    async (idEdicao: string, body: EdicaoParams) => {
+    async (idEdicao: string) => {
       setLoadingEdicao(true);
       try {
-        const response = await edicaoApi.updateEdicaoActivate(idEdicao, body);
+        const response = await edicaoApi.updateEdicaoActivate(idEdicao);
         setEdicao(response);
         showAlert({
           icon: "success",
@@ -189,6 +189,7 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
           timer: 3000,
           showConfirmButton: false,
         });
+        return true;
       } catch (err: unknown) {
         showAlert({
           icon: "error",
@@ -199,6 +200,7 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
           ),
           confirmButtonText: "Retornar",
         });
+        return false;
       } finally {
         setLoadingEdicao(false);
       }

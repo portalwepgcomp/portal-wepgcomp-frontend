@@ -16,6 +16,13 @@ export const submissionApi = {
     return data;
   },
 
+  downloadPdf: async (idSubmission: string) => {
+    const { data } = await instance.get(`${baseUrl}/${idSubmission}/pdf`, {
+      responseType: "blob",
+    });
+
+    return data as Blob;
+  },
   createSubmission: async (body: SubmissionParams) => {
     const { data } = await instance.post(`${baseUrl}`, body);
 

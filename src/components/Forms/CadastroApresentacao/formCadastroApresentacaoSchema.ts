@@ -3,8 +3,7 @@ import { z } from "zod";
 /**
  * Schema de validação do cadastro/edição de apresentação (submissão).
  * Extraído de `FormCadastroApresentacao.tsx` (mesma quebra feita em FormEdicao).
- * Preserva as regras: título/resumo obrigatórios, orientador UUID, celular
- * 10–11 dígitos, slide PDF obrigatório e link Google Drive/Docs validado.
+ * Valida título/resumo, orientador, celular com DDD, slide PDF e link.
  */
 export const esquemaCadastro = z.object({
   id: z.string().optional(),
@@ -20,10 +19,29 @@ export const esquemaCadastro = z.object({
     .uuid({ message: "O orientador é obrigatório" }),
   coorientador: z.string().optional(),
   data: z.string().optional(),
-  celular: z.string().refine((value) => {
-    const celularFormatado = value.replace(/\D/g, "");
-    return celularFormatado.length >= 10 && celularFormatado.length <= 11;
-  }, "O celular deve conter 10 ou 11 dígitos"),
+  celular: z.string().superRefine((value, context) => {
+    const digitos = value.replace(/\D/g, "");
+    let message: string | undefined;
+
+    const formatoValido = /^(?:\d{11}|\(\d{2}\) \d{5}-\d{4})$/.test(value);
+
+    if (digitos.length !== 11 || !formatoValido) {
+      message = "Informe um celular com DDD e 9 dígitos";
+    } else if (digitos[2] !== "9") {
+      message = "O celular deve começar com 9 após o DDD";
+    } else if (
+      digitos
+        .slice(3)
+        .split("")
+        .every((digit) => digit === digitos[3])
+    ) {
+      message = "O celular não pode ter todos os números iguais";
+    }
+
+    if (message) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message });
+    }
+  }),
   slide: z
     .string({ invalid_type_error: "Campo Inválido" })
     .refine((val) => val && val.trim().length > 0, {

@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/UI/Button";
-import { Pencil, Trash2 } from "lucide-react";
+import { DoorClosed, DoorOpen, Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useSweetAlert } from "@/hooks/useAlert";
@@ -11,12 +11,18 @@ interface CardEdicaoProps {
   edicao: Edicao;
   onEditar: () => void;
   onExcluir: () => void;
+  onAtivar: (id: string) => void;
+  onAlternarInscricoes?: (abrir: boolean) => void;
+  alternandoInscricoes?: boolean;
 }
 
 export default function CardEdicao({
   edicao,
   onEditar,
   onExcluir,
+  onAtivar,
+  onAlternarInscricoes,
+  alternandoInscricoes = false,
 }: Readonly<CardEdicaoProps>) {
   const { showAlert } = useSweetAlert();
 
@@ -45,6 +51,50 @@ export default function CardEdicao({
       </div>
 
       <div className="m-4 flex gap-1 max-[980px]:w-full max-[980px]:justify-center">
+        {edicao.isActive ? (
+          <Button
+            size="lg"
+            variante="activate1"
+            aria-label="Ativo"
+            type="button"
+            disabled
+          >
+            Ativo
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            variante="activate2"
+            aria-label="Ativar"
+            onClick={() => onAtivar(edicao.id)}
+            type="button"
+          >
+            Ativar
+          </Button>
+        )}
+
+        {edicao.isActive && onAlternarInscricoes && (
+          <Button
+            size="lg"
+            type="button"
+            variante={edicao.registrationOpen ? "success" : "successLight"}
+            aria-label={
+              edicao.registrationOpen ? "Fechar inscrições" : "Abrir inscrições"
+            }
+            title={
+              edicao.registrationOpen ? "Fechar inscrições" : "Abrir inscrições"
+            }
+            disabled={alternandoInscricoes}
+            onClick={() => onAlternarInscricoes(!edicao.registrationOpen)}
+          >
+            {edicao.registrationOpen ? (
+              <DoorOpen aria-hidden="true" />
+            ) : (
+              <DoorClosed aria-hidden="true" />
+            )}
+          </Button>
+        )}
+
         <Button
           size="lg"
           variante="outline"

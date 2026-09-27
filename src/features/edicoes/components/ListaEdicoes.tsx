@@ -19,7 +19,10 @@ export default function ListaEdicoes() {
     busca,
     setBusca,
     edicaoAtiva,
+    alternandoInscricoes,
     abrirEdicao,
+    alternarInscricoes,
+    ativarEdicao,
     excluir,
   } = useListaEdicoes();
 
@@ -61,6 +64,11 @@ export default function ListaEdicoes() {
                 edicao={edicao}
                 onEditar={() => abrirEdicao(edicao.id)}
                 onExcluir={() => excluir(edicao.id)}
+                onAtivar={() => ativarEdicao(edicao.id)}
+                onAlternarInscricoes={(abrir) =>
+                  alternarInscricoes(edicao.id, abrir)
+                }
+                alternandoInscricoes={alternandoInscricoes}
               />
             ))}
             {itens.length === 0 && <ListaVazia />}

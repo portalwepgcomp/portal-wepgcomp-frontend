@@ -46,7 +46,14 @@ export function PerfilMenu({
   }, []);
 
   return (
-    <div className={cn("relative min-w-[13rem]", className)} ref={ref}>
+    <div
+      className={cn(
+        "relative",
+        compact ? "w-full min-w-0" : "min-w-[13rem]",
+        className,
+      )}
+      ref={ref}
+    >
       <button
         type="button"
         className={cn(
@@ -54,7 +61,7 @@ export function PerfilMenu({
           open
             ? "rounded-t-lg rounded-b-none border-b-0 bg-muted-light/40"
             : "rounded-lg hover:bg-muted-light/60",
-          compact && "gap-1.5 px-2 py-1",
+          compact && "h-9 gap-1.5 px-2 py-0",
         )}
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
@@ -62,7 +69,10 @@ export function PerfilMenu({
         aria-label={`Menu da conta: ${userName}`}
       >
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white"
+          className={cn(
+            "flex shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white",
+            compact ? "h-6 w-6" : "h-8 w-8",
+          )}
           aria-hidden
         >
           {initials}
@@ -95,7 +105,10 @@ export function PerfilMenu({
       {open && (
         <ul
           role="menu"
-          className="absolute right-0 top-full z-40 w-full min-w-[13rem] list-none overflow-hidden rounded-b-lg border border-t-0 border-line bg-white p-0 pb-1 shadow-sm"
+          className={cn(
+            "absolute right-0 top-full z-40 w-full list-none overflow-hidden rounded-b-lg border border-t-0 border-line bg-white p-0 pb-1 shadow-sm",
+            compact ? "min-w-0" : "min-w-[13rem]",
+          )}
         >
           <li className="px-3 py-2">
             <p className="truncate text-xs text-muted">{userName}</p>

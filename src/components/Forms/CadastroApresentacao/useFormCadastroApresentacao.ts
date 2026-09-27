@@ -23,6 +23,7 @@ import {
   type CadastroFormulario,
 } from "./formCadastroApresentacaoSchema";
 import { montarNomeArquivoPdf } from "./montarNomeArquivoPdf";
+import { arquivoEhPdf } from "./validarArquivoPdf";
 
 /**
  * Toda a lógica do formulário de cadastro/edição de apresentação: estado,
@@ -122,13 +123,24 @@ export function useFormCadastroApresentacao() {
   const aoMudarArquivo = (e: React.ChangeEvent<HTMLInputElement>) => {
     const arquivoSelecionado = e.target.files?.[0];
 
-    if (arquivoSelecionado) {
-      setArquivo(arquivoSelecionado);
-      setNomeArquivo(arquivoSelecionado.name);
-      setValue("slide", arquivoSelecionado.name, {
-        shouldValidate: true,
+    if (!arquivoSelecionado) return;
+
+    if (!arquivoEhPdf(arquivoSelecionado)) {
+      e.target.value = "";
+      showAlert({
+        icon: "error",
+        title: "Arquivo incorreto",
+        text: "O slide da apresentação deve ser um arquivo PDF.",
+        confirmButtonText: "Entendi",
       });
+      return;
     }
+
+    setArquivo(arquivoSelecionado);
+    setNomeArquivo(arquivoSelecionado.name);
+    setValue("slide", arquivoSelecionado.name, {
+      shouldValidate: true,
+    });
   };
 
   const criarDadosSubmissao = (

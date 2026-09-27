@@ -8,6 +8,7 @@ import { FileUp, Save, Sparkles, UserCheck } from "lucide-react";
 import IndicadorDeCarregamento from "@/components/IndicadorDeCarregamento/IndicadorDeCarregamento";
 import { Campo, Input, Textarea } from "@/components/UI/Input";
 import { cn } from "@/utils/cn";
+import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { useFormCadastroApresentacao } from "./useFormCadastroApresentacao";
 
 const labelObrigatorio = (texto: string) => (
@@ -36,6 +37,8 @@ export function FormCadastroApresentacao() {
     aoMudarArquivo,
     aoMudarTextarea,
   } = useFormCadastroApresentacao();
+
+  const { baixarPdf, baixandoPdf } = useApresentacaoPdf();
 
   if (carregandoEnvio) {
     return (
@@ -176,12 +179,27 @@ export function FormCadastroApresentacao() {
             }
             htmlFor="coorientador"
           >
-            <Input
-              type="text"
-              id="coorientador"
-              placeholder="Nome do coorientador"
-              className="text-sm rounded-lg"
-              {...register("coorientador")}
+            <Controller
+              name="coorientador"
+              control={control}
+              render={({ field: { onChange, onBlur, value, ref } }) => (
+                <Input
+                  ref={ref}
+                  type="text"
+                  id="coorientador"
+                  placeholder="Nome do coorientador"
+                  className="text-sm rounded-lg"
+                  value={value ?? ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const apenasLetras = e.target.value.replace(
+                      /[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g,
+                      "",
+                    );
+                    onChange(apenasLetras);
+                  }}
+                  onBlur={onBlur}
+                />
+              )}
             />
           </Campo>
         </div>
@@ -204,10 +222,13 @@ export function FormCadastroApresentacao() {
                   component={Input}
                   ref={ref}
                   id="celular"
-                  placeholder="(71) 99999-9999"
+                  placeholder="(XX) 9XXXX-XXXX"
                   className="text-sm rounded-lg"
-                  mask="(__) _____-____"
-                  replacement={{ _: /\d/ }}
+                  mask="(__) c____-____"
+                  replacement={{ _: /\d/, c: /9/ }}
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  aria-describedby="celular-ajuda"
                   value={value ?? ""}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     onChange(e.target.value)
@@ -217,6 +238,10 @@ export function FormCadastroApresentacao() {
               )}
             />
           </div>
+          <p id="celular-ajuda" className="text-xs text-muted">
+            Informe o DDD e um celular com 9 dígitos. Números repetidos não são
+            aceitos.
+          </p>
         </Campo>
       </div>
 
@@ -263,7 +288,7 @@ export function FormCadastroApresentacao() {
             <input
               type="file"
               id="slide"
-              accept=".pdf"
+              accept="application/pdf,.pdf"
               className="block w-full text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-brand-blue/10 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-brand-blue hover:file:bg-brand-blue/20 cursor-pointer"
               onChange={aoMudarArquivo}
             />
@@ -275,14 +300,14 @@ export function FormCadastroApresentacao() {
                   Arquivo selecionado: <strong>{nomeArquivo}</strong>
                 </span>
                 {submission?.id && (
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_API_URL}/uploads/${nomeArquivo}`}
-                    download
-                    target="_blank"
-                    className="ml-auto text-xs font-semibold text-brand-blue hover:underline"
+                  <button
+                    type="button"
+                    onClick={() => baixarPdf(submission.id, nomeArquivo)}
+                    disabled={baixandoPdf}
+                    className="ml-auto text-xs font-semibold text-brand-blue hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Baixar atual
-                  </a>
+                  </button>
                 )}
               </div>
             )}

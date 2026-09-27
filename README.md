@@ -68,9 +68,10 @@ O `Makefile` também exporta `NEXT_PUBLIC_API_URL=http://localhost:3001` por pad
 
 Consulte [`.env.example`](.env.example). Em local, use `.env.local` (Next.js).
 
-| Variável | Descrição |
-|---|---|
-| `NEXT_PUBLIC_API_URL` | URL base da API (ex.: `http://localhost:3001`) |
+| Variável              | Descrição                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_API_URL` | URL base da API (ex.: `http://localhost:3001`)                                                                     |
+| `REGISTRATION_OPEN`   | Habilita o formulário e o link de cadastro quando definida como `true`. Mantenha o mesmo valor configurado na API. |
 
 ## Guia de botões
 
@@ -78,12 +79,12 @@ Use `src/components/UI/Button.tsx` para ações. As classes são compartilhadas 
 links e SweetAlert por `src/lib/estilosBotao.ts`, com os estilos definidos em
 `src/styles/tailwind.css`.
 
-| Variante | Aparência | Uso |
-| --- | --- | --- |
-| `primary` (padrão) | Laranja da marca, texto escuro | Cadastrar, salvar, enviar, avaliar e confirmar ações comuns |
-| `secondary` / `outline` | Fundo branco e contorno neutro | Voltar, cancelar, editar, baixar e abas |
-| `danger` | Vermelho, texto branco | Excluir, resetar e confirmar ações destrutivas |
-| `ghost` | Fundo transparente | Fechar, menus e controles auxiliares |
+| Variante                | Aparência                      | Uso                                                         |
+| ----------------------- | ------------------------------ | ----------------------------------------------------------- |
+| `primary` (padrão)      | Laranja da marca, texto escuro | Cadastrar, salvar, enviar, avaliar e confirmar ações comuns |
+| `secondary` / `outline` | Fundo branco e contorno neutro | Voltar, cancelar, editar, baixar e abas                     |
+| `danger`                | Vermelho, texto branco         | Excluir, resetar e confirmar ações destrutivas              |
+| `ghost`                 | Fundo transparente             | Fechar, menus e controles auxiliares                        |
 
 Todas as variantes têm foco visível por teclado e estado desabilitado sem efeito
 de hover. Em abas e seletores, use `secondary` com `aria-pressed`; a seleção recebe
@@ -124,16 +125,16 @@ await showAlert({
 
 Via npm ou Make:
 
-| Comando | Equivalente Make | Descrição |
-|---|---|---|
-| `npm install` | `make setup` | Instala dependências |
-| `npm run dev` | `make dev` | Servidor de desenvolvimento |
-| `npm run build` | `make build` | Build de produção |
-| `npm run lint` | `make lint` | ESLint |
-| `npm run typecheck` | `make typecheck` | `tsc --noEmit` |
-| `npm test` | `make test` | Testes unitários (Jest) |
-| `npm run test:watch` | — | Jest em modo watch |
-| `npm run ci` | `make ci` | typecheck + lint + test + build |
+| Comando              | Equivalente Make | Descrição                       |
+| -------------------- | ---------------- | ------------------------------- |
+| `npm install`        | `make setup`     | Instala dependências            |
+| `npm run dev`        | `make dev`       | Servidor de desenvolvimento     |
+| `npm run build`      | `make build`     | Build de produção               |
+| `npm run lint`       | `make lint`      | ESLint                          |
+| `npm run typecheck`  | `make typecheck` | `tsc --noEmit`                  |
+| `npm test`           | `make test`      | Testes unitários (Jest)         |
+| `npm run test:watch` | —                | Jest em modo watch              |
+| `npm run ci`         | `make ci`        | typecheck + lint + test + build |
 
 ## Contribuição
 
