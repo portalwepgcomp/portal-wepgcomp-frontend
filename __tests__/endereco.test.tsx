@@ -124,6 +124,6 @@ describe("Endereço do evento", () => {
 
     const map = screen.getByTitle("Mapa do Local do Evento");
     const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
-    expect(mapUrl).toContain("q=-13.0020509,-38.5098765");
+    expect(mapUrl).toContain("q=-13.0020509, -38.5098765");
   });
 });

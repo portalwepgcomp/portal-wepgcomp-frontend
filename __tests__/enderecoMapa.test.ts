@@ -13,13 +13,17 @@ describe("enderecoMapa", () => {
     expect(coordenadasValidas(null, -38.5)).toBe(false);
   });
 
-  it("monta URLs do Google Maps a partir das coordenadas", () => {
-    expect(montarUrlComoChegar(-13.0020509, -38.5098765)).toContain(
-      "destination=-13.0020509%2C-38.5098765",
+  it("preserva a longitude negativa na URL do mapa", () => {
+    const embed = decodeURIComponent(
+      montarUrlMapaEmbed(-13.00094244, -38.50844628),
     );
-    expect(montarUrlMapaEmbed(-13.0020509, -38.5098765)).toContain(
-      "q=-13.0020509%2C-38.5098765",
+    const rota = decodeURIComponent(
+      montarUrlComoChegar(-13.00094244, -38.50844628),
     );
+
+    expect(embed).toContain("q=-13.00094244, -38.50844628");
+    expect(embed).not.toContain(",38.50844628");
+    expect(rota).toContain("destination=-13.00094244, -38.50844628");
   });
 
   it("converte texto de coordenada para número", () => {
