@@ -57,10 +57,9 @@ export default function ListaApresentacoes({
           rotulo: criacao.rotulo,
           desabilitado: criarDesabilitado,
           onClick: () => {
+            abrirCriacao();
             if (criacao.modo === "rota" && criacao.href) {
               router.push(criacao.href);
-            } else {
-              abrirCriacao();
             }
           },
         }
