@@ -7,73 +7,48 @@ import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useEdicao } from "@/hooks/useEdicao";
 import { obterClassesBotao } from "@/lib/estilosBotao";
 
-import {
-  coordenadasValidas,
-  montarUrlComoChegar,
-  montarUrlMapaEmbed,
-  parseCoordenada,
-} from "./enderecoMapa";
+import { normalizarLinkMapa } from "./linkMapa";
+
+const MENSAGEM_LINK_INVALIDO =
+  "Cole o código de Compartilhar → Incorporar um mapa. O link comum do Google não pode aparecer aqui.";
 
 /**
- * Exibe a localização cadastrada na edição.
- * O pin do Google Maps usa apenas latitude/longitude cadastradas.
+ * Exibe o endereço da edição e o mapa incorporado do Google.
  */
 export default function Endereco() {
   const { updateEdicao, Edicao } = useEdicao();
-
   const [content, setContent] = useState(Edicao?.location ?? "");
-  const [latitudeInput, setLatitudeInput] = useState(
-    Edicao?.locationLatitude?.toString() ?? "",
-  );
-  const [longitudeInput, setLongitudeInput] = useState(
-    Edicao?.locationLongitude?.toString() ?? "",
-  );
+  const [linkMapa, setLinkMapa] = useState(Edicao?.mapEmbedUrl ?? "");
+  const [erroLink, setErroLink] = useState<string | null>(null);
 
   useEffect(() => {
     setContent(Edicao?.location ?? "");
-    setLatitudeInput(Edicao?.locationLatitude?.toString() ?? "");
-    setLongitudeInput(Edicao?.locationLongitude?.toString() ?? "");
-  }, [Edicao?.location, Edicao?.locationLatitude, Edicao?.locationLongitude]);
+    setLinkMapa(Edicao?.mapEmbedUrl ?? "");
+  }, [Edicao?.location, Edicao?.mapEmbedUrl]);
 
-  const coordenadas = useMemo(() => {
-    const latitude = Edicao?.locationLatitude;
-    const longitude = Edicao?.locationLongitude;
-    if (!coordenadasValidas(latitude, longitude)) return null;
-    return {
-      latitude: latitude as number,
-      longitude: longitude as number,
-    };
-  }, [Edicao?.locationLatitude, Edicao?.locationLongitude]);
-
-  const mapsExternalUrl = useMemo(
-    () =>
-      coordenadas
-        ? montarUrlComoChegar(coordenadas.latitude, coordenadas.longitude)
-        : null,
-    [coordenadas],
-  );
-
-  const mapUrl = useMemo(
-    () =>
-      coordenadas
-        ? montarUrlMapaEmbed(coordenadas.latitude, coordenadas.longitude)
-        : null,
-    [coordenadas],
+  const mapaSalvo = useMemo(
+    () => normalizarLinkMapa(Edicao?.mapEmbedUrl ?? ""),
+    [Edicao?.mapEmbedUrl],
   );
 
   const handleEditAddress = () => {
-    if (!Edicao) return;
+    if (!Edicao) return false;
 
+    const textoLink = linkMapa.trim();
+    const mapa = textoLink ? normalizarLinkMapa(textoLink) : null;
+    if (textoLink && !mapa) {
+      setErroLink(MENSAGEM_LINK_INVALIDO);
+      return false;
+    }
+
+    setErroLink(null);
     const eventEditionId = getEventEditionIdStorage() ?? Edicao.id;
-    const locationLatitude = parseCoordenada(latitudeInput);
-    const locationLongitude = parseCoordenada(longitudeInput);
-
     void updateEdicao(eventEditionId, {
       location: content,
       name: Edicao.name,
-      locationLatitude,
-      locationLongitude,
+      mapEmbedUrl: mapa?.embed ?? null,
     });
+    return true;
   };
 
   return (
@@ -95,52 +70,50 @@ export default function Endereco() {
                 onChange={setContent}
                 handleEditField={handleEditAddress}
                 editExtras={
-                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-                      Latitude
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        value={latitudeInput}
-                        onChange={(event) =>
-                          setLatitudeInput(event.target.value)
-                        }
-                        placeholder="Ex.: -13.0020509"
-                        disabled={!Edicao?.isActive}
-                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
-                      />
+                  <div className="mt-3 flex flex-col gap-1">
+                    <label
+                      htmlFor="link-mapa"
+                      className="text-xs font-medium text-slate-600"
+                    >
+                      Link do mapa
                     </label>
-                    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-                      Longitude
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        value={longitudeInput}
-                        onChange={(event) =>
-                          setLongitudeInput(event.target.value)
-                        }
-                        placeholder="Ex.: -38.5098765"
-                        disabled={!Edicao?.isActive}
-                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
-                      />
-                    </label>
-                    <p className="sm:col-span-2 text-xs text-slate-500">
-                      Google Maps → botão direito no ponto → copiar coordenadas.
+                    <textarea
+                      id="link-mapa"
+                      value={linkMapa}
+                      rows={4}
+                      disabled={!Edicao?.isActive}
+                      placeholder="Cole aqui o HTML de Incorporar um mapa"
+                      aria-invalid={erroLink ? true : undefined}
+                      aria-describedby="link-mapa-ajuda"
+                      onChange={(event) => {
+                        setLinkMapa(event.target.value);
+                        setErroLink(null);
+                      }}
+                      className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                    />
+                    <p id="link-mapa-ajuda" className="text-xs text-slate-500">
+                      Google Maps → Compartilhar → Incorporar um mapa → copiar
+                      HTML.
                     </p>
+                    {erroLink && (
+                      <p role="alert" className="text-xs text-red-700">
+                        {erroLink}
+                      </p>
+                    )}
                   </div>
                 }
               />
             </div>
           </div>
 
-          {mapsExternalUrl && (
+          {mapaSalvo && (
             <a
-              href={mapsExternalUrl}
+              href={mapaSalvo.abrir}
               target="_blank"
               rel="noopener noreferrer"
               className={`${obterClassesBotao("outline")} w-full sm:w-auto sm:shrink-0`}
             >
-              <span>Como chegar</span>
+              <span>Abrir no Google Maps</span>
               <svg
                 className="h-3.5 w-3.5"
                 fill="none"
@@ -160,17 +133,17 @@ export default function Endereco() {
       </div>
 
       <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:h-auto lg:min-h-0 lg:flex-1">
-        {mapUrl ? (
+        {mapaSalvo ? (
           <iframe
             title="Mapa do Local do Evento"
-            src={mapUrl}
+            src={mapaSalvo.embed}
             className="h-full w-full border-0"
             loading="eager"
             referrerPolicy="strict-origin-when-cross-origin"
           />
         ) : (
           <div className="flex h-full items-center justify-center p-5 text-center text-sm text-slate-500">
-            Informe latitude e longitude para exibir o mapa com o pin exato.
+            Local do Evento
           </div>
         )}
       </div>

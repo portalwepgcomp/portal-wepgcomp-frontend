@@ -3,21 +3,21 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { useState, type ReactNode } from "react";
 
 const mockUpdateEdicao = jest.fn();
-const mockLocation = "<p>Auditório do Instituto de Geociências da UFBA</p>";
+const mockLocation = "<p>Instituto de Biologia da UFBA</p>";
+const embedUrl =
+  "https://www.google.com/maps/embed?pb=!1m18!2d-38.5084892!3d-13.0011881";
 const mockEdicao: {
   id: string;
   name: string;
   location: string;
   isActive: boolean;
-  locationLatitude?: number | null;
-  locationLongitude?: number | null;
+  mapEmbedUrl?: string | null;
 } = {
   id: "edition-2026",
   name: "WEPGCOMP 2026",
   location: mockLocation,
   isActive: true,
-  locationLatitude: null,
-  locationLongitude: null,
+  mapEmbedUrl: null,
 };
 
 jest.mock("@/hooks/useEdicao", () => ({
@@ -41,7 +41,7 @@ jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
   }: {
     content: string;
     onChange: (value: string) => void;
-    handleEditField: () => void;
+    handleEditField: () => void | boolean;
     editExtras?: ReactNode;
   }) {
     const [editing, setEditing] = useState(false);
@@ -62,7 +62,7 @@ jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
         <button
           type="button"
           onClick={() => {
-            if (editing) handleEditField();
+            if (editing && handleEditField() === false) return;
             setEditing(!editing);
           }}
         >
@@ -78,52 +78,59 @@ import Endereco from "@/components/Endereco/Endereco";
 describe("Endereço do evento", () => {
   beforeEach(() => {
     mockEdicao.location = mockLocation;
-    mockEdicao.locationLatitude = null;
-    mockEdicao.locationLongitude = null;
+    mockEdicao.mapEmbedUrl = null;
     mockUpdateEdicao.mockClear();
   });
 
-  it("não mostra latitude/longitude antes de clicar em Editar", () => {
+  it("não mostra o link do mapa antes de clicar em Editar", () => {
     render(<Endereco />);
 
-    expect(screen.queryByLabelText("Latitude")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Longitude")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Link do mapa")).not.toBeInTheDocument();
   });
 
-  it("mostra latitude/longitude somente após Editar e salva junto", () => {
+  it("mostra o link do mapa após Editar e salva o embed", () => {
     render(<Endereco />);
 
     fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    expect(screen.getByLabelText("Link do mapa")).toBeInTheDocument();
 
-    expect(screen.getByLabelText("Latitude")).toBeInTheDocument();
-    expect(screen.getByLabelText("Longitude")).toBeInTheDocument();
-
-    fireEvent.change(screen.getByLabelText("Localização da edição"), {
-      target: { value: "<p>Novo local</p>" },
-    });
-    fireEvent.change(screen.getByLabelText("Latitude"), {
-      target: { value: "-13.0020509" },
-    });
-    fireEvent.change(screen.getByLabelText("Longitude"), {
-      target: { value: "-38.5098765" },
+    fireEvent.change(screen.getByLabelText("Link do mapa"), {
+      target: { value: `<iframe src="${embedUrl}"></iframe>` },
     });
     fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
 
     expect(mockUpdateEdicao).toHaveBeenCalledWith("edition-2026", {
-      location: "<p>Novo local</p>",
+      location: mockLocation,
       name: "WEPGCOMP 2026",
-      locationLatitude: -13.0020509,
-      locationLongitude: -38.5098765,
+      mapEmbedUrl: embedUrl,
     });
+    expect(screen.queryByLabelText("Link do mapa")).not.toBeInTheDocument();
   });
 
-  it("monta o embed do Google Maps com as coordenadas", () => {
-    mockEdicao.locationLatitude = -13.0020509;
-    mockEdicao.locationLongitude = -38.5098765;
+  it("mantém a edição aberta se o link não for de incorporar", () => {
     render(<Endereco />);
 
-    const map = screen.getByTitle("Mapa do Local do Evento");
-    const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
-    expect(mapUrl).toContain("q=-13.0020509, -38.5098765");
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.change(screen.getByLabelText("Link do mapa"), {
+      target: {
+        value:
+          "https://www.google.com/maps/place/Instituto+de+Biologia+da+UFBA",
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+
+    expect(mockUpdateEdicao).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent(/Incorporar um mapa/i);
+    expect(screen.getByLabelText("Link do mapa")).toBeInTheDocument();
+  });
+
+  it("exibe o iframe salvo", () => {
+    mockEdicao.mapEmbedUrl = embedUrl;
+    render(<Endereco />);
+
+    expect(screen.getByTitle("Mapa do Local do Evento")).toHaveAttribute(
+      "src",
+      embedUrl,
+    );
   });
 });

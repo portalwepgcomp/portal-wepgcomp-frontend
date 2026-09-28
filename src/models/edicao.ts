@@ -6,6 +6,7 @@ export interface EdicaoParams {
   location?: string;
   locationLatitude?: number | null;
   locationLongitude?: number | null;
+  mapEmbedUrl?: string | null;
   coordinatorId?: string;
   organizingCommitteeIds?: string[];
   roomName?: string[];
