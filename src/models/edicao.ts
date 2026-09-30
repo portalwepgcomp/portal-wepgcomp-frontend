@@ -4,8 +4,7 @@ export interface EdicaoParams {
   startDate?: string;
   endDate?: string;
   location?: string;
-  locationLatitude?: number | null;
-  locationLongitude?: number | null;
+  mapEmbedUrl?: string | null;
   coordinatorId?: string;
   organizingCommitteeIds?: string[];
   roomName?: string[];
@@ -37,6 +36,4 @@ export interface Edicao extends EdicaoParams {
   updatedAt: string;
   isActive: boolean;
   registrationOpen?: boolean;
-  locationApproximate?: boolean;
-  locationGeocodedAddress?: string | null;
 }

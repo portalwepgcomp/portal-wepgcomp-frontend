@@ -9,6 +9,8 @@ export interface SubmissionParams {
   coAdvisor?: string;
   pdfFile: string;
   phoneNumber: string;
+  linkHostedFile?: string;
+  status?: string;
 }
 
 export interface GetSubmissionParams {
@@ -40,6 +42,4 @@ export interface Submission extends SubmissionParams {
   /** Alias retornado pela API em alguns endpoints */
   abstract?: string;
   type?: string;
-  status?: string;
-  linkHostedFile?: string;
 }

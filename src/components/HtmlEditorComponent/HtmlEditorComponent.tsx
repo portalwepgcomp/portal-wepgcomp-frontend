@@ -11,7 +11,7 @@ import { isAdminLevel } from "@/components/Perfil/perfilLabels";
 interface HtmlEditorComponentProps {
   content: string;
   onChange: (value: string) => void;
-  handleEditField?: () => void;
+  handleEditField?: () => void | boolean;
   /** Conteúdo extra exibido somente no modo Editar (antes do Salvar). */
   editExtras?: ReactNode;
 }
@@ -49,9 +49,7 @@ export default function HtmlEditorComponent({
               type="button"
               className="mt-4 self-end"
               onClick={() => {
-                if (toggleEditor) {
-                  handleEditField();
-                }
+                if (toggleEditor && handleEditField() === false) return;
                 setToggleEditor(!toggleEditor);
               }}
               disabled={!Edicao?.isActive}
