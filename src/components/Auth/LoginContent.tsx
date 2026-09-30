@@ -14,7 +14,7 @@ export function LoginContent() {
       <div className="flex w-full max-w-[980px] overflow-hidden rounded-2xl bg-white shadow-[0_30px_60px_-30px_rgba(14,31,107,0.35)] max-[820px]:flex-col">
         {/* Painel de identidade */}
 
-        <div className="relative flex flex-1 flex-col justify-between gap-10 overflow-hidden bg-[linear-gradient(160deg,#0E1F6B_0%,#1B39B8_45%,#4B0FA8_100%)] px-11 py-12 text-white">
+        <div className="relative flex flex-1 flex-col justify-between gap-10 overflow-hidden bg-[linear-gradient(160deg,#0E1F6B_0%,#1B39B8_45%,#4B0FA8_100%)] px-11 max-sm:px-5 py-12 max-sm:py-6 text-white">
           {/* camadas decorativas */}
 
           <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-white/5 blur-2xl" />
@@ -28,7 +28,7 @@ export function LoginContent() {
               Evento UFBA
             </span>
 
-            <h1 className="mt-5 font-['Space_Grotesk',sans-serif] text-[clamp(38px,5vw,56px)] font-bold leading-[0.95] tracking-[-0.02em] text-white">
+            <h1 className="mt-5 font-['Space_Grotesk',sans-serif] text-[clamp(38px,5vw,56px)] font-bold leading-[0.95] tracking-[-0.02em] text-white max-sm:text-2xl">
               {Edicao?.name || "WEPGCOMP"}
             </h1>
 
@@ -63,7 +63,7 @@ export function LoginContent() {
                 </p>
 
                 <p className="text-sm font-medium text-white">
-                  IBIO — UFBA, Ondina, Salvador
+                  {Edicao?.location || "A definir"}
                 </p>
               </div>
             </div>
