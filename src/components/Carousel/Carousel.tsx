@@ -113,7 +113,7 @@ export default function Carousel() {
         <div className="flex flex-col items-center gap-2 my-2">
           <p className={paragrafo}>
             <span className="font-semibold text-amber-300">Inscrições:</span>{" "}
-            até {formatDateUniq(Edicao?.startDate)}
+            até {formatDateUniq(Edicao?.submissionDeadline)}
           </p>
           <p className={paragrafo}>
             <span className="font-semibold text-amber-300">
