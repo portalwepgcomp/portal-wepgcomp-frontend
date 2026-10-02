@@ -127,7 +127,7 @@ export function Campo({
       {label && (
         <label
           htmlFor={htmlFor}
-          className="mb-2 block text-sm font-medium text-foreground"
+          className="mb-2 block text-sm font-semibold text-foreground"
         >
           {label}
         </label>
