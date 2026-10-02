@@ -8,6 +8,14 @@ import Link from "next/link";
 
 export function LoginContent() {
   const { Edicao } = useEdicao();
+  const location = extractTextFromHtml(Edicao?.location ?? "");
+
+  function extractTextFromHtml(html: string) {
+    const parser = new DOMParser();
+    const document = parser.parseFromString(html, "text/html");
+
+    return document.body.textContent?.trim() || "";
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[#F4F5F7] px-4 py-10">
@@ -63,7 +71,7 @@ export function LoginContent() {
                 </p>
 
                 <p className="text-sm font-medium text-white">
-                  {Edicao?.location || "A definir"}
+                  {location || "A definir"}
                 </p>
               </div>
             </div>
