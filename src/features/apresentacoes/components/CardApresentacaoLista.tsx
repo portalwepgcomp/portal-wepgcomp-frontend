@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import type { ReactNode } from "react";
 import Button from "@/components/UI/Button";
-import { Download, Pencil, Trash2 } from "lucide-react";
+import { obterClassesBotao } from "@/lib/estilosBotao";
+import { Download, LinkIcon, Pencil, Trash2 } from "lucide-react";
 
 import ReadMore from "@/components/ReadMore/ReadMore";
 import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
@@ -92,17 +92,12 @@ export default function CardApresentacaoLista({
           <DicaAcao texto="Abrir link da apresentação">
             <a
               href={linkHospedado}
-              download
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Abrir link da apresentação"
+              className={obterClassesBotao("outline")}
             >
-              <Image
-                src="/assets/images/link.svg"
-                alt=""
-                width={40}
-                height={40}
-              />
+              <LinkIcon aria-hidden="true" />
             </a>
           </DicaAcao>
         ) : null}
