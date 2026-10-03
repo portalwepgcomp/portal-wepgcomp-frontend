@@ -1,6 +1,15 @@
 import type { PresentationBlock } from "@/models/session";
 import type { Submission } from "@/models/submission";
 
+export function sessaoAtualParaCadastro(
+  submission?: Submission | null,
+): string {
+  if (submission?.presentationId != null) {
+    return submission.block?.id ?? "";
+  }
+  return submission?.proposedPresentationBlockId ?? "";
+}
+
 /**
  * Um bloco só pode receber novas escolhas quando possui horários livres.
  * Uma apresentação já alocada pode manter sua sessão durante a edição.
@@ -20,7 +29,9 @@ export function sessoesDisponiveisParaCadastro(
         ((sessao.availableSubmissionSlots ??
           sessao.availablePositionsWithInBlock?.length ??
           0) > 0 ||
-          (submission?.status !== "Rejected" &&
+          (submission?.presentationId == null &&
+            (submission?.status === "Submitted" ||
+              submission?.status === "Confirmed") &&
             submission?.proposedPresentationBlockId === sessao.id) ||
           (submission?.presentationId != null &&
             submission.block?.id === sessao.id)),

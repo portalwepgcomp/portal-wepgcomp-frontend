@@ -24,7 +24,10 @@ import {
 import { montarDadosSubmissao } from "./montarDadosSubmissao";
 import { montarNomeArquivoPdf } from "./montarNomeArquivoPdf";
 import { arquivoEhPdf } from "./validarArquivoPdf";
-import { sessoesDisponiveisParaCadastro } from "./sessoesDisponiveis";
+import {
+  sessaoAtualParaCadastro,
+  sessoesDisponiveisParaCadastro,
+} from "./sessoesDisponiveis";
 
 /**
  * Toda a lógica do formulário de cadastro/edição de apresentação: estado,
@@ -89,10 +92,7 @@ export function useFormCadastroApresentacao() {
       setValue("titulo", submission?.title);
       setValue("resumo", submission?.abstract ?? "");
       setValue("apresentador", submission?.mainAuthorId);
-      setValue(
-        "sessao",
-        submission?.proposedPresentationBlockId || submission?.block?.id || "",
-      );
+      setValue("sessao", sessaoAtualParaCadastro(submission));
       setValue("orientador", submission?.advisorId);
       setValue("coorientador", submission?.coAdvisor);
       setValue("slide", submission?.pdfFile);
@@ -118,13 +118,12 @@ export function useFormCadastroApresentacao() {
   }, [submission, setValue]);
 
   const sessaoSelecionada = watch("sessao");
+  const sessaoAtual = sessaoAtualParaCadastro(submission);
   const sessaoAnteriorIndisponivel =
-    !!submission?.proposedPresentationBlockId &&
+    !!sessaoAtual &&
     !!sessoesCarregadas &&
     !sessaoSelecionada &&
-    !sessoesDisponiveis.some(
-      (sessao) => sessao.id === submission.proposedPresentationBlockId,
-    );
+    !sessoesDisponiveis.some((sessao) => sessao.id === sessaoAtual);
 
   useEffect(() => {
     if (

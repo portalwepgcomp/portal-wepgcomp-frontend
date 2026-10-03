@@ -1,7 +1,10 @@
 import { describe, expect, it } from "@jest/globals";
 
 import { esquemaCadastro } from "@/components/Forms/CadastroApresentacao/formCadastroApresentacaoSchema";
-import { sessoesDisponiveisParaCadastro } from "@/components/Forms/CadastroApresentacao/sessoesDisponiveis";
+import {
+  sessaoAtualParaCadastro,
+  sessoesDisponiveisParaCadastro,
+} from "@/components/Forms/CadastroApresentacao/sessoesDisponiveis";
 import type { PresentationBlock } from "@/models/session";
 import type { Submission } from "@/models/submission";
 
@@ -53,6 +56,7 @@ describe("sessões disponíveis no cadastro de apresentação", () => {
     expect(
       sessoesDisponiveisParaCadastro([atual], edicaoAtual, {
         proposedPresentationBlockId: "atual",
+        status: "Submitted",
       } as Submission),
     ).toEqual([atual]);
     expect(
@@ -63,6 +67,71 @@ describe("sessões disponíveis no cadastro de apresentação", () => {
     ).toEqual([]);
   });
 
+  it("prioriza a alocação atual e não libera a proposta antiga de um trabalho alocado", () => {
+    const propostaAntiga = sessao("proposta-antiga", {
+      availableSubmissionSlots: 0,
+    });
+    const alocada = sessao("alocada", { availableSubmissionSlots: 0 });
+    const submission = {
+      status: "Confirmed",
+      proposedPresentationBlockId: propostaAntiga.id,
+      presentationId: "apresentacao-1",
+      block: { id: alocada.id },
+    } as Submission;
+
+    expect(sessaoAtualParaCadastro(submission)).toBe(alocada.id);
+    expect(
+      sessoesDisponiveisParaCadastro(
+        [propostaAntiga, alocada],
+        edicaoAtual,
+        submission,
+      ),
+    ).toEqual([alocada]);
+  });
+
+  it("permite a proposta antiga de um trabalho alocado apenas quando há novas vagas", () => {
+    const propostaAntiga = sessao("proposta-antiga", {
+      availableSubmissionSlots: 1,
+    });
+    const submission = {
+      status: "Confirmed",
+      proposedPresentationBlockId: propostaAntiga.id,
+      presentationId: "apresentacao-1",
+      block: { id: "alocada" },
+    } as Submission;
+
+    expect(
+      sessoesDisponiveisParaCadastro([propostaAntiga], edicaoAtual, submission),
+    ).toEqual([propostaAntiga]);
+    expect(sessaoAtualParaCadastro(submission)).toBe("alocada");
+  });
+
+  it.each(["Submitted", "Confirmed"])(
+    "preserva a reserva própria não alocada com status %s",
+    (status) => {
+      const reservada = sessao("reservada", { availableSubmissionSlots: 0 });
+      const submission = {
+        status,
+        proposedPresentationBlockId: reservada.id,
+      } as Submission;
+
+      expect(sessaoAtualParaCadastro(submission)).toBe(reservada.id);
+      expect(
+        sessoesDisponiveisParaCadastro([reservada], edicaoAtual, submission),
+      ).toEqual([reservada]);
+    },
+  );
+
+  it("não oferece reserva rejeitada ou escolha inexistente", () => {
+    const lotada = sessao("lotada", { availableSubmissionSlots: 0 });
+    expect(
+      sessoesDisponiveisParaCadastro([lotada], edicaoAtual, {
+        status: "Rejected",
+        proposedPresentationBlockId: lotada.id,
+      } as Submission),
+    ).toEqual([]);
+    expect(sessaoAtualParaCadastro(null)).toBe("");
+  });
   it("exige uma sessão selecionada por UUID", () => {
     const campo = esquemaCadastro.shape.sessao;
 
