@@ -61,6 +61,30 @@ describe("CardApresentacaoLista — ações", () => {
     }
   });
 
+  it("deve dar ao link externo o mesmo tamanho dos demais", () => {
+    renderizar({ linkHostedFile: "https://exemplo.com/slides" });
+
+    const link = screen.getByRole("link", {
+      name: "Abrir link da apresentação",
+    });
+    const baixar = screen.getByRole("button", { name: /Download de/i });
+
+    expect(link.className).toContain("h-9");
+    expect(baixar.className).toContain("h-9");
+  });
+
+  it("não deve marcar o link externo como download", () => {
+    renderizar({ linkHostedFile: "https://exemplo.com/slides" });
+
+    const link = screen.getByRole("link", {
+      name: "Abrir link da apresentação",
+    });
+
+    expect(link).not.toHaveAttribute("download");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+  });
+
   it("não deve oferecer download quando não há PDF", () => {
     renderizar({ pdfFile: "" });
 
