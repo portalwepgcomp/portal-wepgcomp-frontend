@@ -1,13 +1,23 @@
-import { describe, expect, it } from "@jest/globals";
+import { beforeEach, describe, expect, it } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useState, type ReactNode } from "react";
 
 const mockUpdateEdicao = jest.fn();
-const mockLocation = "<p>Auditório do Instituto de Geociências da UFBA</p>";
-const mockEdicao = {
+const mockLocation = "<p>Instituto de Biologia da UFBA</p>";
+const embedUrl =
+  "https://www.google.com/maps/embed?pb=!1m18!2d-38.5084892!3d-13.0011881";
+const mockEdicao: {
+  id: string;
+  name: string;
+  location: string;
+  isActive: boolean;
+  mapEmbedUrl?: string | null;
+} = {
   id: "edition-2026",
   name: "WEPGCOMP 2026",
   location: mockLocation,
   isActive: true,
+  mapEmbedUrl: null,
 };
 
 jest.mock("@/hooks/useEdicao", () => ({
@@ -23,78 +33,104 @@ jest.mock("@/context/AuthProvider/util", () => ({
 
 jest.mock("@/components/HtmlEditorComponent/HtmlEditorComponent", () => ({
   __esModule: true,
-  default: ({
+  default: function HtmlEditorComponentMock({
     content,
     onChange,
     handleEditField,
+    editExtras,
   }: {
     content: string;
     onChange: (value: string) => void;
-    handleEditField: () => void;
-  }) => (
-    <div>
-      <input
-        aria-label="Localização da edição"
-        value={content}
-        onChange={(event) => onChange(event.target.value)}
-      />
-      <button type="button" onClick={handleEditField}>
-        Salvar localização
-      </button>
-    </div>
-  ),
+    handleEditField: () => void | boolean;
+    editExtras?: ReactNode;
+  }) {
+    const [editing, setEditing] = useState(false);
+    return (
+      <div>
+        {!editing ? (
+          <div>{content}</div>
+        ) : (
+          <>
+            <input
+              aria-label="Localização da edição"
+              value={content}
+              onChange={(event) => onChange(event.target.value)}
+            />
+            {editExtras}
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            if (editing && handleEditField() === false) return;
+            setEditing(!editing);
+          }}
+        >
+          {editing ? "Salvar" : "Editar"}
+        </button>
+      </div>
+    );
+  },
 }));
 
 import Endereco from "@/components/Endereco/Endereco";
 
 describe("Endereço do evento", () => {
-  it("exibe somente a localização cadastrada na edição", () => {
-    render(<Endereco />);
-
-    expect(screen.getByLabelText("Localização da edição")).toHaveValue(
-      mockLocation,
-    );
-    expect(
-      screen.queryByText(/Instituto de Computação/i),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText(/Pavilhão de Aulas/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Av\. Milton Santos/i)).not.toBeInTheDocument();
+  beforeEach(() => {
+    mockEdicao.location = mockLocation;
+    mockEdicao.mapEmbedUrl = null;
+    mockUpdateEdicao.mockClear();
   });
 
-  it("salva a localização alterada na edição ativa", () => {
+  it("não mostra o link do mapa antes de clicar em Editar", () => {
     render(<Endereco />);
 
-    const newLocation = "<p>Novo local cadastrado</p>";
-    fireEvent.change(screen.getByLabelText("Localização da edição"), {
-      target: { value: newLocation },
+    expect(screen.queryByLabelText("Link do mapa")).not.toBeInTheDocument();
+  });
+
+  it("mostra o link do mapa após Editar e salva o embed", () => {
+    render(<Endereco />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    expect(screen.getByLabelText("Link do mapa")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Link do mapa"), {
+      target: { value: `<iframe src="${embedUrl}"></iframe>` },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar localização" }));
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
 
     expect(mockUpdateEdicao).toHaveBeenCalledWith("edition-2026", {
-      location: newLocation,
+      location: mockLocation,
       name: "WEPGCOMP 2026",
+      mapEmbedUrl: embedUrl,
     });
+    expect(screen.queryByLabelText("Link do mapa")).not.toBeInTheDocument();
   });
 
-  it("exibe o mapa limpo e mantém o link Como chegar", () => {
+  it("mantém a edição aberta se o link não for de incorporar", () => {
     render(<Endereco />);
 
-    const directionsLink = screen.getByRole("link", { name: /como chegar/i });
-    const map = screen.getByTitle("Mapa do Local do Evento");
-    const directionsUrl = decodeURIComponent(
-      directionsLink.getAttribute("href") ?? "",
-    );
-    const mapUrl = decodeURIComponent(map.getAttribute("src") ?? "");
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.change(screen.getByLabelText("Link do mapa"), {
+      target: {
+        value:
+          "https://www.google.com/maps/place/Instituto+de+Biologia+da+UFBA",
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
 
-    expect(directionsUrl).toContain("-12.9980929,-38.5072076");
-    expect(directionsUrl).toContain("hl=pt-BR");
-    expect(mapUrl).toContain("google.com/maps/embed");
-    expect(mapUrl).toContain("-12.9980929,-38.5072076");
-    expect(map).toHaveAttribute("loading", "eager");
-    expect(directionsLink).toHaveAttribute("target", "_blank");
-    expect(directionsLink).toHaveAttribute(
-      "rel",
-      expect.stringContaining("noopener"),
+    expect(mockUpdateEdicao).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent(/Incorporar um mapa/i);
+    expect(screen.getByLabelText("Link do mapa")).toBeInTheDocument();
+  });
+
+  it("exibe o iframe salvo", () => {
+    mockEdicao.mapEmbedUrl = embedUrl;
+    render(<Endereco />);
+
+    expect(screen.getByTitle("Mapa do Local do Evento")).toHaveAttribute(
+      "src",
+      embedUrl,
     );
   });
 });

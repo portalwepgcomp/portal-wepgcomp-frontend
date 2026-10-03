@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UUID } from "crypto";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -17,12 +16,12 @@ import { useSubmissionFile } from "@/hooks/useSubmissionFile";
 import { UserContext } from "@/hooks/useUsers";
 import { unwrapPaginatedList } from "@/types/api";
 import { Submission, SubmissionParams } from "@/models/submission";
-import { formatLink } from "@/utils/formatLink";
 import { registrarErro } from "@/utils/logError";
 import {
   esquemaCadastro,
   type CadastroFormulario,
 } from "./formCadastroApresentacaoSchema";
+import { montarDadosSubmissao } from "./montarDadosSubmissao";
 import { montarNomeArquivoPdf } from "./montarNomeArquivoPdf";
 import { arquivoEhPdf } from "./validarArquivoPdf";
 import { sessoesDisponiveisParaCadastro } from "./sessoesDisponiveis";
@@ -186,27 +185,6 @@ export function useFormCadastroApresentacao() {
     });
   };
 
-  const criarDadosSubmissao = (
-    data: CadastroFormulario,
-    arquivoPdf: string,
-  ) => {
-    return {
-      ...submission,
-      eventEditionId: eventEditionId ?? "",
-      mainAuthorId: data.apresentador || user?.id || "",
-      title: data.titulo,
-      abstractText: data.resumo,
-      advisorId: data.orientador as UUID,
-      coAdvisor: data.coorientador || "",
-      pdfFile: arquivoPdf,
-      phoneNumber: data.celular,
-      linkHostedFile: formatLink(data.linkApresentacao || ""),
-      proposedPresentationBlockId: data.sessao,
-      // A escolha é da sessão, não de uma posição específica.
-      proposedPositionWithinBlock: undefined,
-    };
-  };
-
   const processarSubmissao = async (
     dadosSubmissao: SubmissionParams,
   ): Promise<boolean> => {
@@ -312,10 +290,12 @@ export function useFormCadastroApresentacao() {
         arquivoEnviadoKey = respostaUpload.key;
       }
 
-      const dadosSubmissao = criarDadosSubmissao(
-        data,
-        arquivoEnviadoKey || data.slide || "",
-      );
+      const dadosSubmissao = montarDadosSubmissao(data, {
+        arquivoPdf: arquivoEnviadoKey || data.slide || "",
+        eventEditionId,
+        usuarioId: user.id,
+        status: submission?.status,
+      });
 
       const sucesso = await processarSubmissao(dadosSubmissao);
 

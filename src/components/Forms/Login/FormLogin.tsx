@@ -80,7 +80,7 @@ export function FormLogin() {
           type="email"
           id="email"
           placeholder="exemplo@ufba.br"
-          className="text-sm"
+          className="focus:border-[#4B0FA8] focus:ring-[#4B0FA8]/10"
           {...register("email")}
         />
       </Campo>
@@ -98,6 +98,7 @@ export function FormLogin() {
         <PasswordInput
           id="password"
           placeholder="digite sua senha"
+          className="focus-within:border-[#4B0FA8] focus-within:ring-[#4B0FA8]/10"
           {...register("password")}
         />
       </Campo>
@@ -105,24 +106,22 @@ export function FormLogin() {
       <div className="mb-4 text-end">
         <Link
           href="/recuperar-senha"
-          className="mt-1 text-sm text-[#090DF0] no-underline underline-offset-2 hover:underline"
+          className="text-sm font-medium text-[#4B0FA8] no-underline hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-[#4B0FA8] focus-visible:outline-offset-3"
         >
           Esqueceu sua senha?
         </Link>
       </div>
 
-      <div className="mx-auto mb-4 flex justify-center gap-2">
+      <div className="mx-auto flex justify-center gap-2">
         <Button
           size="lg"
-          className="w-[224px]"
-          type="submit"
           variante="primary"
+          type="submit"
+          className="w-[224px] transition hover:brightness-110 active:translate-y-px"
         >
           Entrar
         </Button>
       </div>
-
-      <hr className="border-[0.12rem] border-brand-orange" />
     </form>
   );
 }

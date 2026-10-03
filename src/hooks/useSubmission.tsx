@@ -156,8 +156,8 @@ export const SubmissionProvider = ({ children }: SubmissionProps) => {
       setLoadingSubmission(true);
 
       try {
-        const response = await submissionApi.deleteSubmissionById(idSubmission);
-        setSubmission(response);
+        await submissionApi.deleteSubmissionById(idSubmission);
+        setSubmission(null);
         invalidarListas();
 
         showAlert({

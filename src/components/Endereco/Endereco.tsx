@@ -1,36 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import HtmlEditorComponent from "@/components/HtmlEditorComponent/HtmlEditorComponent";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useEdicao } from "@/hooks/useEdicao";
 import { obterClassesBotao } from "@/lib/estilosBotao";
 
-const EVENT_COORDINATES = "-12.9980929,-38.5072076";
-const EVENT_MAP_URL = `https://www.google.com/maps/embed?hl=pt-BR&origin=mfe&pb=!1m3!2m1!1s${EVENT_COORDINATES}!6i17`;
-const MAPS_EXTERNAL_URL = `https://www.google.com/maps/search/?api=1&hl=pt-BR&query=${EVENT_COORDINATES}`;
+import { normalizarLinkMapa } from "./linkMapa";
+
+const MENSAGEM_LINK_INVALIDO =
+  "Cole o código de Compartilhar → Incorporar um mapa. O link comum do Google não pode aparecer aqui.";
 
 /**
- * Exibe a localização cadastrada na edição e preserva sua edição administrativa.
+ * Exibe o endereço da edição e o mapa incorporado do Google.
  */
 export default function Endereco() {
-  const [content, setContent] = useState("");
   const { updateEdicao, Edicao } = useEdicao();
+  const [content, setContent] = useState(Edicao?.location ?? "");
+  const [linkMapa, setLinkMapa] = useState(Edicao?.mapEmbedUrl ?? "");
+  const [erroLink, setErroLink] = useState<string | null>(null);
 
   useEffect(() => {
     setContent(Edicao?.location ?? "");
-  }, [Edicao?.location]);
+    setLinkMapa(Edicao?.mapEmbedUrl ?? "");
+  }, [Edicao?.location, Edicao?.mapEmbedUrl]);
+
+  const mapaSalvo = useMemo(
+    () => normalizarLinkMapa(Edicao?.mapEmbedUrl ?? ""),
+    [Edicao?.mapEmbedUrl],
+  );
 
   const handleEditAddress = () => {
-    if (!Edicao) return;
+    if (!Edicao) return false;
 
+    const textoLink = linkMapa.trim();
+    const mapa = textoLink ? normalizarLinkMapa(textoLink) : null;
+    if (textoLink && !mapa) {
+      setErroLink(MENSAGEM_LINK_INVALIDO);
+      return false;
+    }
+
+    setErroLink(null);
     const eventEditionId = getEventEditionIdStorage() ?? Edicao.id;
-
     void updateEdicao(eventEditionId, {
       location: content,
       name: Edicao.name,
+      mapEmbedUrl: mapa?.embed ?? null,
     });
+    return true;
   };
 
   return (
@@ -51,41 +69,83 @@ export default function Endereco() {
                 content={content}
                 onChange={setContent}
                 handleEditField={handleEditAddress}
+                editExtras={
+                  <div className="mt-3 flex flex-col gap-1">
+                    <label
+                      htmlFor="link-mapa"
+                      className="text-xs font-medium text-slate-600"
+                    >
+                      Link do mapa
+                    </label>
+                    <textarea
+                      id="link-mapa"
+                      value={linkMapa}
+                      rows={4}
+                      disabled={!Edicao?.isActive}
+                      placeholder="Cole aqui o HTML de Incorporar um mapa"
+                      aria-invalid={erroLink ? true : undefined}
+                      aria-describedby="link-mapa-ajuda"
+                      onChange={(event) => {
+                        setLinkMapa(event.target.value);
+                        setErroLink(null);
+                      }}
+                      className="rounded-md border border-gray-300 px-3 py-2 text-sm text-slate-800 disabled:bg-gray-50"
+                    />
+                    <p id="link-mapa-ajuda" className="text-xs text-slate-500">
+                      Google Maps → Compartilhar → Incorporar um mapa → copiar
+                      HTML.
+                    </p>
+                    {erroLink && (
+                      <p role="alert" className="text-xs text-red-700">
+                        {erroLink}
+                      </p>
+                    )}
+                  </div>
+                }
               />
             </div>
           </div>
 
-          <a
-            href={MAPS_EXTERNAL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${obterClassesBotao("outline")} w-full sm:w-auto sm:shrink-0`}
-          >
-            <span>Como chegar</span>
-            <svg
-              className="h-3.5 w-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          {mapaSalvo && (
+            <a
+              href={mapaSalvo.abrir}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${obterClassesBotao("outline")} w-full sm:w-auto sm:shrink-0`}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
-          </a>
+              <span>Abrir no Google Maps</span>
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+            </a>
+          )}
         </div>
       </div>
 
       <div className="relative h-[280px] w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:h-auto lg:min-h-0 lg:flex-1">
-        <iframe
-          title="Mapa do Local do Evento"
-          src={EVENT_MAP_URL}
-          className="h-full w-full border-0"
-          loading="eager"
-        />
+        {mapaSalvo ? (
+          <iframe
+            title="Mapa do Local do Evento"
+            src={mapaSalvo.embed}
+            className="h-full w-full border-0"
+            loading="eager"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center p-5 text-center text-sm text-slate-500">
+            Local do Evento
+          </div>
+        )}
       </div>
     </div>
   );

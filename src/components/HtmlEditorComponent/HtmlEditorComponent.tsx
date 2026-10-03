@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { type ReactNode, useContext, useState } from "react";
 import HtmlEditor from "../HtmlEditor/HtmlEditor";
 
 import { AuthContext } from "@/context/AuthProvider/authProvider";
@@ -11,26 +11,33 @@ import { isAdminLevel } from "@/components/Perfil/perfilLabels";
 interface HtmlEditorComponentProps {
   content: string;
   onChange: (value: string) => void;
-  handleEditField?: () => void;
+  handleEditField?: () => void | boolean;
+  /** Conteúdo extra exibido somente no modo Editar (antes do Salvar). */
+  editExtras?: ReactNode;
 }
 
 export default function HtmlEditorComponent({
   content,
   onChange,
   handleEditField,
+  editExtras,
 }: Readonly<HtmlEditorComponentProps>) {
-  const [toggleEditor, setToggleEditor] = useState<boolean>(false);
+  const [toggleEditor, setToggleEditor] = useState(false);
   const { user } = useContext(AuthContext);
   const { Edicao } = useEdicao();
 
   const isAdm = isAdminLevel(user?.level);
+  const isEditing = isAdm && toggleEditor;
 
   return (
     <div className="flex flex-col">
-      {!isAdm || !toggleEditor ? (
+      {!isEditing ? (
         <div dangerouslySetInnerHTML={{ __html: content }} />
       ) : (
-        <HtmlEditor value={content} onChange={onChange} />
+        <>
+          <HtmlEditor value={content} onChange={onChange} />
+          {editExtras}
+        </>
       )}
 
       {isAdm && (
@@ -42,9 +49,7 @@ export default function HtmlEditorComponent({
               type="button"
               className="mt-4 self-end"
               onClick={() => {
-                if (toggleEditor) {
-                  handleEditField();
-                }
+                if (toggleEditor && handleEditField() === false) return;
                 setToggleEditor(!toggleEditor);
               }}
               disabled={!Edicao?.isActive}

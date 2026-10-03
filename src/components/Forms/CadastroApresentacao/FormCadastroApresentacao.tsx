@@ -408,7 +408,8 @@ export function FormCadastroApresentacao() {
                 {submission?.id && (
                   <button
                     type="button"
-                    onClick={() => baixarPdf(submission.id, nomeArquivo)}
+                    onClick={() => baixarPdf(submission.id, submission.pdfFile)}
+                    title="Baixa o PDF salvo nesta submissão"
                     disabled={baixandoPdf}
                     className="ml-auto text-xs font-semibold text-brand-blue hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                   >

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState, useRef } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -28,8 +28,10 @@ const linkBase =
 const navItemBase = "cursor-pointer max-[1000px]:w-full";
 
 export default function Header() {
+  const menuRef = useRef<HTMLElement>(null);
+  const refreshedYearRef = useRef<string | null>(null);
   const { user, signed } = useContext(AuthContext);
-  const { listEdicao, edicoesList, getEdicaoByYear, Edicao } = useEdicao();
+  const { listEdicao, edicoesList, getEdicaoByYear } = useEdicao();
   const { setSelectEdition, selectEdition } = useActiveEdition();
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
@@ -128,12 +130,14 @@ export default function Header() {
 
   useEffect(() => {
     if (
-      selectEdition.year &&
-      (!Edicao || getYearFromEdicao(Edicao) !== selectEdition.year)
+      !selectEdition.year ||
+      refreshedYearRef.current === selectEdition.year
     ) {
-      getEdicaoByYear(selectEdition.year);
+      return;
     }
-  }, [selectEdition.year, Edicao, getEdicaoByYear]);
+    refreshedYearRef.current = selectEdition.year;
+    void getEdicaoByYear(selectEdition.year);
+  }, [selectEdition.year, getEdicaoByYear]);
 
   useEffect(() => {
     if (edicoesList?.length && !selectEdition.year) {
@@ -149,9 +153,25 @@ export default function Header() {
     }
   }, [edicoesList, selectEdition.year, setSelectEdition]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 px-4 py-3 shadow-sm backdrop-blur-sm md:px-8">
+      <nav
+        ref={menuRef}
+        className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 px-4 py-3 shadow-sm backdrop-blur-sm md:px-8"
+      >
         <div className="flex flex-wrap items-center justify-between gap-4 max-[1000px]:justify-center max-[500px]:gap-2">
           <div className="flex items-center gap-4 max-[500px]:w-full max-[500px]:justify-center">
             <Link className="flex items-center" href="/">
