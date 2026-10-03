@@ -490,10 +490,10 @@ export function FormCadastro({
         />
       </Campo>
 
-      <div className="mx-auto mt-2 flex w-full max-[1000px]:justify-center">
+      <div className="mt-2 flex w-full">
         <Button
           type="submit"
-          className="h-10 w-full max-w-[224px] text-xl font-bold"
+          className="h-10 w-full text-xl font-bold"
           variante="primary"
         >
           Cadastrar
