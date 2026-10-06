@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useSubmissionsQuery } from "@/features/apresentacoes/hooks/useSubmissionsQuery";
+import { useSessoesQuery } from "@/features/sessoes/hooks/useSessoesQuery";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useEdicao } from "@/hooks/useEdicao";
 import { useSubmission } from "@/hooks/useSubmission";
@@ -23,6 +24,10 @@ import {
 import { montarDadosSubmissao } from "./montarDadosSubmissao";
 import { montarNomeArquivoPdf } from "./montarNomeArquivoPdf";
 import { arquivoEhPdf } from "./validarArquivoPdf";
+import {
+  sessaoAtualParaCadastro,
+  sessoesDisponiveisParaCadastro,
+} from "./sessoesDisponiveis";
 
 /**
  * Toda a lógica do formulário de cadastro/edição de apresentação: estado,
@@ -40,6 +45,22 @@ export function useFormCadastroApresentacao() {
   const { sendFile, deleteFile } = useSubmissionFile();
   const { Edicao } = useEdicao();
   const eventEditionId = Edicao?.id || getEventEditionIdStorage() || undefined;
+  const {
+    data: sessoesCarregadas,
+    sessoes,
+    isLoading: carregandoSessoes,
+    error: erroSessoes,
+    refetch: recarregarSessoes,
+  } = useSessoesQuery(eventEditionId);
+  const sessoesDisponiveis = useMemo(
+    () => sessoesDisponiveisParaCadastro(sessoes, eventEditionId, submission),
+    [sessoes, eventEditionId, submission],
+  );
+  const haSessoesDeApresentacao = sessoes.some(
+    (sessao) =>
+      sessao.eventEditionId === eventEditionId &&
+      sessao.type === "Presentation",
+  );
   const { data: submissoes } = useSubmissionsQuery(
     eventEditionId ? { eventEditionId } : undefined,
   );
@@ -60,6 +81,7 @@ export function useFormCadastroApresentacao() {
     setValue,
     reset,
     control,
+    watch,
   } = useForm<CadastroFormulario>({
     resolver: zodResolver(esquemaCadastro),
   });
@@ -70,6 +92,7 @@ export function useFormCadastroApresentacao() {
       setValue("titulo", submission?.title);
       setValue("resumo", submission?.abstract ?? "");
       setValue("apresentador", submission?.mainAuthorId);
+      setValue("sessao", sessaoAtualParaCadastro(submission));
       setValue("orientador", submission?.advisorId);
       setValue("coorientador", submission?.coAdvisor);
       setValue("slide", submission?.pdfFile);
@@ -81,6 +104,7 @@ export function useFormCadastroApresentacao() {
       setValue("titulo", "");
       setValue("resumo", "");
       setValue("apresentador", "");
+      setValue("sessao", "");
       setValue("orientador", "");
       setValue("coorientador", "");
       setValue("data", "");
@@ -92,6 +116,24 @@ export function useFormCadastroApresentacao() {
       setNomeArquivo(null);
     }
   }, [submission, setValue]);
+
+  const sessaoSelecionada = watch("sessao");
+  const sessaoAtual = sessaoAtualParaCadastro(submission);
+  const sessaoAnteriorIndisponivel =
+    !!sessaoAtual &&
+    !!sessoesCarregadas &&
+    !sessaoSelecionada &&
+    !sessoesDisponiveis.some((sessao) => sessao.id === sessaoAtual);
+
+  useEffect(() => {
+    if (
+      sessoesCarregadas &&
+      sessaoSelecionada &&
+      !sessoesDisponiveis.some((sessao) => sessao.id === sessaoSelecionada)
+    ) {
+      setValue("sessao", "", { shouldValidate: true });
+    }
+  }, [sessoesCarregadas, sessaoSelecionada, sessoesDisponiveis, setValue]);
 
   const opcoesApresentadoresSelect = useMemo(() => {
     return userList
@@ -193,6 +235,39 @@ export function useFormCadastroApresentacao() {
       return;
     }
 
+    if (!eventEditionId) {
+      showAlert({
+        icon: "error",
+        text: "Não foi possível identificar a edição atual.",
+        confirmButtonText: "Entendi",
+      });
+      return;
+    }
+
+    const { data: sessoesAtualizadas, isError } = await recarregarSessoes();
+    if (isError) {
+      showAlert({
+        icon: "error",
+        text: "Não foi possível verificar as vagas das sessões. Tente novamente.",
+        confirmButtonText: "Entendi",
+      });
+      return;
+    }
+    const sessaoAindaDisponivel = sessoesDisponiveisParaCadastro(
+      sessoesAtualizadas ?? [],
+      eventEditionId,
+      submission,
+    ).some((sessao) => sessao.id === data.sessao);
+    if (!sessaoAindaDisponivel) {
+      setValue("sessao", "", { shouldValidate: true });
+      showAlert({
+        icon: "error",
+        text: "A sessão escolhida não possui mais vagas. Selecione outra sessão.",
+        confirmButtonText: "Entendi",
+      });
+      return;
+    }
+
     let arquivoEnviadoKey: string | null = null;
 
     try {
@@ -216,7 +291,7 @@ export function useFormCadastroApresentacao() {
 
       const dadosSubmissao = montarDadosSubmissao(data, {
         arquivoPdf: arquivoEnviadoKey || data.slide || "",
-        eventEditionId: getEventEditionIdStorage() ?? "",
+        eventEditionId,
         usuarioId: user.id,
         status: submission?.status,
       });
@@ -266,6 +341,13 @@ export function useFormCadastroApresentacao() {
     loadingUserList,
     opcoesApresentadoresSelect,
     advisors,
+    sessoesDisponiveis,
+    carregandoSessoes,
+    erroSessoes,
+    recarregarSessoes,
+    haSessoesDeApresentacao,
+    sessaoAnteriorIndisponivel,
+    eventEditionId,
     nomeArquivo,
     submission,
     carregandoEnvio,

@@ -12,6 +12,7 @@ const CAMPOS_DO_DTO = [
   "mainAuthorId",
   "pdfFile",
   "phoneNumber",
+  "proposedPresentationBlockId",
   "status",
   "title",
 ];
@@ -19,6 +20,7 @@ const CAMPOS_DO_DTO = [
 const formulario: CadastroFormulario = {
   id: "sub-1",
   titulo: "Meu trabalho",
+  sessao: "22222222-2222-4222-8222-222222222222",
   resumo: "Resumo do trabalho",
   apresentador: "autor-1",
   orientador: "11111111-1111-4111-8111-111111111111",
@@ -40,6 +42,8 @@ describe("montarDadosSubmissao", () => {
     expect(Object.keys(dados).sort()).toEqual(CAMPOS_DO_DTO);
     expect(dados).not.toHaveProperty("id");
     expect(dados.pdfFile).toBe("novo.pdf");
+    expect(dados.proposedPresentationBlockId).toBe(formulario.sessao);
+    expect(dados).not.toHaveProperty("proposedPositionWithinBlock");
     expect(dados.status).toBe("Confirmed");
   });
 

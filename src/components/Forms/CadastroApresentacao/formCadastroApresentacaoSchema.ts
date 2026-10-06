@@ -14,6 +14,9 @@ export const esquemaCadastro = z.object({
     .string({ invalid_type_error: "Campo Inválido" })
     .min(1, "O resumo é obrigatório"),
   apresentador: z.string({ invalid_type_error: "Campo Inválido" }).optional(),
+  sessao: z
+    .string({ invalid_type_error: "Selecione uma sessão disponível" })
+    .uuid({ message: "Selecione uma sessão disponível" }),
   orientador: z
     .string({ invalid_type_error: "Campo Inválido" })
     .uuid({ message: "O orientador é obrigatório" }),

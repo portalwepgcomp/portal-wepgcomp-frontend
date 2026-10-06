@@ -34,6 +34,7 @@ export interface Panelist {
 export interface PresentationBlock extends PresentationBlockParams {
   id: string;
   availablePositionsWithInBlock: AvailablePositionsWithInBlock[];
+  availableSubmissionSlots?: number;
   panelists: Panelist[];
   presentations: Presentation[];
   createdAt: string;

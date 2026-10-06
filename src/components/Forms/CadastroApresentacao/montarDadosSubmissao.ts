@@ -28,6 +28,8 @@ export function montarDadosSubmissao(
     coAdvisor: data.coorientador || "",
     pdfFile: arquivoPdf,
     phoneNumber: data.celular,
+    // A escolha reserva a sessão; a posição será definida na alocação.
+    proposedPresentationBlockId: data.sessao,
     linkHostedFile: formatLink(data.linkApresentacao || ""),
     ...(status ? { status } : {}),
   };

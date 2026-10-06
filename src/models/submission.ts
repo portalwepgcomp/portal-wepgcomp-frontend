@@ -9,6 +9,8 @@ export interface SubmissionParams {
   coAdvisor?: string;
   pdfFile: string;
   phoneNumber: string;
+  proposedPresentationBlockId?: string | null;
+  proposedPositionWithinBlock?: number | null;
   linkHostedFile?: string;
   status?: string;
 }
@@ -39,6 +41,8 @@ export interface Submission extends SubmissionParams {
   advisor: UserAccount;
   proposedPresentationBlockId?: string | null;
   proposedPositionWithinBlock?: number | null;
+  presentationId?: string | null;
+  block?: { id: string; title: string } | null;
   /** Alias retornado pela API em alguns endpoints */
   abstract?: string;
   type?: string;
