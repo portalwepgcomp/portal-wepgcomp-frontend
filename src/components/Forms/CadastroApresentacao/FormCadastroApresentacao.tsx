@@ -260,18 +260,26 @@ export function FormCadastroApresentacao() {
             htmlFor="orientador-select"
             erro={errors.orientador?.message}
           >
-            <select
-              id="orientador-select"
-              className={selectClasse}
-              {...register("orientador")}
-            >
-              <option value="">Selecione o orientador</option>
-              {advisors.map((orientador) => (
-                <option key={orientador.id} value={orientador.id}>
-                  {orientador.name}
-                </option>
-              ))}
-            </select>
+            <Controller
+              name="orientador"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <select
+                  id="orientador-select"
+                  className={selectClasse}
+                  {...field}
+                  value={field.value ?? ""}
+                >
+                  <option value="">Selecione o orientador</option>
+                  {advisors.map((orientador) => (
+                    <option key={orientador.id} value={orientador.id}>
+                      {orientador.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            />
           </Campo>
 
           <Campo
