@@ -1,11 +1,19 @@
-import { describe, expect, it } from "@jest/globals";
-import { act, renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it } from "@jest/globals";
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
+import { FormCadastroApresentacao } from "@/components/Forms/CadastroApresentacao/FormCadastroApresentacao";
 import { useFormCadastroApresentacao } from "@/components/Forms/CadastroApresentacao/useFormCadastroApresentacao";
 
 const sessaoProposta = "11111111-1111-4111-8111-111111111111";
 const sessaoAlocada = "22222222-2222-4222-8222-222222222222";
-const mockSubmission = {
+const submissaoAlocada = {
   id: "sub-1",
   title: "Título do trabalho",
   abstract: "Resumo do trabalho submetido",
@@ -15,8 +23,8 @@ const mockSubmission = {
   phoneNumber: "71991234567",
   status: "Confirmed",
   proposedPresentationBlockId: sessaoProposta,
-  presentationId: "presentation-1",
-  block: { id: sessaoAlocada },
+  presentationId: "presentation-1" as string | undefined,
+  block: { id: sessaoAlocada } as { id: string } | undefined,
 };
 const mockSessoes = [sessaoProposta, sessaoAlocada].map((id) => ({
   id,
@@ -26,6 +34,8 @@ const mockSessoes = [sessaoProposta, sessaoAlocada].map((id) => ({
   availableSubmissionSlots: 0,
   availablePositionsWithInBlock: [],
 }));
+let mockSubmission = { ...submissaoAlocada };
+let mockSessoesCarregadas: typeof mockSessoes | undefined;
 const mockUpdateSubmission = jest.fn().mockResolvedValue(true);
 const mockSendFile = jest.fn();
 const mockRefetch = jest
@@ -78,11 +88,14 @@ jest.mock("@/hooks/useSubmission", () => ({
 jest.mock("@/hooks/useSubmissionFile", () => ({
   useSubmissionFile: () => ({ sendFile: mockSendFile, deleteFile: jest.fn() }),
 }));
+jest.mock("@/hooks/useApresentacaoPdf", () => ({
+  useApresentacaoPdf: () => ({ baixarPdf: jest.fn(), baixandoPdf: false }),
+}));
 jest.mock("@/features/sessoes/hooks/useSessoesQuery", () => ({
   useSessoesQuery: () => ({
-    data: mockSessoes,
-    sessoes: mockSessoes,
-    isLoading: false,
+    data: mockSessoesCarregadas,
+    sessoes: mockSessoesCarregadas ?? [],
+    isLoading: !mockSessoesCarregadas,
     error: null,
     refetch: mockRefetch,
   }),
@@ -117,4 +130,63 @@ describe("edição de submissão já alocada", () => {
     expect(mockSendFile).not.toHaveBeenCalled();
     expect(mockRouterPush).toHaveBeenCalledWith("/minha-apresentacao");
   });
+});
+
+beforeEach(() => {
+  mockSubmission = { ...submissaoAlocada };
+  mockSessoesCarregadas = mockSessoes;
+  mockRefetch.mockResolvedValue({ data: mockSessoes, isError: false });
+});
+
+describe("sessão exibida no formulário de edição", () => {
+  it.each([
+    ["reserva", false, false, sessaoProposta],
+    ["reserva com carregamento assíncrono", false, true, sessaoProposta],
+    ["alocação com proposta antiga", true, false, sessaoAlocada],
+    ["alocação com carregamento assíncrono", true, true, sessaoAlocada],
+  ])(
+    "exibe e envia a sessão correta: %s",
+    async (_cenario, alocada, assincrono, sessaoEsperada) => {
+      if (!alocada) {
+        mockSubmission = {
+          ...submissaoAlocada,
+          presentationId: undefined,
+          block: undefined,
+        };
+      }
+      if (assincrono) mockSessoesCarregadas = undefined;
+
+      const { rerender } = render(<FormCadastroApresentacao />);
+      const select = screen.getByRole("combobox", {
+        name: /Escolha uma sessão disponível/i,
+      });
+
+      if (assincrono) {
+        expect(select).toBeDisabled();
+        expect(
+          screen.getByText("Carregando sessões disponíveis..."),
+        ).toBeInTheDocument();
+        mockSessoesCarregadas = [...mockSessoes];
+        rerender(<FormCadastroApresentacao />);
+      }
+
+      await waitFor(() => expect(select).toHaveValue(sessaoEsperada));
+      expect(select).toBeEnabled();
+      expect(
+        screen.getByRole("option", { name: /sessão atual, sem novas vagas/i }),
+      ).toHaveValue(sessaoEsperada);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /Salvar Alterações/i }),
+      );
+      await waitFor(() =>
+        expect(mockUpdateSubmission).toHaveBeenCalledWith(
+          "sub-1",
+          expect.objectContaining({
+            proposedPresentationBlockId: sessaoEsperada,
+          }),
+        ),
+      );
+    },
+  );
 });
