@@ -28,6 +28,7 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
   const [saveEvaluation, setSaveEvaluation] = useState<
     { evaluation: Evaluation | null; criteria: EvaluationCriteria | null }[]
   >([]);
+  const [tentouEnviar, setTentouEnviar] = useState(false);
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const {
     makeEvaluation,
@@ -40,15 +41,27 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
   const { getPresentationAll, presentationList } = usePresentation();
   const { user } = useContext(AuthContext);
   const { Edicao } = useEdicao();
+  const criteriosSemNota = saveEvaluation.filter(
+    ({ evaluation }) => !evaluation,
+  );
 
   const sendEvaluation = () => {
-    const body: EvaluationParams[] =
-      saveEvaluation?.map((criteria) => {
-        const { evaluationCriteriaId, submissionId, score, userId, comments } =
-          criteria.evaluation as Evaluation;
+    setTentouEnviar(true);
+    if (!saveEvaluation.length || criteriosSemNota.length) return;
 
-        return { evaluationCriteriaId, submissionId, score, userId, comments };
-      }) ?? [];
+    const body: EvaluationParams[] = [];
+    for (const { evaluation } of saveEvaluation) {
+      if (!evaluation) return;
+      const { evaluationCriteriaId, submissionId, score, userId, comments } =
+        evaluation;
+      body.push({
+        evaluationCriteriaId,
+        submissionId,
+        score,
+        userId,
+        comments,
+      });
+    }
 
     makeEvaluation(body);
   };
@@ -90,6 +103,7 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
 
         setPresentation(foundPresentation as unknown as Presentation);
         setSaveEvaluation(saveEvaluationValues);
+        setTentouEnviar(false);
       }
     }
   }, [params?.id, presentationList, evaluations, evaluationCriteria]);
@@ -114,6 +128,14 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
             </div>
 
             <div className="flex flex-col items-center justify-center gap-[30px]">
+              {saveEvaluation.length > 0 && (
+                <p className="text-sm text-muted">
+                  <span aria-hidden="true" className="text-red-700">
+                    *
+                  </span>{" "}
+                  Campo obrigatório
+                </p>
+              )}
               {saveEvaluation?.map((evaluationData, devIndex) => (
                 <div
                   key={evaluationData?.criteria?.id}
@@ -122,7 +144,11 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
                   <div className="text-xl max-[830px]:w-[95%] max-[830px]:text-center">
                     {`${devIndex + 1}. ${
                       evaluationData?.criteria?.description
-                    }`}
+                    }`}{" "}
+                    <span aria-hidden="true" className="text-red-700">
+                      *
+                    </span>
+                    <span className="sr-only"> (obrigatório)</span>
                   </div>
                   <Rating
                     value={evaluationData?.evaluation?.score ?? 0}
@@ -161,12 +187,22 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
                 </div>
               )}
             </div>
+            {tentouEnviar && criteriosSemNota.length > 0 && (
+              <p role="alert" className="max-w-[90%] text-center text-red-700">
+                Selecione uma nota para cada critério antes de enviar a
+                avaliação.
+              </p>
+            )}
             <div className="flex flex-row items-center">
               <Button
                 size="lg"
                 variante="primary"
                 onClick={sendEvaluation}
-                disabled={loadingEvaluation || !Edicao?.isActive}
+                disabled={
+                  loadingEvaluation ||
+                  !Edicao?.isActive ||
+                  !saveEvaluation.length
+                }
               >
                 Avaliar
               </Button>
