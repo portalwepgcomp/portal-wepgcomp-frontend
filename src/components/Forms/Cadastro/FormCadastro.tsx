@@ -68,10 +68,10 @@ const formCadastroSchema = z
         });
       }
     } else {
-      if (!/^\d{1,19}$/.test(raw)) {
+      if (!/^\d{1,13}$/.test(raw)) {
         ctx.addIssue({
           path: ["matricula"],
-          message: "Matrícula inválida. Use somente dígitos (até 19).",
+          message: "Matrícula inválida. Use somente dígitos (até 13).",
           code: z.ZodIssueCode.custom,
         });
       }
@@ -386,13 +386,7 @@ export function FormCadastro({
           className="text-sm"
           {...register("matricula")}
           onChange={handleMudancaMatricula}
-          maxLength={
-            perfil === "professor"
-              ? 19
-              : perfil === "ouvinte" && subperfil === "outro"
-                ? 14
-                : undefined
-          }
+          maxLength={perfil === "ouvinte" && subperfil === "outro" ? 14 : 13}
         />
       </Campo>
 

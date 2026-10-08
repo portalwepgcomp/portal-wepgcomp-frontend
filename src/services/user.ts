@@ -65,9 +65,16 @@ export const userApi = {
   },
 
   confirmEmail: async (token: string) => {
-    const { data } = await instance.post(`${baseUrl}/confirm-email`, null, {
-      params: { token },
-    });
+    // Sem corpo (undefined, não null): com o Content-Type JSON padrão da
+    // instância, `null` seria enviado como o texto "null", que o body-parser
+    // do Nest rejeita ("Unexpected token 'n', "null" is not valid JSON").
+    const { data } = await instance.post(
+      `${baseUrl}/confirm-email`,
+      undefined,
+      {
+        params: { token },
+      },
+    );
 
     return data;
   },
