@@ -36,6 +36,13 @@ export function useGerenciarUsuarios() {
   }, []);
 
   useEffect(() => {
+    // Deep link vindo do e-mail de aprovação pendente: /usuarios?busca=<email>
+    // (lido via window para não exigir Suspense do useSearchParams).
+    const busca = new URLSearchParams(window.location.search).get("busca");
+    if (busca) {
+      setSearchValue(busca);
+    }
+
     usersApi.getUsers({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
