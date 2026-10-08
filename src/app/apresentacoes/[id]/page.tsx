@@ -276,41 +276,49 @@ export default function ApresentacaoDetalhes() {
         <div className="rounded-xl border border-line bg-card p-6">
           <h3 className="mb-5 text-xl font-bold text-brand-navy">Ações</h3>
           <div className="flex flex-wrap gap-3 max-md:flex-col">
-            <Button
-              size="lg"
-              type="button"
-              variante="primary"
-              className="max-md:w-full"
-              onClick={handleAvaliar}
-            >
-              <StarIcon />
-              Avaliar
-            </Button>
+            {signed && (
+              <Button
+                size="lg"
+                type="button"
+                variante="primary"
+                className="max-md:w-full"
+                onClick={handleAvaliar}
+              >
+                <StarIcon />
+                Avaliar
+              </Button>
+            )}
 
-            <Button
-              size="lg"
-              type="button"
-              variante="secondary"
-              className="max-md:w-full"
-              onClick={handleDownloadPdf}
-              disabled={baixandoPdf || !presentation.submission?.pdfFile}
-            >
-              <Download />
-              Baixar
-            </Button>
+            {signed && (
+              <Button
+                size="lg"
+                type="button"
+                variante="secondary"
+                className="max-md:w-full"
+                onClick={handleDownloadPdf}
+                disabled={baixandoPdf || !presentation.submission?.pdfFile}
+              >
+                <Download />
+                Baixar
+              </Button>
+            )}
 
-            <Button
-              size="lg"
-              type="button"
-              variante={
-                presentationBookmark?.bookmarked ? "secondary" : "outline"
-              }
-              className="max-md:w-full"
-              onClick={handleFavorite}
-            >
-              <Heart data-icon="inline-start" />
-              {presentationBookmark?.bookmarked ? "Desfavoritar" : "Favoritar"}
-            </Button>
+            {signed && (
+              <Button
+                size="lg"
+                type="button"
+                variante={
+                  presentationBookmark?.bookmarked ? "secondary" : "outline"
+                }
+                className="max-md:w-full"
+                onClick={handleFavorite}
+              >
+                <Heart data-icon="inline-start" />
+                {presentationBookmark?.bookmarked
+                  ? "Desfavoritar"
+                  : "Favoritar"}
+              </Button>
+            )}
 
             <Button
               size="lg"
