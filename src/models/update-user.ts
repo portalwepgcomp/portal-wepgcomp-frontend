@@ -11,6 +11,15 @@ export interface UpdateUserRequest {
   level?: RoleType;
 }
 
+/** Campos que o próprio usuário pode alterar (PATCH /users/me). */
+export interface UpdateMeRequest {
+  name?: string;
+  /** String vazia remove o link. */
+  linkLattes?: string;
+  /** Só dígitos. Para apresentador/professor aprovado, exige nova aprovação. */
+  registrationNumber?: string;
+}
+
 export interface UpdateUserResponse {
   id: string;
   name: string;
