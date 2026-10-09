@@ -33,16 +33,23 @@ const apresentador = {
   isTeacherActive: false,
 } as User;
 
-function renderizar(onExcluir = () => {}) {
+function renderizar(
+  onExcluir = () => {},
+  usuario: User = apresentador,
+  onAprovarTrocaPerfil = () => {},
+  onRecusarTrocaPerfil = () => {},
+) {
   return render(
     <GerenciarUsuarioAcoes
-      usuario={apresentador}
+      usuario={usuario}
       usuarioAtual={admin}
       edicaoAtiva
       carregando={false}
       onExcluir={onExcluir}
       onAprovarProfessor={() => {}}
       onAprovarApresentador={() => {}}
+      onAprovarTrocaPerfil={onAprovarTrocaPerfil}
+      onRecusarTrocaPerfil={onRecusarTrocaPerfil}
       onPromoverAdmin={() => {}}
       onRebaixar={() => {}}
     />,
@@ -54,6 +61,34 @@ afterEach(() => {
 });
 
 describe("GerenciarUsuarioAcoes", () => {
+  it("só mostra aprovar/recusar troca de perfil quando há solicitação", () => {
+    renderizar();
+    expect(
+      screen.queryByRole("button", { name: "Aprovar troca de perfil" }),
+    ).toBeNull();
+  });
+
+  it("aprova e recusa a troca de perfil pelo id do usuário", () => {
+    const aprovar = jest.fn();
+    const recusar = jest.fn();
+    renderizar(
+      () => {},
+      { ...apresentador, requestedProfile: "Professor" } as User,
+      aprovar,
+      recusar,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Aprovar troca de perfil" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Recusar troca de perfil" }),
+    );
+
+    expect(aprovar).toHaveBeenCalledWith("user-1");
+    expect(recusar).toHaveBeenCalledWith("user-1");
+  });
+
   it("deve rotular cada botão com o texto da ação", () => {
     renderizar();
 

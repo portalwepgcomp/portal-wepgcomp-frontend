@@ -1,6 +1,7 @@
 import { cn } from "@/utils/cn";
 import { badgeBase } from "./constants";
 import { User } from "@/models/user";
+import { fullProfileLabel } from "@/components/Perfil/perfilLabels";
 
 export default function GerenciarUsuarioBadges({ user }: { user: User }) {
   const badges: React.ReactNode[] = [];
@@ -60,6 +61,21 @@ export default function GerenciarUsuarioBadges({ user }: { user: User }) {
         )}
       >
         Ouvinte
+      </span>,
+    );
+  }
+
+  if (user.requestedProfile) {
+    badges.push(
+      <span
+        key="profile-change"
+        className={cn(
+          badgeBase,
+          "border-[#ffcc02] bg-gradient-to-br from-[#fff8e1] to-[#ffecb3] text-[#e65100]",
+        )}
+      >
+        Pediu troca para{" "}
+        {fullProfileLabel(user.requestedProfile, user.requestedSubprofile)}
       </span>,
     );
   }

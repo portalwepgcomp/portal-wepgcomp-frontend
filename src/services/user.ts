@@ -1,8 +1,10 @@
 "use client";
 import axiosInstance from "@/utils/api";
-import { UpdateUserRequest } from "@/models/update-user";
+import { UpdateMeRequest, UpdateUserRequest } from "@/models/update-user";
 import {
+  User,
   GetUserParams,
+  RequestProfileChangeParams,
   RegisterUserParams,
   CreateProfessorByAdminParams,
   ResetPasswordSendEmailParams,
@@ -29,6 +31,51 @@ export const userApi = {
   getAdmins: async () => {
     const { data } = await instance.get(`${baseUrl}/admins`);
 
+    return data;
+  },
+
+  getMe: async (): Promise<User> => {
+    const { data } = await instance.get(`${baseUrl}/me`);
+
+    return data;
+  },
+
+  updateMe: async (body: UpdateMeRequest): Promise<User> => {
+    const { data } = await instance.patch(`${baseUrl}/me`, body);
+
+    return data;
+  },
+
+  requestProfileChange: async (
+    body: RequestProfileChangeParams,
+  ): Promise<User> => {
+    const { data } = await instance.post(
+      `${baseUrl}/me/profile-change-request`,
+      body,
+    );
+
+    return data;
+  },
+
+  cancelProfileChange: async (): Promise<User> => {
+    const { data } = await instance.delete(
+      `${baseUrl}/me/profile-change-request`,
+    );
+
+    return data;
+  },
+
+  approveProfileChange: async (userId: string) => {
+    const { data } = await instance.patch(
+      `${baseUrl}/${userId}/profile-change-request/approve`,
+    );
+    return data;
+  },
+
+  rejectProfileChange: async (userId: string) => {
+    const { data } = await instance.patch(
+      `${baseUrl}/${userId}/profile-change-request/reject`,
+    );
     return data;
   },
 

@@ -67,6 +67,7 @@ export default function PerfilAdmin({
       )}
 
       <PerfilMenuSection title="Conta">
+        <PerfilMenuItem href="/meu-perfil">Meu perfil</PerfilMenuItem>
         <PerfilMenuItem href="/home" onClick={logout} danger>
           Sair
         </PerfilMenuItem>
