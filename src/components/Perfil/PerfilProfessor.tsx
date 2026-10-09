@@ -36,6 +36,7 @@ export default function PerfilProfessor({
         <PerfilMenuItem href="/favoritos">Favoritos</PerfilMenuItem>
       </PerfilMenuSection>
       <PerfilMenuSection title="Conta">
+        <PerfilMenuItem href="/meu-perfil">Meu perfil</PerfilMenuItem>
         <PerfilMenuItem href="/home" onClick={logout} danger>
           Sair
         </PerfilMenuItem>

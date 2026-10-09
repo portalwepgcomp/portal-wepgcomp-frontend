@@ -13,6 +13,8 @@ interface GerenciarUsuarioAcoesProps {
   onExcluir: (id: string) => void;
   onAprovarProfessor: (id: string) => void;
   onAprovarApresentador: (id: string) => void;
+  onAprovarTrocaPerfil: (id: string) => void;
+  onRecusarTrocaPerfil: (id: string) => void;
   onPromoverAdmin: (id: string) => void;
   onRebaixar: (id: string) => void;
 }
@@ -53,6 +55,8 @@ export default function GerenciarUsuarioAcoes({
   onExcluir,
   onAprovarProfessor,
   onAprovarApresentador,
+  onAprovarTrocaPerfil,
+  onRecusarTrocaPerfil,
   onPromoverAdmin,
   onRebaixar,
 }: GerenciarUsuarioAcoesProps) {
@@ -122,6 +126,27 @@ export default function GerenciarUsuarioAcoes({
         title="Aprovar Apresentador"
         variante="success"
         onClick={() => onAprovarApresentador(usuario.id)}
+        disabled={desabilitado}
+      />,
+    );
+  }
+
+  if (isAdmin && usuario.requestedProfile) {
+    acoes.push(
+      <BotaoAcao
+        key="approve-profile-change"
+        rotulo="Aprovar troca de perfil"
+        title="Aprovar troca de perfil"
+        variante="success"
+        onClick={() => onAprovarTrocaPerfil(usuario.id)}
+        disabled={desabilitado}
+      />,
+      <BotaoAcao
+        key="reject-profile-change"
+        rotulo="Recusar troca de perfil"
+        title="Recusar troca de perfil"
+        variante="outline"
+        onClick={() => onRecusarTrocaPerfil(usuario.id)}
         disabled={desabilitado}
       />,
     );

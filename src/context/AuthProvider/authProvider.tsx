@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import { useSweetAlert } from "@/hooks/useAlert";
 import { UserLogin, UserProfile } from "@/models/user";
@@ -22,6 +28,7 @@ interface IContextLogin {
   signed: boolean;
   singIn: (body: UserLogin) => Promise<void>;
   logout: () => void;
+  updateUserProfile: (data: Partial<UserProfile>) => void;
   isValidatingToken: boolean;
   isLoggingOut: boolean;
 }
@@ -113,6 +120,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => setIsLoggingOut(false), 500);
   }
 
+  // Mantém a sessão (estado + localStorage) em sincronia após o usuário
+  // editar o próprio perfil, sem exigir novo login.
+  const updateUserProfile = useCallback((data: Partial<UserProfile>) => {
+    setUser((current) => {
+      if (!current) return current;
+      const updated = { ...current, ...data };
+      setUserLocalStorage(updated);
+      return updated;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -120,6 +138,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signed: !!user,
         singIn,
         logout,
+        updateUserProfile,
         isValidatingToken,
         isLoggingOut,
       }}
