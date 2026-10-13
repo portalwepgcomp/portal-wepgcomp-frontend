@@ -26,6 +26,8 @@ export default function Gerenciar() {
     switchActiveUser,
     approveTeacher,
     approvePresenter,
+    approveProfileChange,
+    rejectProfileChange,
     promoteToAdmin,
     demoteUser,
     deleteUser,
@@ -72,6 +74,8 @@ export default function Gerenciar() {
                 onExcluir={deleteUser}
                 onAprovarProfessor={approveTeacher}
                 onAprovarApresentador={approvePresenter}
+                onAprovarTrocaPerfil={approveProfileChange}
+                onRecusarTrocaPerfil={rejectProfileChange}
                 onPromoverAdmin={promoteToAdmin}
                 onRebaixar={demoteUser}
               />

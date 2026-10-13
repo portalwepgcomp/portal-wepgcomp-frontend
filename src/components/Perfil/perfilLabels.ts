@@ -1,4 +1,4 @@
-import type { ProfileType, RoleType } from "@/models/user";
+import type { ProfileType, RoleType, SubprofileType } from "@/models/user";
 
 export function profileLabel(profile: ProfileType): string {
   switch (profile) {
@@ -11,6 +11,32 @@ export function profileLabel(profile: ProfileType): string {
     default:
       return profile;
   }
+}
+
+export function subprofileLabel(subprofile: SubprofileType): string {
+  switch (subprofile) {
+    case "Doctorate":
+      return "Doutorando";
+    case "Master":
+      return "Mestrando";
+    case "Bachelor":
+      return "Graduando";
+    case "Other":
+      return "Outro";
+    default:
+      return subprofile;
+  }
+}
+
+/** Ex.: "Apresentador" ou "Ouvinte (Mestrando)". */
+export function fullProfileLabel(
+  profile: ProfileType,
+  subprofile?: SubprofileType | null,
+): string {
+  const label = profileLabel(profile);
+  return profile === "Listener" && subprofile
+    ? `${label} (${subprofileLabel(subprofile)})`
+    : label;
 }
 
 export function isAdminLevel(level?: RoleType | string): boolean {

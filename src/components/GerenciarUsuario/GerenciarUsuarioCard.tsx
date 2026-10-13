@@ -22,6 +22,8 @@ interface GerenciarUsuarioCardProps {
   onExcluir: (id: string) => void;
   onAprovarProfessor: (id: string) => void;
   onAprovarApresentador: (id: string) => void;
+  onAprovarTrocaPerfil: (id: string) => void;
+  onRecusarTrocaPerfil: (id: string) => void;
   onPromoverAdmin: (id: string) => void;
   onRebaixar: (id: string) => void;
 }
@@ -52,6 +54,8 @@ export default function GerenciarUsuarioCard({
   onExcluir,
   onAprovarProfessor,
   onAprovarApresentador,
+  onAprovarTrocaPerfil,
+  onRecusarTrocaPerfil,
   onPromoverAdmin,
   onRebaixar,
 }: GerenciarUsuarioCardProps) {
@@ -123,6 +127,8 @@ export default function GerenciarUsuarioCard({
             onExcluir={onExcluir}
             onAprovarProfessor={onAprovarProfessor}
             onAprovarApresentador={onAprovarApresentador}
+            onAprovarTrocaPerfil={onAprovarTrocaPerfil}
+            onRecusarTrocaPerfil={onRecusarTrocaPerfil}
             onPromoverAdmin={onPromoverAdmin}
             onRebaixar={onRebaixar}
           />

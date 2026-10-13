@@ -59,6 +59,16 @@ export interface User extends RegisterUserParams {
   isTeacherActive: boolean;
   isPresenterActive: boolean;
   hasSubmission: boolean;
+  /** Solicitação de troca de perfil pendente de aprovação por um admin. */
+  requestedProfile?: ProfileType;
+  requestedSubprofile?: SubprofileType;
+  profileRequestedAt?: string;
+}
+
+export interface RequestProfileChangeParams {
+  profile: ProfileType;
+  /** Obrigatório quando o perfil pedido é Listener. */
+  subprofile?: SubprofileType;
 }
 
 export interface ResetPasswordSendEmailParams {

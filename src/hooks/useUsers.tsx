@@ -55,6 +55,8 @@ interface UserProviderData {
   switchActiveUser: (userId: string, activate: boolean) => Promise<void>;
   approveTeacher: (userId: string) => Promise<void>;
   approvePresenter: (userId: string) => Promise<void>;
+  approveProfileChange: (userId: string) => Promise<void>;
+  rejectProfileChange: (userId: string) => Promise<void>;
   promoteToAdmin: (userId: string) => Promise<void>;
   demoteUser: (userId: string) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
@@ -405,6 +407,54 @@ export const UserProvider = ({ children }: UserProps) => {
     [getUsers, showAlert],
   );
 
+  const reviewProfileChange = useCallback(
+    async (userId: string, approve: boolean) => {
+      setLoadingRoleAction(true);
+
+      try {
+        if (approve) {
+          await userApi.approveProfileChange(userId);
+        } else {
+          await userApi.rejectProfileChange(userId);
+        }
+        showAlert({
+          icon: "success",
+          title: approve
+            ? "Troca de perfil aprovada!"
+            : "Solicitação de troca de perfil recusada.",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        getUsers({});
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: approve
+            ? "Erro ao aprovar troca de perfil"
+            : "Erro ao recusar troca de perfil",
+          text: getErrorMessage(
+            err,
+            "Ocorreu um erro ao processar a solicitação. Tente novamente!",
+          ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingRoleAction(false);
+      }
+    },
+    [getUsers, showAlert],
+  );
+
+  const approveProfileChange = useCallback(
+    (userId: string) => reviewProfileChange(userId, true),
+    [reviewProfileChange],
+  );
+
+  const rejectProfileChange = useCallback(
+    (userId: string) => reviewProfileChange(userId, false),
+    [reviewProfileChange],
+  );
+
   const promoteToAdmin = useCallback(
     async (userId: string) => {
       setLoadingRoleAction(true);
@@ -583,6 +633,8 @@ export const UserProvider = ({ children }: UserProps) => {
       switchActiveUser,
       approveTeacher,
       approvePresenter,
+      approveProfileChange,
+      rejectProfileChange,
       promoteToAdmin,
       demoteUser,
       deleteUser,
@@ -613,6 +665,8 @@ export const UserProvider = ({ children }: UserProps) => {
       switchActiveUser,
       approveTeacher,
       approvePresenter,
+      approveProfileChange,
+      rejectProfileChange,
       promoteToAdmin,
       demoteUser,
       deleteUser,

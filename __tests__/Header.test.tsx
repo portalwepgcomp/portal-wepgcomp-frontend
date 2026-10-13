@@ -63,6 +63,7 @@ function renderHeader() {
         signed: true,
         singIn: async () => undefined,
         logout: () => undefined,
+        updateUserProfile: () => undefined,
         isValidatingToken: false,
         isLoggingOut: false,
       }}
