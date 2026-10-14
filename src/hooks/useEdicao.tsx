@@ -8,11 +8,15 @@ import {
   useContext,
   useCallback,
   useMemo,
+  useRef,
 } from "react";
 
 import { edicaoApi } from "@/services/edicao";
 import { useSweetAlert } from "@/hooks/useAlert";
-import { setEventEditionIdStorage } from "@/context/AuthProvider/util";
+import {
+  setEventEditionIdStorage,
+  clearEventEditionIdStorage,
+} from "@/context/AuthProvider/util";
 import { Edicao, EdicaoParams } from "@/models/edicao";
 import { getErrorMessage } from "@/utils/error";
 
@@ -28,7 +32,6 @@ interface EdicaoProviderData {
   setEdicao: Dispatch<SetStateAction<Edicao | null>>;
   listEdicao: () => Promise<Edicao[]>;
   getEdicaoById: (idEdicao: string) => Promise<Edicao | null>;
-  getEdicaoByYear: (year: string) => Promise<Edicao | null>;
   createEdicao: (body: EdicaoParams) => Promise<boolean>;
   updateEdicao: (idEdicao: string, body: EdicaoParams) => Promise<void>;
   updateEdicaoActivate: (idEdicao: string) => Promise<boolean>;
@@ -43,6 +46,7 @@ export const EdicaoContext = createContext<EdicaoProviderData>(
 export const useEdicao = () => useContext(EdicaoContext);
 
 export const EdicaoProvider = ({ children }: EdicaoProps) => {
+  const selectionRequest = useRef(0);
   const [loadingEdicoesList, setLoadingEdicoesList] = useState<boolean>(false);
   const [loadingEdicao, setLoadingEdicao] = useState<boolean>(false);
   const [edicoesList, setEdicoesList] = useState<Edicao[]>([]);
@@ -68,7 +72,10 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
   }, [Edicao]);
 
   const clearEdicao = useCallback(() => {
+    selectionRequest.current += 1;
     setEdicao(null);
+    setLoadingEdicao(false);
+    clearEventEditionIdStorage();
     localStorage.removeItem("edicaoAtiva");
   }, []);
 
@@ -87,31 +94,20 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
   }, []);
 
   const getEdicaoById = useCallback(async (idEdicao: string) => {
+    if (!idEdicao) return null;
+    const request = ++selectionRequest.current;
     setLoadingEdicao(true);
     try {
       const response = await edicaoApi.getEdicaoById(idEdicao);
+      if (request !== selectionRequest.current) return null;
+      if (response?.id !== idEdicao) return null;
       setEdicao(response);
       setEventEditionIdStorage(response.id);
       return response;
     } catch {
       return null;
     } finally {
-      setLoadingEdicao(false);
-    }
-  }, []);
-
-  const getEdicaoByYear = useCallback(async (year: string) => {
-    if (!year) return null;
-    setLoadingEdicao(true);
-    try {
-      const response = await edicaoApi.getEdicaoByYear(year);
-      setEdicao(response);
-      setEventEditionIdStorage(response.id);
-      return response;
-    } catch {
-      return null;
-    } finally {
-      setLoadingEdicao(false);
+      if (request === selectionRequest.current) setLoadingEdicao(false);
     }
   }, []);
 
@@ -249,7 +245,6 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
       setEdicao,
       listEdicao,
       getEdicaoById,
-      getEdicaoByYear,
       createEdicao,
       updateEdicao,
       updateEdicaoActivate,
@@ -263,7 +258,6 @@ export const EdicaoProvider = ({ children }: EdicaoProps) => {
       edicoesList,
       listEdicao,
       getEdicaoById,
-      getEdicaoByYear,
       createEdicao,
       updateEdicao,
       updateEdicaoActivate,

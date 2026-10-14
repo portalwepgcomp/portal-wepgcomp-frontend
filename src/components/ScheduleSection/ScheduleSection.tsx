@@ -49,7 +49,7 @@ export default function ScheduleSection() {
 
       setSelectedDate(todayInsideEvent ? today : generatedDates[0]);
     }
-  }, [Edicao?.id, Edicao?.startDate, Edicao?.endDate, selectEdition.year]);
+  }, [Edicao?.id, Edicao?.startDate, Edicao?.endDate, selectEdition.id]);
 
   const hasAttemptedActiveRef = useRef(false);
   useEffect(() => {

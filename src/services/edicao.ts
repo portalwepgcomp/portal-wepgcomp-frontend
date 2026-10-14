@@ -1,19 +1,10 @@
 "use client";
 import axiosInstance from "@/utils/api";
-import { api } from "@/context/AuthProvider/util";
 import { unwrapPaginatedList } from "@/types/api";
 import { Edicao, EdicaoParams, GetEdicaoParams } from "@/models/edicao";
 
 const baseUrl = "/event";
 const instance = axiosInstance;
-
-export interface ISessaoAtivaResposta {
-  id?: string;
-  year: string;
-  isActive: boolean;
-  startDate?: string;
-  endDate?: string;
-}
 
 export const edicaoApi = {
   listEdicao: async (params?: string | GetEdicaoParams): Promise<Edicao[]> => {
@@ -28,11 +19,6 @@ export const edicaoApi = {
   getEdicaoById: async (idEdicao: string) => {
     const { data } = await instance.get(`${baseUrl}/${idEdicao}`);
 
-    return data;
-  },
-
-  getEdicaoByYear: async (year: string) => {
-    const { data } = await instance.get(`${baseUrl}/year/${year}`);
     return data;
   },
 
@@ -72,11 +58,6 @@ export const edicaoApi = {
   deleteEdicaoById: async (idEdicao: string) => {
     const { data } = await instance.delete(`${baseUrl}/${idEdicao}`);
 
-    return data;
-  },
-
-  async getEdicaoAtiva(): Promise<ISessaoAtivaResposta> {
-    const { data } = await api.get("/event-editions/active");
     return data;
   },
 };

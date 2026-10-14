@@ -59,6 +59,13 @@ export function getEventEditionIdStorage() {
   }
 }
 
+export function clearEventEditionIdStorage() {
+  if (typeof document !== "undefined") {
+    document.cookie =
+      "session_eventEditionId=; Path=/; Max-Age=0; SameSite=Lax";
+  }
+}
+
 export function logout() {
   localStorage.clear();
 }

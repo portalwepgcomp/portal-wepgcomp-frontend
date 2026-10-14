@@ -34,9 +34,12 @@ jest.mock("@/hooks/useEdicao", () => ({
 }));
 
 jest.mock("@/hooks/useActiveEdition", () => ({
+  getEditionYear: () => "2026",
   useActiveEdition: () => ({
     setSelectEdition: mockSetSelectEdition,
     selectEdition: {
+      id: "edicao-2026",
+      name: "WEPGCOMP 2026",
       year: "2026",
       isActive: true,
     },

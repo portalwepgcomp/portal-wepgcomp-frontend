@@ -10,12 +10,13 @@ import { classeItemMenu } from "@/lib/estilosMenu";
 import { Input } from "@/components/UI/Input";
 
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { useEdicao } from "@/hooks/useEdicao";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { PremiacaoProvider } from "@/hooks/usePremiacao";
 import { presentationApi } from "@/services/presentation";
 
 export default function Premiacao() {
+  const { Edicao } = useEdicao();
   const [activeCategory, setActiveCategory] = useState<
     "banca" | "avaliadores" | "publico"
   >("banca");
@@ -41,7 +42,7 @@ export default function Premiacao() {
   };
 
   const handleRecalculateScores = async () => {
-    const eventEditionId = getEventEditionIdStorage();
+    const eventEditionId = Edicao?.id;
     if (!eventEditionId) {
       showAlert({
         icon: "warning",
@@ -87,7 +88,7 @@ export default function Premiacao() {
   const handleResetScores = async (
     target: "evaluators" | "committee" | "public",
   ) => {
-    const eventEditionId = getEventEditionIdStorage();
+    const eventEditionId = Edicao?.id;
     if (!eventEditionId) {
       showAlert({
         icon: "warning",
@@ -147,7 +148,7 @@ export default function Premiacao() {
 
   return (
     <ProtectedLayout>
-      <PremiacaoProvider>
+      <PremiacaoProvider key={Edicao?.id}>
         <div className="w-full">
           <Banner title="Premiação" />
           <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 flex flex-col gap-6">
