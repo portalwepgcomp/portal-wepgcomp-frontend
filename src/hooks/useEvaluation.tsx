@@ -14,6 +14,7 @@ import {
   EvaluationCriteria,
   EvaluationParams,
   EvaluationCriteriaParams,
+  AnonymousEvaluationParams,
 } from "@/models/evaluation";
 import { getErrorMessage } from "@/utils/error";
 
@@ -29,6 +30,7 @@ interface EvaluationProviderData {
   getEvaluations: (submissionId: string) => Promise<void>;
   getEvaluationByUser: (userId: string) => Promise<void>;
   makeEvaluation: (body: EvaluationParams[]) => Promise<void>;
+  makeAnonymousEvaluation: (body: AnonymousEvaluationParams) => Promise<void>;
   getEvaluationCriteria: (eventEditionId: string) => Promise<void>;
   createEvaluationCriteria: (
     body: EvaluationCriteriaParams[],
@@ -78,6 +80,32 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
             err,
             "Ocorreu um erro durante a avaliação. Tente novamente mais tarde!",
           ),
+          confirmButtonText: "Retornar",
+        });
+      } finally {
+        setLoadingEvaluation(false);
+      }
+    },
+    [router, showAlert],
+  );
+
+  const makeAnonymousEvaluation = useCallback(
+    async (body: AnonymousEvaluationParams) => {
+      setLoadingEvaluation(true);
+      try {
+        await evaluationApi.makeAnonymousEvaluation(body);
+        showAlert({
+          icon: "success",
+          title: "Avaliação realizada com sucesso!",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        router.push("/home");
+      } catch (err: unknown) {
+        showAlert({
+          icon: "error",
+          title: "Erro ao avaliar",
+          text: getErrorMessage(err),
           confirmButtonText: "Retornar",
         });
       } finally {
@@ -193,6 +221,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
       evaluations,
       evaluationCriteria,
       makeEvaluation,
+      makeAnonymousEvaluation,
       getEvaluationByUser,
       getEvaluations,
       getEvaluationCriteria,
@@ -205,6 +234,7 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
       evaluations,
       evaluationCriteria,
       makeEvaluation,
+      makeAnonymousEvaluation,
       getEvaluationByUser,
       getEvaluations,
       getEvaluationCriteria,

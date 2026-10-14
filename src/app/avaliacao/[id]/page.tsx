@@ -1,185 +1,254 @@
 "use client";
 
-import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
-
+import { useContext, useEffect, useState, type FormEvent } from "react";
+import { z } from "zod";
+import { Info } from "lucide-react";
 import Rating from "@/components/Rating/Rating";
-
 import LoadingPage from "@/components/LoadingPage";
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
 import Banner from "@/components/UI/Banner";
 import Button from "@/components/UI/Button";
+import { Campo, Input } from "@/components/UI/Input";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { useEdicao } from "@/hooks/useEdicao";
 import { useEvaluation } from "@/hooks/useEvaluation";
-import { usePresentation } from "@/hooks/usePresentation";
-import { Info } from "lucide-react";
-import { Presentation } from "@/models/presentation";
+import { evaluationApi } from "@/services/evaluation";
 import {
   Evaluation,
-  EvaluationCriteria,
+  EvaluationContextData,
   EvaluationParams,
 } from "@/models/evaluation";
+import { getErrorMessage } from "@/utils/error";
 
-const tooltipTexto =
-  "O sistema calcula a nota final de cada apresentação usando média bayesiana, separando avaliações de avaliadores e público geral. A fórmula central é: (N × Média da Amostra + C × Média Prévia) / (N + C), onde N é o número de avaliações recebidas pela apresentação, C é o número de confiança (calculado pelo percentil 40% do número de avaliações por apresentação no evento), Média da Amostra é a média ponderada das avaliações recebidas pela apresentação e Média Prévia é a média geral do evento. Se não houver dados suficientes para o calculo das estatisticas do evento (geral em seu inicio), são utiliados valores padrão: Número de Confiança: 5 para o público e 3 para os avaliadores.";
+const visitorSchema = z.object({
+  name: z.string().trim().min(1, "Informe seu nome.").max(255),
+  email: z.string().trim().email("Informe um e-mail válido.").max(255),
+});
+
+type CriterionScore = {
+  id: string;
+  description: string;
+  score: number | null;
+  comments?: string;
+};
 
 export default function Avaliacao({ params }: { params: { id: string } }) {
-  const [saveEvaluation, setSaveEvaluation] = useState<
-    { evaluation: Evaluation | null; criteria: EvaluationCriteria | null }[]
-  >([]);
-  const [presentation, setPresentation] = useState<Presentation | null>(null);
-  const {
-    makeEvaluation,
-    evaluations,
-    evaluationCriteria,
-    getEvaluationByUser,
-    getEvaluationCriteria,
-    loadingEvaluation,
-  } = useEvaluation();
-  const { getPresentationAll, presentationList } = usePresentation();
-  const { user } = useContext(AuthContext);
-  const { Edicao } = useEdicao();
-
-  const sendEvaluation = () => {
-    const body: EvaluationParams[] =
-      saveEvaluation?.map((criteria) => {
-        const { evaluationCriteriaId, submissionId, score, userId, comments } =
-          criteria.evaluation as Evaluation;
-
-        return { evaluationCriteriaId, submissionId, score, userId, comments };
-      }) ?? [];
-
-    makeEvaluation(body);
-  };
+  const { user, isValidatingToken, isLoggingOut } = useContext(AuthContext);
+  const { makeEvaluation, makeAnonymousEvaluation, loadingEvaluation } =
+    useEvaluation();
+  const [context, setContext] = useState<EvaluationContextData | null>(null);
+  const [scores, setScores] = useState<CriterionScore[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
-    if (!Edicao?.id || !user?.id) return;
-    getPresentationAll(Edicao.id);
-    getEvaluationCriteria(Edicao.id);
-    getEvaluationByUser(user.id);
-  }, [
-    Edicao?.id,
-    user?.id,
-    getPresentationAll,
-    getEvaluationCriteria,
-    getEvaluationByUser,
-  ]);
+    if (isValidatingToken || isLoggingOut) return;
+    let cancelled = false;
+    setLoading(true);
+    setContext(null);
+    setScores([]);
+    setError("");
+    setFormError("");
 
-  useEffect(() => {
-    if (params?.id) {
-      const foundPresentation = presentationList.find(
-        (presentationValue) => presentationValue?.id === params?.id,
-      );
-
-      if (foundPresentation) {
-        const evaluationsFilterBySubmission = evaluations?.filter(
-          (value) => value.submissionId === foundPresentation?.submission?.id,
+    async function load() {
+      try {
+        const data = await evaluationApi.getEvaluationContext(params.id);
+        let criteria = data.criteria;
+        let previous: Evaluation[] = [];
+        if (user?.id) {
+          [criteria, previous] = await Promise.all([
+            evaluationApi.getEvaluationCriteria(data.eventEdition.id),
+            evaluationApi.getEvaluationByUser(user.id),
+          ]);
+        }
+        if (cancelled) return;
+        setContext(data);
+        setScores(
+          criteria.map((criterion) => {
+            const evaluation = previous.find(
+              (value) =>
+                value.submissionId === data.submissionId &&
+                value.evaluationCriteriaId === criterion.id,
+            );
+            return {
+              id: criterion.id,
+              description: criterion.description,
+              score: evaluation?.score ?? null,
+              comments: evaluation?.comments,
+            };
+          }),
         );
-
-        const saveEvaluationValues = evaluationCriteria?.map((criteria) => {
-          const evaluationValue = evaluationsFilterBySubmission?.find(
-            (v) => v.evaluationCriteriaId === criteria.id,
-          );
-
-          return {
-            evaluation: evaluationValue || null,
-            criteria: criteria,
-          };
-        });
-
-        setPresentation(foundPresentation as unknown as Presentation);
-        setSaveEvaluation(saveEvaluationValues);
+      } catch (err: unknown) {
+        if (!cancelled)
+          setError(getErrorMessage(err, "Erro ao carregar a avaliação."));
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
-  }, [params?.id, presentationList, evaluations, evaluationCriteria]);
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [params.id, user?.id, isValidatingToken, isLoggingOut]);
+
+  async function sendEvaluation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFormError("");
+    if (!context || !context.eventEdition.isActive || loadingEvaluation) return;
+    if (
+      !scores.length ||
+      scores.some((criterion) => criterion.score === null)
+    ) {
+      setFormError("Preencha todos os critérios antes de avaliar.");
+      return;
+    }
+    const body: EvaluationParams[] = scores.map((criterion) => ({
+      evaluationCriteriaId: criterion.id,
+      submissionId: context.submissionId,
+      score: criterion.score!,
+      comments: criterion.comments,
+    }));
+
+    if (user?.id) {
+      await makeEvaluation(
+        body.map((evaluation) => ({ ...evaluation, userId: user.id })),
+      );
+    } else if (
+      context.eventEdition.isEvaluationRestrictToLoggedUsers === false
+    ) {
+      const visitor = visitorSchema.safeParse({ name, email });
+      if (!visitor.success) {
+        setFormError(visitor.error.issues[0].message);
+        return;
+      }
+      await makeAnonymousEvaluation({
+        name: visitor.data.name,
+        email: visitor.data.email.toLowerCase(),
+        evaluations: body,
+      });
+    }
+  }
+
+  if (loading || isValidatingToken || isLoggingOut) return <LoadingPage />;
+  if (error || !context)
+    return <p role="alert">{error || "Apresentação não encontrada."}</p>;
+  if (
+    !user &&
+    context.eventEdition.isEvaluationRestrictToLoggedUsers !== false
+  ) {
+    return <ProtectedLayout>{null}</ProtectedLayout>;
+  }
 
   return (
-    <ProtectedLayout>
-      <div className="flex flex-col gap-2.5">
-        <Banner title="Avaliação" />
-        {(loadingEvaluation || !presentation?.submission?.title) && (
-          <LoadingPage />
-        )}
-        {!loadingEvaluation && presentation?.submission?.title && (
-          <div className="mb-[300px] flex flex-col items-center gap-[50px]">
-            <div className="h-[90px] w-[800px] max-w-[90%] rounded-xl pl-[5px] text-center max-[830px]:h-auto">
-              <div className="flex flex-col px-2">
-                <div className="text-2xl font-bold">
-                  {presentation?.submission?.mainAuthor?.name}
-                </div>
-                <hr className="my-2 border-line" />
-                <div className="text-xl">{presentation?.submission?.title}</div>
-              </div>
-            </div>
+    <div className="flex flex-col gap-2.5">
+      <Banner title="Avaliação" />
+      <form
+        onSubmit={sendEvaluation}
+        className="mb-[300px] flex flex-col items-center gap-[50px]"
+      >
+        <div className="w-[800px] max-w-[90%] rounded-xl text-center">
+          <div className="text-2xl font-bold">{context.authorName}</div>
+          <hr className="my-2 border-line" />
+          <div className="text-xl">{context.title}</div>
+          <p className="mt-2 text-sm text-muted">{context.eventEdition.name}</p>
+        </div>
 
-            <div className="flex flex-col items-center justify-center gap-[30px]">
-              {saveEvaluation?.map((evaluationData, devIndex) => (
-                <div
-                  key={evaluationData?.criteria?.id}
-                  className="flex flex-col items-center"
-                >
-                  <div className="text-xl max-[830px]:w-[95%] max-[830px]:text-center">
-                    {`${devIndex + 1}. ${
-                      evaluationData?.criteria?.description
-                    }`}
-                  </div>
-                  <Rating
-                    value={evaluationData?.evaluation?.score ?? 0}
-                    onChange={(value) => {
-                      setSaveEvaluation((oldValues) =>
-                        oldValues?.map((item, index) =>
-                          index === devIndex
-                            ? {
-                                ...item,
-                                evaluation: {
-                                  userId: user?.id ?? "",
-                                  submissionId:
-                                    presentation?.submission?.id ?? "",
-                                  evaluationCriteriaId: item.criteria?.id ?? "",
-                                  score: value,
-                                },
-                              }
-                            : item,
-                        ),
-                      );
-                    }}
-                  />
-                </div>
-              ))}
-              {!saveEvaluation?.length && (
-                <div className="mt-4 flex items-center justify-center p-3">
-                  <h4 className="mb-0 flex items-center gap-2 text-foreground">
-                    <Image
-                      src="/assets/images/empty_box.svg"
-                      alt="Lista vazia"
-                      width={90}
-                      height={90}
-                    />
-                    Essa lista ainda está vazia
-                  </h4>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-row items-center">
-              <Button
-                size="lg"
-                variante="primary"
-                onClick={sendEvaluation}
-                disabled={loadingEvaluation || !Edicao?.isActive}
-              >
-                Avaliar
-              </Button>
-              <span
-                title={tooltipTexto}
-                className="ml-4 inline-flex cursor-help"
-              >
-                <Info className="h-5 w-5 text-muted" />
-              </span>
-            </div>
-          </div>
+        {!user && (
+          <fieldset
+            className="w-full max-w-md px-4"
+            disabled={loadingEvaluation}
+          >
+            <legend className="mb-4 font-semibold">Avaliação sem login</legend>
+            <Campo htmlFor="visitor-name" label="Nome">
+              <Input
+                id="visitor-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                maxLength={255}
+                autoComplete="name"
+              />
+            </Campo>
+            <Campo htmlFor="visitor-email" label="E-mail">
+              <Input
+                id="visitor-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                maxLength={255}
+                autoComplete="email"
+              />
+            </Campo>
+            <p className="text-sm text-muted">
+              O e-mail identifica sua avaliação. Um novo envio para o mesmo
+              trabalho atualiza suas notas.
+            </p>
+          </fieldset>
         )}
-      </div>
-    </ProtectedLayout>
+
+        <fieldset
+          disabled={loadingEvaluation}
+          className="flex flex-col items-center gap-[30px]"
+        >
+          {scores.map((criterion, index) => (
+            <div
+              key={criterion.id}
+              className="flex flex-col items-center"
+              role="group"
+              aria-label={criterion.description}
+            >
+              <div className="text-xl max-[830px]:w-[95%] max-[830px]:text-center">
+                {index + 1}. {criterion.description}
+              </div>
+              <Rating
+                value={criterion.score ?? 0}
+                onChange={(value) => {
+                  if (loadingEvaluation) return;
+                  setScores((values) =>
+                    values.map((item) =>
+                      item.id === criterion.id
+                        ? { ...item, score: value }
+                        : item,
+                    ),
+                  );
+                }}
+              />
+            </div>
+          ))}
+          {!scores.length && (
+            <p>Nenhum critério de avaliação foi cadastrado para esta edição.</p>
+          )}
+        </fieldset>
+        {formError && (
+          <p role="alert" className="text-error">
+            {formError}
+          </p>
+        )}
+        {!context.eventEdition.isActive && (
+          <p>Esta edição não está aberta para avaliações.</p>
+        )}
+        <Button
+          size="lg"
+          variante="primary"
+          type="submit"
+          disabled={
+            loadingEvaluation ||
+            !context.eventEdition.isActive ||
+            !scores.length
+          }
+        >
+          {loadingEvaluation ? "Enviando..." : "Avaliar"}
+        </Button>
+        <span
+          title="As notas de banca e público são calculadas separadamente por média bayesiana: (N × média da amostra + C × média prévia) / (N + C). O cálculo considera os pesos dos critérios e a quantidade de avaliações."
+          className="inline-flex cursor-help"
+        >
+          <Info className="h-5 w-5 text-muted" />
+        </span>
+      </form>
+    </div>
   );
 }

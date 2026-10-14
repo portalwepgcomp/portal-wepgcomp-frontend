@@ -16,6 +16,7 @@ export interface EdicaoParams {
   callForPapersText?: string;
   submissionDeadline?: string;
   partnersText?: string;
+  isEvaluationRestrictToLoggedUsers?: boolean;
 }
 
 export interface GetEdicaoParams {

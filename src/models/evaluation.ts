@@ -24,3 +24,23 @@ export interface EvaluationCriteria extends EvaluationCriteriaParams {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface AnonymousEvaluationParams {
+  name: string;
+  email: string;
+  evaluations: Omit<EvaluationParams, "userId">[];
+}
+
+export interface EvaluationContextData {
+  presentationId: string;
+  submissionId: string;
+  title: string;
+  authorName: string;
+  eventEdition: {
+    id: string;
+    name: string;
+    isActive: boolean;
+    isEvaluationRestrictToLoggedUsers: boolean;
+  };
+  criteria: { id: string; title: string; description: string }[];
+}

@@ -10,6 +10,7 @@ import { usePresentation } from "@/hooks/usePresentation";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { PresentationBookmark } from "@/models/presentation";
+import { useEdicao } from "@/hooks/useEdicao";
 
 interface PresentationCardProps {
   key?: string;
@@ -52,6 +53,7 @@ export default function PresentationCard({
 
   const { baixarPdf, baixandoPdf } = useApresentacaoPdf();
   const { signed } = useContext(AuthContext);
+  const { Edicao } = useEdicao();
   const router = useRouter();
 
   useEffect(() => {
@@ -115,7 +117,7 @@ export default function PresentationCard({
             Orientador(a): {advisorName}
           </h4>
         </div>
-        {!!signed && (
+        {(signed || Edicao?.isEvaluationRestrictToLoggedUsers === false) && (
           <div>
             <Button
               size="lg"
