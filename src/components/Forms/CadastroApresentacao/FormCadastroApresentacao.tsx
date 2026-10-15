@@ -160,43 +160,51 @@ export function FormCadastroApresentacao() {
           htmlFor="sessao-select"
           erro={errors.sessao?.message}
         >
-          <select
-            id="sessao-select"
-            className={selectClasse}
-            aria-describedby="sessao-ajuda"
-            disabled={
-              !eventEditionId ||
-              carregandoSessoes ||
-              !!erroSessoes ||
-              sessoesDisponiveis.length === 0
-            }
-            {...register("sessao")}
-          >
-            <option value="">Selecione uma sessão</option>
-            {sessoesDisponiveis.map((sessao) => {
-              const vagas =
-                sessao.availableSubmissionSlots ??
-                sessao.availablePositionsWithInBlock?.length ??
-                0;
-              const disponibilidade =
-                vagas > 0
-                  ? vagas + (vagas === 1 ? " vaga" : " vagas")
-                  : "sessão atual, sem novas vagas";
+          <Controller
+            name="sessao"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <select
+                id="sessao-select"
+                className={selectClasse}
+                aria-describedby="sessao-ajuda"
+                disabled={
+                  !eventEditionId ||
+                  carregandoSessoes ||
+                  !!erroSessoes ||
+                  sessoesDisponiveis.length === 0
+                }
+                {...field}
+                value={field.value ?? ""}
+              >
+                <option value="">Selecione uma sessão</option>
+                {sessoesDisponiveis.map((sessao) => {
+                  const vagas =
+                    sessao.availableSubmissionSlots ??
+                    sessao.availablePositionsWithInBlock?.length ??
+                    0;
+                  const disponibilidade =
+                    vagas > 0
+                      ? vagas + (vagas === 1 ? " vaga" : " vagas")
+                      : "sessão atual, sem novas vagas";
 
-              return (
-                <option key={sessao.id} value={sessao.id}>
-                  {(sessao.title || "Sessão de apresentações") +
-                    " — " +
-                    new Date(sessao.startTime).toLocaleString("pt-BR", {
-                      dateStyle: "short",
-                      timeStyle: "short",
-                    }) +
-                    " — " +
-                    disponibilidade}
-                </option>
-              );
-            })}
-          </select>
+                  return (
+                    <option key={sessao.id} value={sessao.id}>
+                      {(sessao.title || "Sessão de apresentações") +
+                        " — " +
+                        new Date(sessao.startTime).toLocaleString("pt-BR", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        }) +
+                        " — " +
+                        disponibilidade}
+                    </option>
+                  );
+                })}
+              </select>
+            )}
+          />
           <p id="sessao-ajuda" className="mt-2 text-xs text-muted">
             Escolha uma sessão desta edição com vaga para sua apresentação.
           </p>
