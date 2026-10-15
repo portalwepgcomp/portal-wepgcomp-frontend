@@ -12,10 +12,20 @@ import { Input } from "@/components/UI/Input";
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
 import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import { useSweetAlert } from "@/hooks/useAlert";
-import { PremiacaoProvider } from "@/hooks/usePremiacao";
+import { PremiacaoProvider, usePremiacao } from "@/hooks/usePremiacao";
 import { presentationApi } from "@/services/presentation";
 
 export default function Premiacao() {
+  return (
+    <ProtectedLayout>
+      <PremiacaoProvider>
+        <PremiacaoConteudo />
+      </PremiacaoProvider>
+    </ProtectedLayout>
+  );
+}
+
+function PremiacaoConteudo() {
   const [activeCategory, setActiveCategory] = useState<
     "banca" | "avaliadores" | "publico"
   >("banca");
@@ -25,6 +35,7 @@ export default function Premiacao() {
   const [resetOpen, setResetOpen] = useState(false);
   const resetRef = useRef<HTMLDivElement>(null);
   const { showAlert } = useSweetAlert();
+  const { atualizarPremiacoes } = usePremiacao();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -63,8 +74,11 @@ export default function Premiacao() {
     if (!res.isConfirmed) return;
 
     setIsCalculating(true);
+    let notasRecalculadas = false;
     try {
       await presentationApi.calculateAllScores(eventEditionId);
+      notasRecalculadas = true;
+      await atualizarPremiacoes(eventEditionId);
       showAlert({
         icon: "success",
         title: "Sucesso!",
@@ -76,8 +90,10 @@ export default function Premiacao() {
           ?.message || "Erro ao recalcular as notas.";
       showAlert({
         icon: "error",
-        title: "Erro",
-        text: errorMsg,
+        title: notasRecalculadas ? "Erro ao atualizar premiações" : "Erro",
+        text: notasRecalculadas
+          ? "As notas foram recalculadas, mas não foi possível atualizar os rankings. Tente novamente."
+          : errorMsg,
       });
     } finally {
       setIsCalculating(false);
@@ -146,117 +162,113 @@ export default function Premiacao() {
   };
 
   return (
-    <ProtectedLayout>
-      <PremiacaoProvider>
-        <div className="w-full">
-          <Banner title="Premiação" />
-          <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 flex flex-col gap-6">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <div className="flex w-full max-w-md items-center gap-2">
-                <Input
-                  type="text"
-                  placeholder="Pesquise pelo nome da apresentação"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Button
-                  variante="primary"
-                  size="lg"
-                  type="button"
-                  aria-label="Buscar apresentações"
-                >
-                  <Image
-                    src="/assets/images/search.svg"
-                    alt="Search icon"
-                    width={14}
-                    height={14}
-                  />
-                </Button>
-              </div>
+    <div className="w-full">
+      <Banner title="Premiação" />
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 flex flex-col gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex w-full max-w-md items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Pesquise pelo nome da apresentação"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button
+              variante="primary"
+              size="lg"
+              type="button"
+              aria-label="Buscar apresentações"
+            >
+              <Image
+                src="/assets/images/search.svg"
+                alt="Search icon"
+                width={14}
+                height={14}
+              />
+            </Button>
+          </div>
 
-              <Button
-                size="lg"
-                variante="primary"
-                type="button"
+          <Button
+            size="lg"
+            variante="primary"
+            type="button"
 
-                onClick={handleRecalculateScores}
-                disabled={isCalculating || isResetting}
+            onClick={handleRecalculateScores}
+            disabled={isCalculating || isResetting}
+          >
+            {isCalculating ? "Recalculando..." : "Recalcular"}
+          </Button>
+
+          <div className="relative" ref={resetRef}>
+            <Button
+              size="lg"
+              type="button"
+              variante="danger"
+              aria-expanded={resetOpen}
+              aria-controls="opcoes-reset"
+
+              onClick={() => setResetOpen((v) => !v)}
+              disabled={isCalculating || isResetting}
+            >
+              {isResetting ? "Resetando..." : "Resetar ▾"}
+            </Button>
+            {resetOpen && (
+              <ul
+                id="opcoes-reset"
+                className="absolute right-0 z-50 mt-1 min-w-[14rem] list-none rounded-md border border-line bg-white py-1 shadow-lg"
               >
-                {isCalculating ? "Recalculando..." : "Recalcular"}
-              </Button>
-
-              <div className="relative" ref={resetRef}>
-                <Button
-                  size="lg"
-                  type="button"
-                  variante="danger"
-                  aria-expanded={resetOpen}
-                  aria-controls="opcoes-reset"
-
-                  onClick={() => setResetOpen((v) => !v)}
-                  disabled={isCalculating || isResetting}
-                >
-                  {isResetting ? "Resetando..." : "Resetar ▾"}
-                </Button>
-                {resetOpen && (
-                  <ul
-                    id="opcoes-reset"
-                    className="absolute right-0 z-50 mt-1 min-w-[14rem] list-none rounded-md border border-line bg-white py-1 shadow-lg"
-                  >
-                    {[
-                      {
-                        label: "Resetar Scores da Banca",
-                        type: "evaluators" as const,
-                      },
-                      {
-                        label: "Resetar Avaliadores",
-                        type: "committee" as const,
-                      },
-                      {
-                        label: "Resetar Scores do Público",
-                        type: "public" as const,
-                      },
-                    ].map((item) => (
-                      <li key={item.type}>
-                        <button
-                          type="button"
-                          className={classeItemMenu}
-                          onClick={() => handleResetScores(item.type)}
-                          disabled={isResetting}
-                        >
-                          {item.label}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
-              {(["banca", "avaliadores", "publico"] as const).map((cat) => (
-                <Button
-                  size="lg"
-                  key={cat}
-                  type="button"
-                  variante={activeCategory === cat ? "secondary" : "outline"}
-                  aria-pressed={activeCategory === cat}
-                  className="max-sm:w-full"
-                  onClick={() => handleChangeCategory(cat)}
-                >
-                  {cat === "banca"
-                    ? "Banca"
-                    : cat === "avaliadores"
-                      ? "Avaliadores"
-                      : "Público"}
-                </Button>
-              ))}
-            </div>
-
-            {!!activeCategory && (
-              <Premiacoes categoria={activeCategory} searchValue={searchTerm} />
+                {[
+                  {
+                    label: "Resetar Scores da Banca",
+                    type: "evaluators" as const,
+                  },
+                  {
+                    label: "Resetar Avaliadores",
+                    type: "committee" as const,
+                  },
+                  {
+                    label: "Resetar Scores do Público",
+                    type: "public" as const,
+                  },
+                ].map((item) => (
+                  <li key={item.type}>
+                    <button
+                      type="button"
+                      className={classeItemMenu}
+                      onClick={() => handleResetScores(item.type)}
+                      disabled={isResetting}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
+
+          {(["banca", "avaliadores", "publico"] as const).map((cat) => (
+            <Button
+              size="lg"
+              key={cat}
+              type="button"
+              variante={activeCategory === cat ? "secondary" : "outline"}
+              aria-pressed={activeCategory === cat}
+              className="max-sm:w-full"
+              onClick={() => handleChangeCategory(cat)}
+            >
+              {cat === "banca"
+                ? "Banca"
+                : cat === "avaliadores"
+                  ? "Avaliadores"
+                  : "Público"}
+            </Button>
+          ))}
         </div>
-      </PremiacaoProvider>
-    </ProtectedLayout>
+
+        {!!activeCategory && (
+          <Premiacoes categoria={activeCategory} searchValue={searchTerm} />
+        )}
+      </div>
+    </div>
   );
 }
