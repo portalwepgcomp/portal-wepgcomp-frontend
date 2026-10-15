@@ -424,7 +424,7 @@ export default function ApresentacaoDetalhes() {
                     Local
                   </strong>
                   <p className="m-0 text-base text-[#1a1a1a]">
-                    Auditório A do IGEO
+                    Auditório do IBIO
                   </p>
                 </div>
               </div>
