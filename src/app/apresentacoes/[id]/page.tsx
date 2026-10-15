@@ -200,7 +200,7 @@ export default function ApresentacaoDetalhes() {
         text: presentation.submission?.title || "Apresentação",
         dates: `${startTime}/${endTime}`,
         details: presentation.submission?.abstract || "",
-        location: "Auditório A do IGEO",
+        location: "Auditório do IBIO",
         ctz: "America/Sao_Paulo",
       };
 
