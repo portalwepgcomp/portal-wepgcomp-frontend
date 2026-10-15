@@ -36,6 +36,7 @@ interface PremiacaoProviderData {
   getPremiacoesAvaliadores: (
     eventId: string,
   ) => Promise<AuthorOrEvaluator[] | undefined>;
+  atualizarPremiacoes: (eventId: string) => Promise<void>;
   createAwardedPanelists: (body: AvaliadorParams) => Promise<void>;
   getPanelists: (eventId: string) => Promise<void>;
 }
@@ -139,6 +140,24 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
     [showAlert],
   );
 
+  const atualizarPremiacoes = useCallback(async (eventId: string) => {
+    setLoadingPremiacaoList(true);
+
+    try {
+      const [banca, audiencia, avaliadores] = await Promise.all([
+        premiacaoApi.listTopPanelistsById(eventId),
+        premiacaoApi.listTopAudienceById(eventId),
+        premiacaoApi.listAwardedPanelistsById(eventId),
+      ]);
+
+      setPremiacaoListBanca(banca);
+      setPremiacaoListAudiencia(audiencia);
+      setPremiacaoListAvaliadores(avaliadores);
+    } finally {
+      setLoadingPremiacaoList(false);
+    }
+  }, []);
+
   const createAwardedPanelists = useCallback(async (body: AvaliadorParams) => {
     setLoadingPremiacaoList(true);
 
@@ -174,6 +193,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
       getPremiacoesBanca,
       getPremiacoesAudiencia,
       getPremiacoesAvaliadores,
+      atualizarPremiacoes,
       getPanelists,
       createAwardedPanelists,
     }),
@@ -188,6 +208,7 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
       getPremiacoesBanca,
       getPremiacoesAudiencia,
       getPremiacoesAvaliadores,
+      atualizarPremiacoes,
       getPanelists,
       createAwardedPanelists,
     ],
