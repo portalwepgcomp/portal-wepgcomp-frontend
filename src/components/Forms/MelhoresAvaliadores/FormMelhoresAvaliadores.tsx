@@ -14,6 +14,7 @@ import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { usePremiacao } from "@/hooks/usePremiacao";
 import { registrarErro } from "@/utils/logError";
+import { getErrorMessage } from "@/utils/error";
 import { AvaliadorParams } from "@/models/premiacao";
 import { OptionType } from "@/models/forms";
 
@@ -37,6 +38,7 @@ export function FormMelhorAvaliador() {
   const router = useRouter();
   const { showAlert } = useSweetAlert();
   const { user } = useContext(AuthContext);
+  const isAdmin = user?.level === "Admin";
   const [panelistsLoaded, setPanelistsLoaded] = useState(false);
   const { createAwardedPanelists, getPanelists, listPanelists } =
     usePremiacao();
@@ -60,11 +62,12 @@ export function FormMelhorAvaliador() {
   const selectedAvaliadores = watch("avaliadores") || [];
 
   useEffect(() => {
-    if (!panelistsLoaded) {
-      getPanelists(getEventEditionIdStorage() ?? "");
+    const eventEditionId = getEventEditionIdStorage();
+    if (isAdmin && !panelistsLoaded && eventEditionId) {
+      getPanelists(eventEditionId);
       setPanelistsLoaded(true);
     }
-  }, [panelistsLoaded, getPanelists]);
+  }, [isAdmin, panelistsLoaded, getPanelists]);
 
   const handleFormAvaliadores = async (data: FormMelhorAvaliadorSchema) => {
     const { avaliadores, eventEditionId } = data;
@@ -74,10 +77,10 @@ export function FormMelhorAvaliador() {
       panelists: avaliadores?.map((v) => ({ userId: v.value })) || [],
     } as AvaliadorParams;
 
-    if (!user) {
+    if (!isAdmin) {
       showAlert({
         icon: "error",
-        text: "Você precisa estar logado para escolher os avaliadores.",
+        text: "Apenas administradores podem salvar a premiação dos avaliadores.",
         confirmButtonText: "Retornar",
       });
       return;
@@ -92,16 +95,36 @@ export function FormMelhorAvaliador() {
       return;
     }
 
-    if (eventEditionId) {
-      await createAwardedPanelists(body);
+    if (!eventEditionId) {
       showAlert({
-        icon: "success",
-        title: "Premiação Salva!",
-        text: "Os avaliadores homenageados foram registrados com sucesso.",
-      }).then(() => {
-        router.push("/premiacao");
+        icon: "warning",
+        title: "Edição não selecionada",
+        text: "Selecione uma edição do evento para salvar a premiação.",
       });
+      return;
     }
+
+    try {
+      await createAwardedPanelists(body);
+    } catch (err: unknown) {
+      showAlert({
+        icon: "error",
+        title: "Erro ao salvar os avaliadores",
+        text: getErrorMessage(
+          err,
+          "Ocorreu um erro durante a escolha dos avaliadores. Tente novamente mais tarde!",
+        ),
+        confirmButtonText: "Retornar",
+      });
+      return;
+    }
+
+    await showAlert({
+      icon: "success",
+      title: "Premiação Salva!",
+      text: "Os avaliadores homenageados foram registrados com sucesso.",
+    });
+    router.push("/premiacao");
   };
 
   useEffect(() => {
@@ -120,6 +143,14 @@ export function FormMelhorAvaliador() {
       null,
     );
 
+  if (!isAdmin) {
+    return (
+      <p role="alert" className="text-sm text-error">
+        Apenas administradores podem salvar a premiação dos avaliadores.
+      </p>
+    );
+  }
+
   return (
     <form
       className="space-y-6 w-full"
@@ -128,7 +159,10 @@ export function FormMelhorAvaliador() {
     >
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-bold text-foreground flex items-center gap-2">
+          <label
+            htmlFor="melhoresAvaliadores-input"
+            className="text-sm font-bold text-foreground flex items-center gap-2"
+          >
             <Users className="h-4 w-4 text-brand-blue" />
             Selecione os Membros da Banca
           </label>
@@ -150,6 +184,8 @@ export function FormMelhorAvaliador() {
             <Select
               {...field}
               id="melhoresAvaliadores-select"
+              inputId="melhoresAvaliadores-input"
+              isDisabled={isSubmitting}
               isMulti
               menuPortalTarget={
                 typeof document !== "undefined" ? document.body : undefined

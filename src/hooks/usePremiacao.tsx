@@ -158,35 +158,16 @@ export const PremiacaoProvider = ({ children }: SubmissionProps) => {
     }
   }, []);
 
-  const createAwardedPanelists = useCallback(
-    async (body: AvaliadorParams) => {
-      setLoadingPremiacaoList(true);
+  const createAwardedPanelists = useCallback(async (body: AvaliadorParams) => {
+    setLoadingPremiacaoList(true);
 
-      try {
-        const response = await premiacaoApi.createAwardedPanelists(body);
-        setPremiacaoAvaliadores(response);
-        showAlert({
-          icon: "success",
-          title: "Avaliadores salvos com sucesso!",
-          timer: 3000,
-          showConfirmButton: false,
-        });
-      } catch (err: unknown) {
-        showAlert({
-          icon: "error",
-          title: "Erro ao salvar os avaliadores",
-          text: getErrorMessage(
-            err,
-            "Ocorreu um erro durante a escolha dos avaliadores. Tente novamente mais tarde!",
-          ),
-          confirmButtonText: "Retornar",
-        });
-      } finally {
-        setLoadingPremiacaoList(false);
-      }
-    },
-    [showAlert],
-  );
+    try {
+      const response = await premiacaoApi.createAwardedPanelists(body);
+      setPremiacaoAvaliadores(response);
+    } finally {
+      setLoadingPremiacaoList(false);
+    }
+  }, []);
 
   const getPanelists = useCallback(async (eventId: string) => {
     setLoadingpremiacao(true);
