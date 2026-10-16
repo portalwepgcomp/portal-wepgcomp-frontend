@@ -40,8 +40,10 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+  const [tentouEnviar, setTentouEnviar] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const criteriosSemNota = scores.some((criterion) => criterion.score === null);
 
   useEffect(() => {
     if (isValidatingToken || isLoggingOut) return;
@@ -51,6 +53,7 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
     setScores([]);
     setError("");
     setFormError("");
+    setTentouEnviar(false);
 
     async function load() {
       try {
@@ -97,13 +100,8 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
     event.preventDefault();
     setFormError("");
     if (!context || !context.eventEdition.isActive || loadingEvaluation) return;
-    if (
-      !scores.length ||
-      scores.some((criterion) => criterion.score === null)
-    ) {
-      setFormError("Preencha todos os critérios antes de avaliar.");
-      return;
-    }
+    setTentouEnviar(true);
+    if (!scores.length || criteriosSemNota) return;
     const body: EvaluationParams[] = scores.map((criterion) => ({
       evaluationCriteriaId: criterion.id,
       submissionId: context.submissionId,
@@ -193,6 +191,14 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
           disabled={loadingEvaluation}
           className="flex flex-col items-center gap-[30px]"
         >
+          {scores.length > 0 && (
+            <p className="text-sm text-muted">
+              <span aria-hidden="true" className="text-red-700">
+                *
+              </span>{" "}
+              Campo obrigatório
+            </p>
+          )}
           {scores.map((criterion, index) => (
             <div
               key={criterion.id}
@@ -201,7 +207,11 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
               aria-label={criterion.description}
             >
               <div className="text-xl max-[830px]:w-[95%] max-[830px]:text-center">
-                {index + 1}. {criterion.description}
+                {index + 1}. {criterion.description}{" "}
+                <span aria-hidden="true" className="text-red-700">
+                  *
+                </span>
+                <span className="sr-only"> (obrigatório)</span>
               </div>
               <Rating
                 value={criterion.score ?? 0}
@@ -222,6 +232,11 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
             <p>Nenhum critério de avaliação foi cadastrado para esta edição.</p>
           )}
         </fieldset>
+        {tentouEnviar && criteriosSemNota && (
+          <p role="alert" className="max-w-[90%] text-center text-red-700">
+            Selecione uma nota para cada critério antes de enviar a avaliação.
+          </p>
+        )}
         {formError && (
           <p role="alert" className="text-error">
             {formError}

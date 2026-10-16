@@ -222,7 +222,7 @@ export default function ApresentacaoDetalhes() {
         text: presentation.submission?.title || "Apresentação",
         dates: `${startTime}/${endTime}`,
         details: presentation.submission?.abstract || "",
-        location: "Auditório A do IGEO",
+        location: "Auditório do IBIO",
         ctz: "America/Sao_Paulo",
       };
 
@@ -446,7 +446,7 @@ export default function ApresentacaoDetalhes() {
                     Local
                   </strong>
                   <p className="m-0 text-base text-[#1a1a1a]">
-                    Auditório A do IGEO
+                    Auditório do IBIO
                   </p>
                 </div>
               </div>

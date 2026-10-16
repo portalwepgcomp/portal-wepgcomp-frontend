@@ -245,7 +245,7 @@ describe("Avaliação anônima", () => {
     fireEvent.click(group.querySelectorAll(".star")[2]);
     enviar();
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Preencha todos os critérios",
+      "Selecione uma nota para cada critério antes de enviar a avaliação.",
     );
     expect(api.makeAnonymousEvaluation).not.toHaveBeenCalled();
   });
