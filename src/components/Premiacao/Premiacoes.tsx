@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import PremiacaoCategoria from "./PremiacaoCategoria";
 import { usePremiacao } from "@/hooks/usePremiacao";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { useEdicao } from "@/hooks/useEdicao";
 
 export default function Premiacoes({
   categoria,
@@ -10,6 +10,7 @@ export default function Premiacoes({
   categoria: "banca" | "avaliadores" | "publico";
   searchValue: string;
 }>) {
+  const { Edicao } = useEdicao();
   const {
     premiacaoListBanca,
     premiacaoListAudiencia,
@@ -20,7 +21,7 @@ export default function Premiacoes({
   } = usePremiacao();
 
   useEffect(() => {
-    const eventEditionId = getEventEditionIdStorage();
+    const eventEditionId = Edicao?.id;
     if (!eventEditionId) return;
 
     switch (categoria) {
@@ -38,6 +39,7 @@ export default function Premiacoes({
     }
   }, [
     categoria,
+    Edicao?.id,
     getPremiacoesAudiencia,
     getPremiacoesAvaliadores,
     getPremiacoesBanca,

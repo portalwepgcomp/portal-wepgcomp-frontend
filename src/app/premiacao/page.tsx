@@ -10,26 +10,43 @@ import { classeItemMenu } from "@/lib/estilosMenu";
 import { Input } from "@/components/UI/Input";
 
 import { ProtectedLayout } from "@/components/ProtectedLayout/protectedLayout";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
+import { useEdicao } from "@/hooks/useEdicao";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { PremiacaoProvider, usePremiacao } from "@/hooks/usePremiacao";
 import { presentationApi } from "@/services/presentation";
 
+type Categoria = "banca" | "avaliadores" | "publico";
+
 export default function Premiacao() {
+  const { Edicao } = useEdicao();
+  const [activeCategory, setActiveCategory] = useState<Categoria>("banca");
+  const [searchTerm, setSearchTerm] = useState("");
   return (
     <ProtectedLayout>
-      <PremiacaoProvider>
-        <PremiacaoConteudo />
+      <PremiacaoProvider key={Edicao?.id}>
+        <PremiacaoConteudo
+          activeCategory={activeCategory}
+          onChangeCategory={setActiveCategory}
+          searchTerm={searchTerm}
+          onChangeSearch={setSearchTerm}
+        />
       </PremiacaoProvider>
     </ProtectedLayout>
   );
 }
 
-function PremiacaoConteudo() {
-  const [activeCategory, setActiveCategory] = useState<
-    "banca" | "avaliadores" | "publico"
-  >("banca");
-  const [searchTerm, setSearchTerm] = useState("");
+function PremiacaoConteudo({
+  activeCategory,
+  onChangeCategory,
+  searchTerm,
+  onChangeSearch,
+}: {
+  activeCategory: Categoria;
+  onChangeCategory: (categoria: Categoria) => void;
+  searchTerm: string;
+  onChangeSearch: (pesquisa: string) => void;
+}) {
+  const { Edicao } = useEdicao();
   const [isCalculating, setIsCalculating] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
@@ -47,12 +64,12 @@ function PremiacaoConteudo() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleChangeCategory = (cat: "banca" | "avaliadores" | "publico") => {
-    setActiveCategory(cat);
+  const handleChangeCategory = (cat: Categoria) => {
+    onChangeCategory(cat);
   };
 
   const handleRecalculateScores = async () => {
-    const eventEditionId = getEventEditionIdStorage();
+    const eventEditionId = Edicao?.id;
     if (!eventEditionId) {
       showAlert({
         icon: "warning",
@@ -103,7 +120,7 @@ function PremiacaoConteudo() {
   const handleResetScores = async (
     target: "evaluators" | "committee" | "public",
   ) => {
-    const eventEditionId = getEventEditionIdStorage();
+    const eventEditionId = Edicao?.id;
     if (!eventEditionId) {
       showAlert({
         icon: "warning",
@@ -171,7 +188,7 @@ function PremiacaoConteudo() {
               type="text"
               placeholder="Pesquise pelo nome da apresentação"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => onChangeSearch(e.target.value)}
             />
             <Button
               variante="primary"

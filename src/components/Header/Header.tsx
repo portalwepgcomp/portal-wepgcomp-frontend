@@ -16,7 +16,7 @@ import PerfilApresentador from "../Perfil/PerfilApresentador";
 import PerfilOuvinte from "../Perfil/PerfilOuvinte";
 import PerfilProfessor from "../Perfil/PerfilProfessor";
 
-import { useActiveEdition } from "@/hooks/useActiveEdition";
+import { getEditionYear, useActiveEdition } from "@/hooks/useActiveEdition";
 import { useEdicao } from "@/hooks/useEdicao";
 import type { Edicao as EdicaoType } from "@/models/edicao";
 import { cn } from "@/utils/cn";
@@ -29,10 +29,14 @@ const navItemBase = "cursor-pointer max-[1000px]:w-full";
 
 export default function Header() {
   const menuRef = useRef<HTMLElement>(null);
-  const refreshedYearRef = useRef<string | null>(null);
   const { user, signed } = useContext(AuthContext);
-  const { listEdicao, edicoesList, getEdicaoByYear } = useEdicao();
-  const { setSelectEdition, selectEdition } = useActiveEdition();
+  const { edicoesList, Edicao } = useEdicao();
+  const {
+    setSelectEdition,
+    selectEdition,
+    loadingActiveEdition,
+    selectionError,
+  } = useActiveEdition();
 
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -49,37 +53,30 @@ export default function Header() {
     }
   };
 
-  const getYearFromEdicao = (ed?: EdicaoType | null): string => {
-    if (!ed) return "";
-    if (ed.startDate) {
-      const parsed = new Date(ed.startDate).getFullYear();
-      if (!isNaN(parsed)) return String(parsed);
-    }
-    const match = ed.name?.match(/\b(20\d{2})\b/);
-    return match ? match[1] : "";
+  const editionsOptions = useMemo(() => {
+    const editions: EdicaoType[] = [...(edicoesList ?? [])];
+    if (Edicao?.id && !editions.some((edition) => edition.id === Edicao.id))
+      editions.push(Edicao);
+    return editions.sort(
+      (a, b) =>
+        (b.startDate ?? "").localeCompare(a.startDate ?? "") ||
+        a.id.localeCompare(b.id),
+    );
+  }, [edicoesList, Edicao]);
+
+  const editionLabel = (edition: EdicaoType) => {
+    const date = edition.startDate ? new Date(edition.startDate) : null;
+    const dateLabel =
+      date && !Number.isNaN(date.getTime())
+        ? ` — ${date.toLocaleDateString("pt-BR", { timeZone: "UTC" })}`
+        : "";
+    const repeated =
+      editionsOptions.filter(
+        (value) =>
+          value.name === edition.name && value.startDate === edition.startDate,
+      ).length > 1;
+    return `${edition.name || `Edição ${getEditionYear(edition)}`}${dateLabel}${edition.isActive ? " (ativa)" : ""}${repeated ? ` — ${edition.id}` : ""}`;
   };
-
-  const yearsOptions = useMemo(() => {
-    const filtered = (edicoesList ?? [])
-      .map((edicao) => {
-        const rawYear = getYearFromEdicao(edicao);
-        if (rawYear) {
-          return {
-            value: rawYear,
-            label: `Edição ${rawYear}`,
-            isActive: edicao.isActive,
-          };
-        }
-        return { value: "", label: "", isActive: false };
-      })
-      .filter(
-        (option, index, self) =>
-          option.value &&
-          self.findIndex((o) => o.value === option.value) === index,
-      );
-
-    return [...filtered].sort((a, b) => Number(b.value) - Number(a.value));
-  }, [edicoesList]);
 
   function perfil(compact = false) {
     if (!user) return null;
@@ -109,10 +106,6 @@ export default function Header() {
   }
 
   useEffect(() => {
-    listEdicao();
-  }, [listEdicao]);
-
-  useEffect(() => {
     if (pathname === "/home") {
       const currentHash =
         typeof window !== "undefined" ? window.location.hash : "";
@@ -127,31 +120,6 @@ export default function Header() {
       setSelectedItem(null);
     }
   }, [pathname]);
-
-  useEffect(() => {
-    if (
-      !selectEdition.year ||
-      refreshedYearRef.current === selectEdition.year
-    ) {
-      return;
-    }
-    refreshedYearRef.current = selectEdition.year;
-    void getEdicaoByYear(selectEdition.year);
-  }, [selectEdition.year, getEdicaoByYear]);
-
-  useEffect(() => {
-    if (edicoesList?.length && !selectEdition.year) {
-      const edAtiva = edicoesList.find((v) => v.isActive) || edicoesList[0];
-      const detectedYear = getYearFromEdicao(edAtiva);
-
-      if (detectedYear) {
-        setSelectEdition({
-          year: detectedYear,
-          isActive: !!edAtiva?.isActive,
-        });
-      }
-    }
-  }, [edicoesList, selectEdition.year, setSelectEdition]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -187,37 +155,43 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4 max-[500px]:w-full">
-            {!!yearsOptions.length && (
+            {!!editionsOptions.length && (
               <select
                 id="event-edition-select"
                 className="max-w-48 rounded-md border border-line bg-white px-3 py-2 text-sm max-[500px]:w-full max-[500px]:max-w-none max-[500px]:text-xs"
                 aria-label="Selecionar edição do evento"
-                value={selectEdition.year}
-                onChange={(ed: React.ChangeEvent<HTMLSelectElement>) =>
-                  setSelectEdition({
-                    year: ed.target.value,
-                    isActive:
-                      yearsOptions.find(
-                        (v: { value: string; isActive: boolean }) =>
-                          v.value == ed.target.value,
-                      )?.isActive ?? false,
-                  })
-                }
+                value={selectEdition.id}
+                disabled={loadingActiveEdition}
+                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                  const edition = editionsOptions.find(
+                    (value) => value.id === event.target.value,
+                  );
+                  if (edition)
+                    setSelectEdition({
+                      id: edition.id,
+                      name: edition.name,
+                      year: getEditionYear(edition),
+                      isActive: edition.isActive,
+                    });
+                }}
               >
-                {yearsOptions?.map(
-                  (op: { value: string; label: string }, i: number) => (
-                    <option
-                      id={`edicao-op${i}`}
-                      key={op.value}
-                      value={op.value}
-                    >
-                      {op.label}
-                    </option>
-                  ),
+                {!selectEdition.id && (
+                  <option value="">Selecione uma edição</option>
                 )}
+                {editionsOptions.map((edition) => (
+                  <option key={edition.id} value={edition.id}>
+                    {editionLabel(edition)}
+                  </option>
+                ))}
               </select>
             )}
           </div>
+
+          {selectionError && (
+            <p role="alert" className="text-sm text-error">
+              {selectionError}
+            </p>
+          )}
 
           <section className="flex w-full flex-col gap-2 min-[501px]:flex-row min-[1001px]:hidden">
             <Button

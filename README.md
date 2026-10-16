@@ -64,6 +64,17 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 O `Makefile` também exporta `NEXT_PUBLIC_API_URL=http://localhost:3001` por padrão ao usar `make`.
 
+## Seleção da edição
+
+O seletor identifica cada edição pelo ID e exibe nome, data de início e indicação
+de edição ativa. Edições do mesmo ano aparecem como opções separadas. A seleção é
+mantida no contexto, no cookie `session_eventEditionId` e no armazenamento local.
+
+Na restauração, o ID do cookie tem prioridade, seguido do ID salvo no navegador.
+Dados antigos que guardam apenas o ano são migrados automaticamente somente se
+houver uma edição correspondente. Quando há várias, o usuário deve escolher a
+edição explicitamente. Rankings e recálculo usam o ID da edição selecionada.
+
 ## Variáveis de ambiente
 
 Consulte [`.env.example`](.env.example). Em local, use `.env.local` (Next.js).

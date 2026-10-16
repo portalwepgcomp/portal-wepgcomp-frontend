@@ -9,12 +9,12 @@ import {
 import type { ReactNode } from "react";
 
 import Premiacao from "@/app/premiacao/page";
-import { getEventEditionIdStorage } from "@/context/AuthProvider/util";
 import type { AuthorOrEvaluator, Premiacoes } from "@/models/premiacao";
 import { premiacaoApi } from "@/services/premiacao";
 import { presentationApi } from "@/services/presentation";
 
 const mockShowAlert = jest.fn();
+let mockEdicaoId: string | null;
 
 jest.mock("@/hooks/useAlert", () => ({
   useSweetAlert: () => ({ showAlert: mockShowAlert }),
@@ -24,8 +24,8 @@ jest.mock("@/components/ProtectedLayout/protectedLayout", () => ({
   ProtectedLayout: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 
-jest.mock("@/context/AuthProvider/util", () => ({
-  getEventEditionIdStorage: jest.fn(),
+jest.mock("@/hooks/useEdicao", () => ({
+  useEdicao: () => ({ Edicao: mockEdicaoId ? { id: mockEdicaoId } : null }),
 }));
 
 jest.mock("@/services/premiacao", () => ({
@@ -40,7 +40,6 @@ jest.mock("@/services/presentation", () => ({
   presentationApi: { calculateAllScores: jest.fn() },
 }));
 
-const getEdicao = jest.mocked(getEventEditionIdStorage);
 const recalcular = jest.mocked(presentationApi.calculateAllScores);
 const listarBanca = jest.mocked(premiacaoApi.listTopPanelistsById);
 const listarPublico = jest.mocked(premiacaoApi.listTopAudienceById);
@@ -85,7 +84,7 @@ async function abrirCategoria(nome: string, conteudo: string) {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  getEdicao.mockReturnValue("edicao-97");
+  mockEdicaoId = "edicao-97";
   mockShowAlert.mockResolvedValue({ isConfirmed: true });
   recalcular.mockResolvedValue({});
   configurarRankings(4, 4);
@@ -249,7 +248,7 @@ describe("Premiação — recálculo dos rankings", () => {
   });
 
   it("solicita a seleção de uma edição antes de recalcular", async () => {
-    getEdicao.mockReturnValue(null);
+    mockEdicaoId = null;
     render(<Premiacao />);
 
     fireEvent.click(screen.getByRole("button", { name: "Recalcular" }));
