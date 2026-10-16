@@ -2,105 +2,88 @@ import { expect } from "@jest/globals";
 import { fireEvent, render, screen } from "@testing-library/react";
 import Avaliacao from "@/app/avaliacao/[id]/page";
 import { AuthContext } from "@/context/AuthProvider/authProvider";
-import { useEdicao } from "@/hooks/useEdicao";
 import { useEvaluation } from "@/hooks/useEvaluation";
-import { usePresentation } from "@/hooks/usePresentation";
-import { Evaluation, EvaluationCriteria } from "@/models/evaluation";
-import { Presentation } from "@/models/presentation";
-import { PropsWithChildren } from "react";
+import type { EvaluationContextData } from "@/models/evaluation";
+import { evaluationApi } from "@/services/evaluation";
+import type { ContextType } from "react";
 
-jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
-jest.mock("@/hooks/useEdicao", () => ({ useEdicao: jest.fn() }));
 jest.mock("@/hooks/useEvaluation", () => ({ useEvaluation: jest.fn() }));
-jest.mock("@/hooks/usePresentation", () => ({ usePresentation: jest.fn() }));
-jest.mock("@/components/ProtectedLayout/protectedLayout", () => ({
-  ProtectedLayout: ({ children }: PropsWithChildren) => children,
+jest.mock("@/services/evaluation", () => ({
+  evaluationApi: {
+    getEvaluationContext: jest.fn(),
+    getEvaluationCriteria: jest.fn(),
+    getEvaluationByUser: jest.fn(),
+  },
 }));
 
 const makeEvaluation = jest.fn();
 const evaluationCriteria = [
   { id: "clareza", title: "Clareza", description: "Clareza da apresentação" },
   { id: "dominio", title: "Domínio", description: "Domínio do tema" },
-].map((criteria) => ({
-  ...criteria,
-  eventEditionId: "edicao",
-  weightRadio: 1,
-  createdAt: new Date("2026-10-07T12:00:00Z"),
-  updatedAt: new Date("2026-10-07T12:00:00Z"),
-})) satisfies EvaluationCriteria[];
-let evaluations: Evaluation[];
-let loadingEvaluation: boolean;
-let isActive: boolean;
+];
+const context: EvaluationContextData = {
+  presentationId: "apresentacao",
+  submissionId: "trabalho",
+  title: "Trabalho de teste",
+  authorName: "Autora",
+  eventEdition: {
+    id: "edicao",
+    name: "Edição de teste",
+    isActive: true,
+    isEvaluationRestrictToLoggedUsers: true,
+  },
+  criteria: evaluationCriteria,
+};
+const api = jest.mocked(evaluationApi);
+const auth = {
+  user: { id: "ouvinte" },
+  isValidatingToken: false,
+  isLoggingOut: false,
+} as ContextType<typeof AuthContext>;
 
 beforeEach(() => {
-  evaluations = [];
-  loadingEvaluation = false;
-  isActive = true;
-  jest
-    .mocked(useEdicao)
-    .mockImplementation(
-      () =>
-        ({ Edicao: { id: "edicao", isActive } }) as ReturnType<
-          typeof useEdicao
-        >,
-    );
-  const getPresentationAll = jest.fn();
-  jest.mocked(usePresentation).mockReturnValue({
-    getPresentationAll,
-    presentationBookmark: { bookmarked: false },
-    getPresentationBookmark: jest.fn(),
-    postPresentationBookmark: jest.fn(),
-    deletePresentationBookmark: jest.fn(),
-    getPresentationById: jest.fn(),
-    presentationList: [
-      {
-        id: "apresentacao",
-        submission: {
-          id: "trabalho",
-          title: "Trabalho de teste",
-          mainAuthor: { name: "Autora" },
-        },
-      } as Presentation,
-    ],
-  });
-  const getEvaluationByUser = jest.fn();
-  const getEvaluationCriteria = jest.fn();
-  jest.mocked(useEvaluation).mockImplementation(() => ({
+  jest.clearAllMocks();
+  api.getEvaluationContext.mockResolvedValue(context);
+  api.getEvaluationCriteria.mockResolvedValue(evaluationCriteria);
+  api.getEvaluationByUser.mockResolvedValue([]);
+  jest.mocked(useEvaluation).mockReturnValue({
     makeEvaluation,
-    evaluations,
-    evaluationCriteria,
-    getEvaluationByUser,
-    getEvaluationCriteria,
-    loadingEvaluation,
+    makeAnonymousEvaluation: jest.fn(async () => {}),
+    loadingEvaluation: false,
     loadingEvaluationCriteria: false,
-    getEvaluations: jest.fn(),
-    createEvaluationCriteria: jest.fn(),
-    updateEvaluationCriteria: jest.fn(),
-  }));
+    evaluations: [],
+    evaluationCriteria: [],
+    getEvaluations: jest.fn(async () => {}),
+    getEvaluationByUser: jest.fn(async () => {}),
+    getEvaluationCriteria: jest.fn(async () => {}),
+    createEvaluationCriteria: jest.fn(async () => true),
+    updateEvaluationCriteria: jest.fn(async () => true),
+  });
 });
 
-function renderizar() {
-  return render(
-    <AuthContext.Provider
-      value={
-        { user: { id: "ouvinte" } } as React.ContextType<typeof AuthContext>
-      }
-    >
-      <Avaliacao params={{ id: "apresentacao" }} />
-    </AuthContext.Provider>,
+function pagina(id = "apresentacao") {
+  return (
+    <AuthContext.Provider value={auth}>
+      <Avaliacao params={{ id }} />
+    </AuthContext.Provider>
   );
 }
 
-function marcarNota(criterio: number, nota: number) {
-  const rotulo = `${criterio + 1}. ${evaluationCriteria[criterio].description}`;
-  const estrelas = screen
-    .getByText(rotulo)
-    .parentElement!.querySelectorAll(".star");
-  fireEvent.click(estrelas[nota - 1]);
+async function renderizar() {
+  const view = render(pagina());
+  await screen.findByRole("button", { name: "Avaliar" });
+  return view;
 }
 
-it("orienta a preencher as notas quando nenhum critério foi avaliado", () => {
-  renderizar();
+function marcarNota(criterio: number, nota: number) {
+  const group = screen.getByRole("group", {
+    name: evaluationCriteria[criterio].description,
+  });
+  fireEvent.click(group.querySelectorAll(".star")[nota - 1]);
+}
+
+it("orienta a preencher as notas quando nenhum critério foi avaliado", async () => {
+  await renderizar();
   fireEvent.click(screen.getByRole("button", { name: "Avaliar" }));
 
   expect(screen.getByRole("alert")).toHaveTextContent(
@@ -109,8 +92,8 @@ it("orienta a preencher as notas quando nenhum critério foi avaliado", () => {
   expect(makeEvaluation).not.toHaveBeenCalled();
 });
 
-it("bloqueia o envio parcial com uma mensagem sem listar critérios", () => {
-  renderizar();
+it("bloqueia o envio parcial com uma mensagem sem listar critérios", async () => {
+  await renderizar();
   marcarNota(0, 4);
   fireEvent.click(screen.getByRole("button", { name: "Avaliar" }));
 
@@ -120,8 +103,8 @@ it("bloqueia o envio parcial com uma mensagem sem listar critérios", () => {
   expect(makeEvaluation).not.toHaveBeenCalled();
 });
 
-it("remove a mensagem ao completar as notas e envia todos os critérios", () => {
-  renderizar();
+it("remove a mensagem ao completar as notas e envia todos os critérios", async () => {
+  await renderizar();
   marcarNota(0, 4);
   fireEvent.click(screen.getByRole("button", { name: "Avaliar" }));
   marcarNota(1, 5);
@@ -145,8 +128,8 @@ it("remove a mensagem ao completar as notas e envia todos os critérios", () => 
   ]);
 });
 
-it("permite reenviar uma avaliação completa existente e preserva comentários", () => {
-  evaluations = evaluationCriteria.map((criteria) => ({
+it("permite reenviar uma avaliação completa existente e preserva comentários", async () => {
+  const evaluations = evaluationCriteria.map((criteria) => ({
     id: `avaliacao-${criteria.id}`,
     userId: "ouvinte",
     submissionId: "trabalho",
@@ -154,7 +137,8 @@ it("permite reenviar uma avaliação completa existente e preserva comentários"
     score: 3,
     comments: "Comentário existente",
   }));
-  renderizar();
+  api.getEvaluationByUser.mockResolvedValue(evaluations);
+  await renderizar();
   fireEvent.click(screen.getByRole("button", { name: "Avaliar" }));
 
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -163,24 +147,57 @@ it("permite reenviar uma avaliação completa existente e preserva comentários"
   );
 });
 
-it("não envia uma avaliação vazia quando a edição não tem critérios", () => {
-  const context = jest.mocked(useEvaluation)();
-  jest
-    .mocked(useEvaluation)
-    .mockReturnValue({ ...context, evaluationCriteria: [] });
-  renderizar();
+it("não envia uma avaliação vazia quando a edição não tem critérios", async () => {
+  api.getEvaluationCriteria.mockResolvedValue([]);
+  await renderizar();
 
-  expect(screen.getByRole("button", { name: "Avaliar" })).toBeDisabled();
-  fireEvent.click(screen.getByRole("button", { name: "Avaliar" }));
+  const button = screen.getByRole("button", { name: "Avaliar" });
+  expect(button).toBeDisabled();
+  fireEvent.submit(button.closest("form")!);
   expect(makeEvaluation).not.toHaveBeenCalled();
 });
 
-it("mantém o envio desabilitado em uma edição inativa", () => {
-  isActive = false;
-  renderizar();
+it("mantém o envio desabilitado em uma edição inativa", async () => {
+  api.getEvaluationContext.mockResolvedValue({
+    ...context,
+    eventEdition: { ...context.eventEdition, isActive: false },
+  });
+  await renderizar();
   marcarNota(0, 4);
   marcarNota(1, 5);
 
-  expect(screen.getByRole("button", { name: "Avaliar" })).toBeDisabled();
+  const button = screen.getByRole("button", { name: "Avaliar" });
+  expect(button).toBeDisabled();
+  fireEvent.submit(button.closest("form")!);
   expect(makeEvaluation).not.toHaveBeenCalled();
+});
+
+it("limpa o aviso de critérios incompletos ao trocar de apresentação", async () => {
+  const { rerender } = await renderizar();
+  fireEvent.click(screen.getByRole("button", { name: "Avaliar" }));
+  expect(screen.getByRole("alert")).toBeInTheDocument();
+  api.getEvaluationContext.mockResolvedValue({
+    ...context,
+    presentationId: "outra-apresentacao",
+    submissionId: "outro-trabalho",
+    title: "Outro trabalho",
+  });
+
+  rerender(pagina("outra-apresentacao"));
+  await screen.findByText("Outro trabalho");
+  expect(api.getEvaluationContext).toHaveBeenLastCalledWith(
+    "outra-apresentacao",
+  );
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(makeEvaluation).not.toHaveBeenCalled();
+});
+
+it("identifica cada critério como obrigatório visualmente e para leitores de tela", async () => {
+  await renderizar();
+  expect(screen.getByText("Campo obrigatório")).toBeInTheDocument();
+  for (const criterion of evaluationCriteria) {
+    const group = screen.getByRole("group", { name: criterion.description });
+    expect(group).toHaveTextContent("(obrigatório)");
+    expect(group.querySelector('[aria-hidden="true"]')).toHaveTextContent("*");
+  }
 });
