@@ -193,14 +193,35 @@ describe("Identidade da edição", () => {
     ).toHaveValue(inactive.id);
     fireEvent.click(screen.getByRole("button", { name: "Público" }));
     await waitFor(() => expect(audience).toHaveBeenCalledWith(active.id));
+    fireEvent.change(
+      screen.getByPlaceholderText("Pesquise pelo nome da apresentação"),
+      { target: { value: "Trabalho" } },
+    );
     fireEvent.change(select, { target: { value: inactive.id } });
     await expectSelection(inactive);
     expect(
       await screen.findByText(`Trabalho de ${inactive.id}`),
     ).toBeInTheDocument();
     expect(audience).toHaveBeenLastCalledWith(inactive.id);
+    expect(screen.getByRole("button", { name: "Público" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(
+      screen.getByPlaceholderText("Pesquise pelo nome da apresentação"),
+    ).toHaveValue("Trabalho");
     fireEvent.click(screen.getByRole("button", { name: "Recalcular" }));
     await waitFor(() => expect(recalculate).toHaveBeenCalledWith(inactive.id));
+    await waitFor(() =>
+      expect(mockShowAlert).toHaveBeenCalledWith(
+        expect.objectContaining({ icon: "success" }),
+      ),
+    );
+    expect(banca).toHaveBeenLastCalledWith(inactive.id);
+    expect(audience).toHaveBeenLastCalledWith(inactive.id);
+    expect(premiacaoApi.listAwardedPanelistsById).toHaveBeenLastCalledWith(
+      inactive.id,
+    );
   });
 
   it.each(["cookie", "activeEdition", "edicaoAtiva"])(

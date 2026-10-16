@@ -23,6 +23,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { formatDate, formatOnlyTime, getInitials } from "./utils";
 import { Presentation, PresentationBookmark } from "@/models/presentation";
+import { edicaoApi } from "@/services/edicao";
 
 export default function ApresentacaoDetalhes() {
   const params = useParams();
@@ -42,6 +43,7 @@ export default function ApresentacaoDetalhes() {
   const [presentation, setPresentation] = useState<Presentation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [allowsAnonymous, setAllowsAnonymous] = useState(false);
   const [presentationBookmark, setPresentationBookmark] =
     useState<PresentationBookmark>();
 
@@ -51,6 +53,26 @@ export default function ApresentacaoDetalhes() {
   useEffect(() => {
     dayjs.locale("pt-br");
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setAllowsAnonymous(false);
+    const eventEditionId = presentation?.submission?.eventEditionId;
+    if (!signed && eventEditionId) {
+      edicaoApi
+        .getEdicaoById(eventEditionId)
+        .then((edition) => {
+          if (!cancelled)
+            setAllowsAnonymous(
+              edition.isEvaluationRestrictToLoggedUsers === false,
+            );
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [signed, presentation?.submission?.eventEditionId]);
 
   useEffect(() => {
     if (!presentationId || isFetching.current || hasFetched.current) {
@@ -160,7 +182,7 @@ export default function ApresentacaoDetalhes() {
   };
 
   const handleAvaliar = async () => {
-    if (!signed) {
+    if (!signed && !allowsAnonymous) {
       const res = await showAlert({
         icon: "info",
         title: "Acesso restrito",
@@ -200,7 +222,7 @@ export default function ApresentacaoDetalhes() {
         text: presentation.submission?.title || "Apresentação",
         dates: `${startTime}/${endTime}`,
         details: presentation.submission?.abstract || "",
-        location: "Auditório A do IGEO",
+        location: "Auditório do IBIO",
         ctz: "America/Sao_Paulo",
       };
 
@@ -276,7 +298,7 @@ export default function ApresentacaoDetalhes() {
         <div className="rounded-xl border border-line bg-card p-6">
           <h3 className="mb-5 text-xl font-bold text-brand-navy">Ações</h3>
           <div className="flex flex-wrap gap-3 max-md:flex-col">
-            {signed && (
+            {(signed || allowsAnonymous) && (
               <Button
                 size="lg"
                 type="button"
@@ -424,7 +446,7 @@ export default function ApresentacaoDetalhes() {
                     Local
                   </strong>
                   <p className="m-0 text-base text-[#1a1a1a]">
-                    Auditório A do IGEO
+                    Auditório do IBIO
                   </p>
                 </div>
               </div>

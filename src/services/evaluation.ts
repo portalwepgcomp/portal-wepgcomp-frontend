@@ -3,6 +3,8 @@ import axiosInstance from "@/utils/api";
 import {
   EvaluationParams,
   EvaluationCriteriaParams,
+  AnonymousEvaluationParams,
+  EvaluationContextData,
 } from "@/models/evaluation";
 
 const baseUrl = "/evaluations";
@@ -10,6 +12,18 @@ const baseUrlCriteria = "/evaluation-criteria";
 const instance = axiosInstance;
 
 export const evaluationApi = {
+  getEvaluationContext: async (
+    presentationId: string,
+  ): Promise<EvaluationContextData> => {
+    const { data } = await instance.get(`${baseUrl}/context/${presentationId}`);
+    return data;
+  },
+
+  makeAnonymousEvaluation: async (body: AnonymousEvaluationParams) => {
+    const { data } = await instance.put(`${baseUrl}/anonymous`, body);
+    return data;
+  },
+
   makeEvaluation: async (body: EvaluationParams[]) => {
     const { data } = await instance.put(`${baseUrl}`, body);
 
