@@ -4,6 +4,7 @@ import Banner from "@/components/UI/Banner";
 import Button from "@/components/UI/Button";
 import Spinner from "@/components/UI/Spinner";
 import { useAuth } from "@/hooks/useAuth";
+import { useEdicao } from "@/hooks/useEdicao";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { usePresentation } from "@/hooks/usePresentation";
@@ -28,6 +29,7 @@ import { edicaoApi } from "@/services/edicao";
 export default function ApresentacaoDetalhes() {
   const params = useParams();
   const router = useRouter();
+  const { Edicao } = useEdicao();
   const presentationId = params.id as string;
 
   const { signed } = useAuth();
@@ -222,7 +224,7 @@ export default function ApresentacaoDetalhes() {
         text: presentation.submission?.title || "Apresentação",
         dates: `${startTime}/${endTime}`,
         details: presentation.submission?.abstract || "",
-        location: "Auditório do IBIO",
+        location: Edicao?.location || "Local não informado",
         ctz: "America/Sao_Paulo",
       };
 
@@ -446,7 +448,7 @@ export default function ApresentacaoDetalhes() {
                     Local
                   </strong>
                   <p className="m-0 text-base text-[#1a1a1a]">
-                    Auditório do IBIO
+                    {Edicao?.location || "Local não informado"}
                   </p>
                 </div>
               </div>
