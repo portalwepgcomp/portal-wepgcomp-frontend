@@ -151,7 +151,7 @@ const SendEmail = () => {
             </div>
             <div>
               <h1 className="m-0 text-xl font-semibold text-foreground">
-                Portal WePGCOMP
+                Portal WEPGCOMP
               </h1>
               <p className="m-0 text-sm text-muted">Envio de E-mails</p>
             </div>
