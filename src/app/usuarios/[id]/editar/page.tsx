@@ -14,6 +14,7 @@ import { cn } from "@/utils/cn";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { cpfValido } from "@/lib/cpf";
 
 const updateUserSchema = z
   .object({
@@ -45,6 +46,12 @@ const updateUserSchema = z
           code: z.ZodIssueCode.custom,
           path: ["registrationNumber"],
           message: "O CPF deve ter 11 dígitos.",
+        });
+      } else if (!cpfValido(data.registrationNumber)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["registrationNumber"],
+          message: "CPF inválido.",
         });
       }
     } else if (data.profile === "Presenter" || data.profile === "Professor") {

@@ -16,6 +16,7 @@ import { userApi } from "@/services/user";
 import { SolicitarTrocaPerfil } from "./SolicitarTrocaPerfil";
 import { getErrorMessage } from "@/utils/error";
 import { maskCPF } from "@/lib/masks";
+import { cpfValido } from "@/lib/cpf";
 
 const criarSchema = (usaCpf: boolean) =>
   z.object({
@@ -47,7 +48,10 @@ const criarSchema = (usaCpf: boolean) =>
             ? "CPF inválido. Deve conter 11 dígitos."
             : "Matrícula inválida. Use somente dígitos (até 13).",
         },
-      ),
+      )
+      .refine((digitos) => !usaCpf || cpfValido(digitos), {
+        message: "CPF inválido.",
+      }),
   });
 
 type FormMeuPerfilSchema = z.infer<ReturnType<typeof criarSchema>>;
