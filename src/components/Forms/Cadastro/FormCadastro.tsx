@@ -14,6 +14,7 @@ import { Campo, Input, PasswordInput } from "@/components/UI/Input";
 import { Info, ShieldCheck, ShieldX } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { maskCPF } from "@/lib/masks";
+import { cpfValido } from "@/lib/cpf";
 
 const formCadastroSchema = z
   .object({
@@ -64,6 +65,12 @@ const formCadastroSchema = z
         ctx.addIssue({
           path: ["matricula"],
           message: "CPF inválido. Deve conter 11 dígitos.",
+          code: z.ZodIssueCode.custom,
+        });
+      } else if (!cpfValido(digits)) {
+        ctx.addIssue({
+          path: ["matricula"],
+          message: "CPF inválido.",
           code: z.ZodIssueCode.custom,
         });
       }
