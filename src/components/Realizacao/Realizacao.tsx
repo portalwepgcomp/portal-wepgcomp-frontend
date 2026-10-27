@@ -49,6 +49,15 @@ const realizacaoLogos: Logo[] = [
     height: 130,
     priority: true,
   },
+  {
+    src: "/assets/images/logo-openti.png",
+    alt: "Open Tecnologia Logo",
+    href: "https://openti.org/",
+    linkLabel: "Visitar site da Open Tecnologia (abre em nova aba)",
+    width: 170,
+    height: 100,
+    priority: true,
+  },
 ];
 
 const apoioLogos: Logo[] = [];
