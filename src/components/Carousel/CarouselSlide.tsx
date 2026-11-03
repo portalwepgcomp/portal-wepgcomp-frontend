@@ -7,12 +7,14 @@ interface CarouselSlideProps {
   imageUrl: string;
   isActive: boolean;
   children: ReactNode;
+  overlayClassName?: string;
 }
 
 export default function CarouselSlide({
   imageUrl,
   isActive,
   children,
+  overlayClassName,
 }: Readonly<CarouselSlideProps>) {
   return (
     <div
@@ -23,10 +25,12 @@ export default function CarouselSlide({
       aria-hidden={!isActive}
     >
       <div
-        className="relative flex min-h-[460px] md:min-h-[500px] w-full flex-col items-center justify-center bg-cover bg-center px-4 py-12 pb-20 text-white"
+        className="relative flex min-h-[400px] md:min-h-[440px] w-full flex-col items-center justify-center bg-cover bg-center px-4 py-8 pb-16 text-white"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
-        <div className="absolute inset-0 bg-black/45" />
+        <div
+          className={cn("absolute inset-0", overlayClassName ?? "bg-black/45")}
+        />
         <div className="relative z-10 flex w-full max-w-4xl flex-col items-center justify-center gap-3 text-center">
           {children}
         </div>

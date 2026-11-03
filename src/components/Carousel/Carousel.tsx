@@ -4,12 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEdicao } from "@/hooks/useEdicao";
 import { cn } from "@/utils/cn";
 import { formatDateEvent, formatDateUniq } from "@/utils/formatDate";
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import CarouselSlide from "./CarouselSlide";
 
 const INTERVAL_MS = 6000;
-const SLIDE_COUNT = 3;
+const SLIDE_COUNT = 4;
 
 const slide1 = {
   backgroundUrl: "/assets/images/slide1.png",
@@ -29,6 +30,16 @@ const slide3 = {
   backgroundUrl: "/assets/images/slide3.png",
   title: "DATAS IMPORTANTES",
   labelButton: "INSCREVA-SE JÁ!",
+};
+
+const slide4 = {
+  backgroundUrl: "/assets/images/slide4.png",
+  logoUrl: "/assets/images/logo-openti.png",
+  title: "PATROCINADOR CONFIRMADO",
+  description: "Obrigado por apoiar o WEPGCOMP 2026.",
+  labelButton: "Conheça a OpenTI",
+  ImageAlt: "Open Tecnologia",
+  sponsorUrl: "https://openti.org/",
 };
 
 const botaoOutline =
@@ -59,7 +70,7 @@ export default function Carousel() {
   return (
     <div
       id="carousel-wepgcomp"
-      className="relative mb-10 min-h-[460px] md:min-h-[500px] w-full overflow-hidden"
+      className="relative mb-10 min-h-[400px] md:min-h-[440px] w-full overflow-hidden"
     >
       <CarouselSlide
         imageUrl={slide1.backgroundUrl}
@@ -133,6 +144,35 @@ export default function Carousel() {
             {slide3.labelButton}
           </Link>
         )}
+      </CarouselSlide>
+
+      <CarouselSlide
+        imageUrl={slide4.backgroundUrl}
+        isActive={activeIndex === 3}
+        overlayClassName="bg-transparent"
+      >
+        <h2 className="text-center text-2xl font-extrabold tracking-tight drop-shadow-md sm:text-3xl md:text-4xl lg:text-5xl">
+          {slide4.title}
+        </h2>
+        <div className="w-full max-w-[460px] rounded-[2rem] bg-white px-8 py-6 shadow-2xl md:px-14 md:py-7">
+          <Image
+            src={slide4.logoUrl}
+            alt={slide4.ImageAlt}
+            width={1600}
+            height={441}
+            sizes="(max-width: 640px) 90vw, 560px"
+            className="h-auto w-full"
+          />
+        </div>
+        <p className={paragrafo}>{slide4.description}</p>
+        <a
+          href={slide4.sponsorUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={botaoOutline}
+        >
+          {slide4.labelButton}
+        </a>
       </CarouselSlide>
 
       <div className="absolute bottom-5 left-0 right-0 z-20 flex justify-center gap-2.5">
