@@ -151,6 +151,7 @@ function PremiacaoConteudo({
 
     setIsResetting(true);
     setResetOpen(false);
+    let resetExecutado = false;
     try {
       if (target === "evaluators") {
         await presentationApi.resetEvaluatorsScores(eventEditionId);
@@ -159,6 +160,8 @@ function PremiacaoConteudo({
       } else {
         await presentationApi.resetPublicScores(eventEditionId);
       }
+      resetExecutado = true;
+      await atualizarPremiacoes(eventEditionId);
       showAlert({
         icon: "success",
         title: "Sucesso!",
@@ -170,8 +173,10 @@ function PremiacaoConteudo({
           ?.message || "Erro ao efetuar o reset.";
       showAlert({
         icon: "error",
-        title: "Erro",
-        text: errorMsg,
+        title: resetExecutado ? "Reset efetuado" : "Erro",
+        text: resetExecutado
+          ? "O reset foi concluído, mas não foi possível atualizar os rankings. Tente novamente."
+          : errorMsg,
       });
     } finally {
       setIsResetting(false);
