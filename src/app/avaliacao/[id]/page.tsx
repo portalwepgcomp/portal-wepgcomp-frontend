@@ -112,6 +112,7 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
     if (user?.id) {
       await makeEvaluation(
         body.map((evaluation) => ({ ...evaluation, userId: user.id })),
+        context.eventEdition.id,
       );
     } else if (
       context.eventEdition.isEvaluationRestrictToLoggedUsers === false
@@ -121,11 +122,14 @@ export default function Avaliacao({ params }: { params: { id: string } }) {
         setFormError(visitor.error.issues[0].message);
         return;
       }
-      await makeAnonymousEvaluation({
-        name: visitor.data.name,
-        email: visitor.data.email.toLowerCase(),
-        evaluations: body,
-      });
+      await makeAnonymousEvaluation(
+        {
+          name: visitor.data.name,
+          email: visitor.data.email.toLowerCase(),
+          evaluations: body,
+        },
+        context.eventEdition.id,
+      );
     }
   }
 

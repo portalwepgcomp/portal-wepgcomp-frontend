@@ -112,20 +112,23 @@ it("remove a mensagem ao completar as notas e envia todos os critérios", async 
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Avaliar" }));
   expect(makeEvaluation).toHaveBeenCalledTimes(1);
-  expect(makeEvaluation).toHaveBeenCalledWith([
-    {
-      userId: "ouvinte",
-      submissionId: "trabalho",
-      evaluationCriteriaId: "clareza",
-      score: 4,
-    },
-    {
-      userId: "ouvinte",
-      submissionId: "trabalho",
-      evaluationCriteriaId: "dominio",
-      score: 5,
-    },
-  ]);
+  expect(makeEvaluation).toHaveBeenCalledWith(
+    [
+      {
+        userId: "ouvinte",
+        submissionId: "trabalho",
+        evaluationCriteriaId: "clareza",
+        score: 4,
+      },
+      {
+        userId: "ouvinte",
+        submissionId: "trabalho",
+        evaluationCriteriaId: "dominio",
+        score: 5,
+      },
+    ],
+    "edicao",
+  );
 });
 
 it("permite reenviar uma avaliação completa existente e preserva comentários", async () => {
@@ -144,6 +147,7 @@ it("permite reenviar uma avaliação completa existente e preserva comentários"
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(makeEvaluation).toHaveBeenCalledWith(
     evaluations.map(({ id: _id, ...evaluation }) => evaluation),
+    "edicao",
   );
 });
 
