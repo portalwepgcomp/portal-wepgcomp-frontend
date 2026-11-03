@@ -7,6 +7,7 @@ import {
   useMemo,
 } from "react";
 import { evaluationApi } from "@/services/evaluation";
+import { presentationApi } from "@/services/presentation";
 import { useSweetAlert } from "@/hooks/useAlert";
 import { useRouter } from "next/navigation";
 import {
@@ -29,8 +30,14 @@ interface EvaluationProviderData {
   evaluationCriteria: EvaluationCriteria[];
   getEvaluations: (submissionId: string) => Promise<void>;
   getEvaluationByUser: (userId: string) => Promise<void>;
-  makeEvaluation: (body: EvaluationParams[]) => Promise<void>;
-  makeAnonymousEvaluation: (body: AnonymousEvaluationParams) => Promise<void>;
+  makeEvaluation: (
+    body: EvaluationParams[],
+    eventEditionId: string,
+  ) => Promise<void>;
+  makeAnonymousEvaluation: (
+    body: AnonymousEvaluationParams,
+    eventEditionId: string,
+  ) => Promise<void>;
   getEvaluationCriteria: (eventEditionId: string) => Promise<void>;
   createEvaluationCriteria: (
     body: EvaluationCriteriaParams[],
@@ -59,11 +66,20 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
   const router = useRouter();
 
   const makeEvaluation = useCallback(
-    async (body: EvaluationParams[]) => {
+    async (body: EvaluationParams[], eventEditionId: string) => {
       setLoadingEvaluation(true);
       try {
         const response = await evaluationApi.makeEvaluation(body);
         setEvaluations(response);
+        try {
+          await presentationApi.calculateAllScores(eventEditionId);
+        } catch (recalculationError) {
+          console.error(
+            "Falha ao recalcular notas após avaliação",
+            recalculationError,
+          );
+          // A avaliação já foi salva; o recálculo poderá ser repetido por um administrador.
+        }
         showAlert({
           icon: "success",
           title: "Avaliação realizada com sucesso!",
@@ -90,10 +106,19 @@ export const EvaluationProvider = ({ children }: EvaluationProps) => {
   );
 
   const makeAnonymousEvaluation = useCallback(
-    async (body: AnonymousEvaluationParams) => {
+    async (body: AnonymousEvaluationParams, eventEditionId: string) => {
       setLoadingEvaluation(true);
       try {
         await evaluationApi.makeAnonymousEvaluation(body);
+        try {
+          await presentationApi.calculateAllScores(eventEditionId);
+        } catch (recalculationError) {
+          console.error(
+            "Falha ao recalcular notas após avaliação",
+            recalculationError,
+          );
+          // A avaliação já foi salva; o recálculo poderá ser repetido por um administrador.
+        }
         showAlert({
           icon: "success",
           title: "Avaliação realizada com sucesso!",
