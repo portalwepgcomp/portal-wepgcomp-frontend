@@ -7,6 +7,7 @@ import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { EvaluationProvider } from "@/hooks/useEvaluation";
 import type { EvaluationContextData } from "@/models/evaluation";
 import { evaluationApi } from "@/services/evaluation";
+import { presentationApi } from "@/services/presentation";
 
 const mockPush = jest.fn();
 const mockRouter = { push: mockPush };
@@ -22,6 +23,11 @@ jest.mock("@/services/evaluation", () => ({
     getEvaluationCriteria: jest.fn(),
     makeEvaluation: jest.fn(),
     makeAnonymousEvaluation: jest.fn(),
+  },
+}));
+jest.mock("@/services/presentation", () => ({
+  presentationApi: {
+    calculateAllScores: jest.fn().mockResolvedValue({}),
   },
 }));
 const api = jest.mocked(evaluationApi);
@@ -136,9 +142,12 @@ describe("Avaliação anônima", () => {
       }),
     );
     expect(api.makeEvaluation).not.toHaveBeenCalled();
-    expect(mockShowAlert).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockShowAlert).toHaveBeenCalledTimes(1));
     expect(mockShowAlert).toHaveBeenCalledWith(
       expect.objectContaining({ icon: "success" }),
+    );
+    expect(presentationApi.calculateAllScores).toHaveBeenCalledWith(
+      "actual-edition",
     );
     expect(mockPush).toHaveBeenCalledWith("/home");
   });
