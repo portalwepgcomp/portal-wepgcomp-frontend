@@ -36,7 +36,7 @@ const slide4 = {
   backgroundUrl: "/assets/images/slide4.png",
   logoUrl: "/assets/images/logo-openti.png",
   title: "PATROCINADOR CONFIRMADO",
-  description: "Obrigado por apoiar o WEPGCOMP 2026.",
+  description: "Obrigado por apoiar o WEPGCOMP 2026!",
   labelButton: "Conheça a OpenTI",
   ImageAlt: "Open Tecnologia",
   sponsorUrl: "https://openti.org/",
@@ -94,14 +94,15 @@ export default function Carousel() {
       <CarouselSlide
         imageUrl={slide2.backgroundUrl}
         isActive={activeIndex === 1}
+        slideContentClassName="py-2 pb-10 md:py-8 md:pb-16"
       >
         <h2 className={titulo}>{slide2.title}</h2>
         <div className="flex w-full max-w-4xl flex-col md:flex-row items-center justify-center gap-6 md:gap-10 mt-2">
-          <div className="flex flex-col items-center justify-center shrink-0 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-4">
+          <div className="flex shrink-0 flex-col items-center justify-center rounded-xl border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm md:px-6 md:py-4">
             <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-amber-300">
               {slide2.concept_subtitles[0]}
             </span>
-            <span className="text-4xl md:text-6xl font-black my-1 text-white">
+            <span className="my-1 text-3xl font-black text-white md:text-6xl">
               {slide2.concept_subtitles[1]}
             </span>
             <span className="text-xs md:text-sm font-bold uppercase tracking-wider text-amber-300">
@@ -109,7 +110,7 @@ export default function Carousel() {
             </span>
           </div>
           <div className="flex flex-col text-left md:text-justify">
-            <p className="text-sm md:text-base lg:text-lg text-white/95 leading-relaxed">
+            <p className="text-[13px] leading-snug text-white/95 md:text-base md:leading-relaxed lg:text-lg">
               {slide2.subtitles[0]}
             </p>
           </div>

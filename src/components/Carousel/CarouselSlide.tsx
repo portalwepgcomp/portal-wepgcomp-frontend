@@ -8,6 +8,7 @@ interface CarouselSlideProps {
   isActive: boolean;
   children: ReactNode;
   overlayClassName?: string;
+  slideContentClassName?: string;
 }
 
 export default function CarouselSlide({
@@ -15,6 +16,7 @@ export default function CarouselSlide({
   isActive,
   children,
   overlayClassName,
+  slideContentClassName,
 }: Readonly<CarouselSlideProps>) {
   return (
     <div
@@ -25,7 +27,10 @@ export default function CarouselSlide({
       aria-hidden={!isActive}
     >
       <div
-        className="relative flex min-h-[400px] md:min-h-[440px] w-full flex-col items-center justify-center bg-cover bg-center px-4 py-8 pb-16 text-white"
+        className={cn(
+          "relative flex min-h-[400px] md:min-h-[440px] w-full flex-col items-center justify-center bg-cover bg-center px-4 py-8 pb-16 text-white",
+          slideContentClassName,
+        )}
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
         <div
