@@ -8,6 +8,7 @@ import { useSweetAlert } from "@/hooks/useAlert";
 import { useApresentacaoPdf } from "@/hooks/useApresentacaoPdf";
 import { usePresentation } from "@/hooks/usePresentation";
 import { obterClassesBotao } from "@/lib/estilosBotao";
+import type { Edicao } from "@/models/edicao";
 import { registrarErro } from "@/utils/logError";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
@@ -41,6 +42,9 @@ export default function ApresentacaoDetalhes() {
   const { showAlert } = useSweetAlert();
   const { baixarPdf, baixandoPdf } = useApresentacaoPdf();
   const [presentation, setPresentation] = useState<Presentation | null>(null);
+  const [presentationEdition, setPresentationEdition] = useState<Edicao | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [allowsAnonymous, setAllowsAnonymous] = useState(false);
@@ -58,16 +62,22 @@ export default function ApresentacaoDetalhes() {
     let cancelled = false;
     setAllowsAnonymous(false);
     const eventEditionId = presentation?.submission?.eventEditionId;
-    if (!signed && eventEditionId) {
+    setPresentationEdition(null);
+
+    if (eventEditionId) {
       edicaoApi
         .getEdicaoById(eventEditionId)
-        .then((edition) => {
-          if (!cancelled)
-            setAllowsAnonymous(
-              edition.isEvaluationRestrictToLoggedUsers === false,
-            );
+        .then((edition: Edicao) => {
+          if (cancelled) return;
+
+          setPresentationEdition(edition);
+          setAllowsAnonymous(
+            !signed && edition.isEvaluationRestrictToLoggedUsers === false,
+          );
         })
-        .catch(() => {});
+        .catch(() => {
+          if (!cancelled) setPresentationEdition(null);
+        });
     }
     return () => {
       cancelled = true;
@@ -222,7 +232,7 @@ export default function ApresentacaoDetalhes() {
         text: presentation.submission?.title || "Apresentação",
         dates: `${startTime}/${endTime}`,
         details: presentation.submission?.abstract || "",
-        location: "Auditório do IBIO",
+        location: presentationEdition?.location || "Local não informado",
         ctz: "America/Sao_Paulo",
       };
 
@@ -446,7 +456,7 @@ export default function ApresentacaoDetalhes() {
                     Local
                   </strong>
                   <p className="m-0 text-base text-[#1a1a1a]">
-                    Auditório do IBIO
+                    {presentationEdition?.location || "Local não informado"}
                   </p>
                 </div>
               </div>
