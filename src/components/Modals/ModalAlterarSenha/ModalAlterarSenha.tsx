@@ -3,7 +3,9 @@
 import { Campo, Input } from "@/components/UI/Input";
 import { useUsers } from "@/hooks/useUsers";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
+import { useSweetAlert } from "@/hooks/useAlert";
 import { useEdicao } from "@/hooks/useEdicao";
 
 import ModalComponent from "@/components/UI/ModalComponent/ModalComponent";
@@ -14,6 +16,8 @@ export default function ModalAlterarSenha() {
 
   const { resetPasswordSendEmail, loadingSendEmail } = useUsers();
   const { Edicao } = useEdicao();
+  const router = useRouter();
+  const { showAlert } = useSweetAlert();
 
   const validateEmail = (value: string) => {
     if (!value) return "O email é obrigatório.";
@@ -22,15 +26,24 @@ export default function ModalAlterarSenha() {
     return "";
   };
 
-  const handleSendEmail = () => {
+  const handleSendEmail = async () => {
     const validationError = validateEmail(email);
     if (validationError) {
       setError(validationError);
       return;
     }
     setError("");
-    const body = { email };
-    resetPasswordSendEmail(body);
+    const emailEnviado = await resetPasswordSendEmail({ email });
+    if (!emailEnviado) return;
+
+    showAlert({
+      icon: "success",
+      title: "E-mail enviado com sucesso!",
+      text: "Confira o e-mail cadastrado para redefinir a senha.",
+      timer: 3000,
+      showConfirmButton: false,
+    });
+    router.push("/login");
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {

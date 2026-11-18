@@ -48,7 +48,9 @@ interface UserProviderData {
   createProfessorByAdmin: (
     body: CreateProfessorByAdminParams,
   ) => Promise<User | undefined>;
-  resetPasswordSendEmail: (body: ResetPasswordSendEmailParams) => Promise<void>;
+  resetPasswordSendEmail: (
+    body: ResetPasswordSendEmailParams,
+  ) => Promise<boolean>;
   resetPassword: (body: ResetPasswordParams) => Promise<void>;
   getAdvisors: () => Promise<void>;
   getAdmins: () => Promise<void>;
@@ -200,32 +202,21 @@ export const UserProvider = ({ children }: UserProps) => {
       setLoadingSendEmail(true);
 
       try {
-        const response = await userApi.resetPasswordSendEmail(body);
-        setUser(response);
-
-        showAlert({
-          icon: "success",
-          title: "E-mail enviado com sucesso!",
-          text: "Confira o e-mail cadastrado para redefinir a senha.",
-          timer: 3000,
-          showConfirmButton: false,
-        });
-
-        router.push("/login");
+        await userApi.resetPasswordSendEmail(body);
+        return true;
       } catch (err: unknown) {
-        setUser(null);
-
         showAlert({
           icon: "error",
           title: "Erro ao enviar e-mail",
           text: getErrorMessage(err, "Ocorreu um erro ao enviar o e-mail."),
           confirmButtonText: "Retornar",
         });
+        return false;
       } finally {
         setLoadingSendEmail(false);
       }
     },
-    [router, showAlert],
+    [showAlert],
   );
 
   const resetPassword = useCallback(
