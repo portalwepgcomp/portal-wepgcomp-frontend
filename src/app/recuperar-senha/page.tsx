@@ -32,8 +32,8 @@ export default function RecuperarSenha() {
       return;
     }
     setError("");
-    await resetPasswordSendEmail({ email });
-    setEnviado(true);
+    const emailEnviado = await resetPasswordSendEmail({ email });
+    setEnviado(emailEnviado);
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
