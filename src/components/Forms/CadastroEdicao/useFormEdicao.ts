@@ -31,6 +31,9 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
 
   const [salaInputValue, setSalaInputValue] = useState("");
   const [comissaoOptions, setComissaoOptions] = useState<OptionType[]>([]);
+  const [coordenadorOptions, setCoordenadorOptions] = useState<OptionType[]>(
+    [],
+  );
 
   const form = useForm<FormEdicaoSchema>({
     resolver: zodResolver(formEdicaoSchema),
@@ -56,9 +59,21 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     setValue(
       "comissao",
       committerList
-        ?.filter((c) => c.role === "OrganizingCommittee")
+        ?.filter(
+          (c) => c.role === "OrganizingCommittee" && c.level !== "Coordinator",
+        )
         .map((c) => ({ value: c.userId, label: c.userName })),
     );
+    const coordenadorAtual = committerList?.find(
+      (member) =>
+        member.role === "OrganizingCommittee" && member.level === "Coordinator",
+    );
+    if (coordenadorAtual) {
+      setValue("coordenador", {
+        value: coordenadorAtual.userId,
+        label: coordenadorAtual.userName,
+      });
+    }
     setValue("duracao", dados.presentationDuration ?? 0);
     setValue("sessoes", dados.presentationsPerPresentationBlock ?? 0);
     setValue("submissao", dados.callForPapersText ?? "");
@@ -74,11 +89,40 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
 
   useEffect(() => {
     if (admins.length > 0) {
-      setComissaoOptions(
-        admins.map((v) => ({ value: v.id ?? "", label: v.name ?? "" })),
-      );
+      const adminOptions = admins.map((v) => ({
+        value: v.id ?? "",
+        label: v.name ?? "",
+      }));
+      setComissaoOptions(adminOptions);
+      setCoordenadorOptions((current) => {
+        const options = [...adminOptions, ...current];
+        return options.filter(
+          (option, index) =>
+            options.findIndex((item) => item.value === option.value) === index,
+        );
+      });
     }
   }, [admins]);
+
+  useEffect(() => {
+    const coordenadorAtual = committerList.find(
+      (member) =>
+        member.role === "OrganizingCommittee" && member.level === "Coordinator",
+    );
+    if (!coordenadorAtual) return;
+
+    const option = {
+      value: coordenadorAtual.userId,
+      label: coordenadorAtual.userName,
+    };
+
+    setCoordenadorOptions((current) =>
+      current.some((item) => item.value === option.value)
+        ? current
+        : [...current, option],
+    );
+    setValue("coordenador", option);
+  }, [committerList, setValue]);
 
   useEffect(() => {
     if (edicaoData?.id) getCommitterAll(edicaoData.id);
@@ -99,7 +143,7 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
       description: data.descricao,
       location: data.local,
       roomName: data.salas.map((s) => s.value),
-      coordinatorId: user.id,
+      coordinatorId: data.coordenador.value,
       organizingCommitteeIds: data.comissao?.map((v) => v.value) || [],
       itSupportIds: [],
       administrativeSupportIds: [],
@@ -129,6 +173,7 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     form,
     Edicao,
     comissaoOptions,
+    coordenadorOptions,
     salaInputValue,
     setSalaInputValue,
     handleSubmit: handleSubmit(onSubmit, onInvalid),

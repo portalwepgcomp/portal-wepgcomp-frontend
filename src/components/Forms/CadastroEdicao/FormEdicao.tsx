@@ -37,6 +37,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
     form,
     Edicao,
     comissaoOptions,
+    coordenadorOptions,
     salaInputValue,
     setSalaInputValue,
     handleSubmit,
@@ -68,6 +69,29 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
           placeholder="WEPGCOMP 202.."
           className="text-sm"
           {...register("titulo")}
+        />
+      </Campo>
+
+      <Campo
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Coordenador geral")}
+          </span>
+        }
+        erro={errors.coordenador?.message}
+        className="mb-1"
+      >
+        <Controller
+          name="coordenador"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              id="coordenador-select"
+              options={coordenadorOptions}
+              placeholder="Escolha o coordenador geral"
+            />
+          )}
         />
       </Campo>
 
