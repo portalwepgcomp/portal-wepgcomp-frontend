@@ -19,6 +19,20 @@ function getDetailsMessage(data: Record<string, unknown>): string | undefined {
 }
 
 /**
+ * Identificador da requisição que falhou (corpo ou cabeçalho `X-Request-Id`),
+ * usado para localizar o registro na tela de logs de erro.
+ */
+export function obterRequestIdDoErro(err: unknown): string | undefined {
+  if (!isAxiosError(err) || !err.response) return undefined;
+
+  const data = err.response.data as Record<string, unknown> | undefined;
+  if (typeof data?.requestId === "string") return data.requestId;
+
+  const header = err.response.headers?.["x-request-id"];
+  return typeof header === "string" ? header : undefined;
+}
+
+/**
  * Extrai de forma segura e tipada a mensagem de erro retornada pelo backend ou lançada localmente.
  */
 export function getErrorMessage(

@@ -44,6 +44,11 @@ const config: Config = {
         error: {
           DEFAULT: "#e74c3c",
           light: "#fadbd8",
+          strong: "#b91c1c",
+        },
+        warning: {
+          DEFAULT: "#b45309",
+          light: "#fef3c7",
         },
       },
       borderRadius: {
@@ -57,7 +62,14 @@ const config: Config = {
         lg: "0 10px 15px rgba(0, 0, 0, 0.1)",
       },
       fontFamily: {
-        sans: ["Montserrat", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        sans: [
+          "Montserrat",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
       },
       transitionDuration: {
         fast: "150ms",
@@ -75,7 +87,8 @@ const config: Config = {
         },
       },
       animation: {
-        "select-content-show": "selectContentShow 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        "select-content-show":
+          "selectContentShow 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
         "select-content-hide": "selectContentHide 0.15s ease-in",
       },
     },

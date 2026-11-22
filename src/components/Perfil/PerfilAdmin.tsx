@@ -63,6 +63,9 @@ export default function PerfilAdmin({
           <PerfilMenuItem href="/edicoes">Eventos</PerfilMenuItem>
           <PerfilMenuItem href="/usuarios">Usuários</PerfilMenuItem>
           <PerfilMenuItem href="/gerenciamento">Gerenciamento</PerfilMenuItem>
+          <PerfilMenuItem href="/gerenciamento/logs-erro">
+            Logs de erro
+          </PerfilMenuItem>
         </PerfilMenuSection>
       )}
 
