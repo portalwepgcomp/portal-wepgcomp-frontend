@@ -8,6 +8,7 @@ import {
   Lock,
   LockOpen,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/utils/cn";
 import type { CampoOrdenacao, LogErroResumo } from "../tipos";
 import {
@@ -26,6 +27,9 @@ const BORDA_TOM = {
   neutro: "before:bg-line",
 } as const;
 
+const DESTAQUE_NOVO =
+  "motion-safe:animate-destaque-novo motion-reduce:bg-warning-light/60";
+
 interface TabelaLogsProps {
   itens: LogErroResumo[];
   selecionado?: string;
@@ -33,9 +37,38 @@ interface TabelaLogsProps {
   ordenar: CampoOrdenacao;
   ordem: "asc" | "desc";
   agora: Date;
+  /** Recém-chegados pelo tempo real, destacados por alguns segundos. */
+  novosIds?: ReadonlySet<string>;
   aoOrdenar: (campo: CampoOrdenacao) => void;
   aoAbrir: (id: string) => void;
   aoPreCarregar: (id: string) => void;
+  aoMudarPonteiro?: (dentro: boolean) => void;
+  /** O início da lista saiu da tela por rolagem (está acima da viewport). */
+  aoMudarTopoForaDaTela?: (fora: boolean) => void;
+}
+
+function useTopoForaDaTela(aoMudar?: (fora: boolean) => void) {
+  const sentinelaRef = useRef<HTMLDivElement>(null);
+  const aoMudarRef = useRef(aoMudar);
+  aoMudarRef.current = aoMudar;
+
+  useEffect(() => {
+    const alvo = sentinelaRef.current;
+    if (!alvo || typeof IntersectionObserver === "undefined") return;
+    const observador = new IntersectionObserver(([entrada]) => {
+      const topo = entrada.rootBounds?.top ?? 0;
+      aoMudarRef.current?.(
+        !entrada.isIntersecting && entrada.boundingClientRect.top < topo,
+      );
+    });
+    observador.observe(alvo);
+    return () => {
+      observador.disconnect();
+      aoMudarRef.current?.(false);
+    };
+  }, []);
+
+  return sentinelaRef;
 }
 
 function CabecalhoOrdenavel({
@@ -109,14 +142,25 @@ export default function TabelaLogs({
   ordenar,
   ordem,
   agora,
+  novosIds,
   aoOrdenar,
   aoAbrir,
   aoPreCarregar,
+  aoMudarPonteiro,
+  aoMudarTopoForaDaTela,
 }: Readonly<TabelaLogsProps>) {
   const props = { ordenar, ordem, aoOrdenar };
+  const sentinelaRef = useTopoForaDaTela(aoMudarTopoForaDaTela);
+  const aoMudarPonteiroRef = useRef(aoMudarPonteiro);
+  aoMudarPonteiroRef.current = aoMudarPonteiro;
+  useEffect(() => () => aoMudarPonteiroRef.current?.(false), []);
 
   return (
-    <>
+    <div
+      onPointerEnter={() => aoMudarPonteiro?.(true)}
+      onPointerLeave={() => aoMudarPonteiro?.(false)}
+    >
+      <div ref={sentinelaRef} className="h-px" aria-hidden />
       <table className="hidden w-full table-fixed border-collapse text-sm md:table">
         <caption className="sr-only">Registros de falha</caption>
         <thead className="border-b border-line bg-muted-light/50 text-[11px] text-muted">
@@ -167,6 +211,7 @@ export default function TabelaLogs({
                 data-focado={focado === indice || undefined}
                 className={cn(
                   "group cursor-pointer transition-colors hover:bg-primary-light/50",
+                  novosIds?.has(log.id) && DESTAQUE_NOVO,
                   ativo && "bg-primary-light",
                   focado === indice &&
                     "outline outline-2 -outline-offset-2 outline-blue-800/50",
@@ -272,6 +317,7 @@ export default function TabelaLogs({
                 "relative flex w-full flex-col gap-1.5 px-4 py-3 text-left",
                 "before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:content-['']",
                 BORDA_TOM[tomDoLog(log)],
+                novosIds?.has(log.id) && DESTAQUE_NOVO,
                 selecionado === log.id && "bg-primary-light",
               )}
             >
@@ -299,6 +345,6 @@ export default function TabelaLogs({
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 }

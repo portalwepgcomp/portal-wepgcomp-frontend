@@ -260,6 +260,8 @@ interface BarraFerramentasProps {
   aoMudar: (mudancas: Partial<FiltrosLogsErro>) => void;
   aoAbrirFiltros: () => void;
   aoAtualizar: () => void;
+  /** Estado do tempo real, ao lado do botão de atualizar. */
+  indicador?: ReactNode;
   visoes: VisaoSalva[];
   aoAbrirVisao: (consulta: string) => void;
   aoSalvarVisao: (nome: string) => void;
@@ -278,6 +280,7 @@ export default function BarraFerramentasLogs({
   aoMudar,
   aoAbrirFiltros,
   aoAtualizar,
+  indicador,
   visoes,
   aoAbrirVisao,
   aoSalvarVisao,
@@ -315,6 +318,7 @@ export default function BarraFerramentasLogs({
           aoSalvar={aoSalvarVisao}
           aoRemover={aoRemoverVisao}
         />
+        {indicador}
         <button
           type="button"
           onClick={aoAtualizar}

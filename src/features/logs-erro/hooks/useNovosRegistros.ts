@@ -13,11 +13,13 @@ const INTERVALO_MS = 30_000;
 
 /**
  * Conta registros mais novos que o primeiro da lista sem trocar a lista sob o
- * cursor do usuário — ele decide quando mostrar.
+ * cursor do usuário — ele decide quando mostrar. Com o stream ao vivo, a
+ * contagem só é refeita quando ele avisa; o intervalo é o plano B.
  */
 export function useNovosRegistros(
   filtros: FiltrosLogsErro,
   maisRecente?: string,
+  aoVivo = false,
 ) {
   const habilitado =
     !!maisRecente &&
@@ -39,7 +41,7 @@ export function useNovosRegistros(
       return resposta.total;
     },
     enabled: habilitado,
-    refetchInterval: INTERVALO_MS,
+    refetchInterval: aoVivo ? false : INTERVALO_MS,
     refetchIntervalInBackground: false,
   });
 

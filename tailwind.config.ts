@@ -85,8 +85,13 @@ const config: Config = {
           from: { opacity: "1", transform: "translateY(0) scale(1)" },
           to: { opacity: "0", transform: "translateY(-4px) scale(0.98)" },
         },
+        destaqueNovo: {
+          from: { backgroundColor: "#fef3c7" },
+          to: { backgroundColor: "transparent" },
+        },
       },
       animation: {
+        "destaque-novo": "destaqueNovo 2.5s ease-out",
         "select-content-show":
           "selectContentShow 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
         "select-content-hide": "selectContentHide 0.15s ease-in",

@@ -1,15 +1,25 @@
 "use client";
 
 import { ArrowUp } from "lucide-react";
+import { cn } from "@/utils/cn";
 
 export default function AvisoNovosRegistros({
   quantidade,
+  fixo = false,
   aoMostrar,
-}: Readonly<{ quantidade: number; aoMostrar: () => void }>) {
+}: Readonly<{
+  quantidade: number;
+  /** O topo da tabela saiu da tela: o aviso acompanha a rolagem. */
+  fixo?: boolean;
+  aoMostrar: () => void;
+}>) {
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none absolute inset-x-0 top-14 z-20 flex justify-center"
+      className={cn(
+        "pointer-events-none inset-x-0 flex justify-center",
+        fixo ? "fixed top-4 z-40" : "absolute top-14 z-20",
+      )}
     >
       {quantidade > 0 && (
         <button

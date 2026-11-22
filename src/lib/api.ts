@@ -2,6 +2,18 @@
 
 import Axios from "axios";
 
+/**
+ * Encerra a sessão e avisa o AuthProvider. Só age se havia um token salvo: um
+ * 401 de visitante não é sessão expirada.
+ */
+export function encerrarSessaoExpirada() {
+  if (typeof window === "undefined") return;
+  if (!localStorage.getItem("@Auth:token")) return;
+
+  localStorage.clear();
+  window.dispatchEvent(new CustomEvent("session-expired"));
+}
+
 const axiosInstance = Axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
@@ -40,17 +52,8 @@ axiosInstance.interceptors.response.use(
     const isAuthEndpoint =
       url.includes("auth/login") || url.includes("auth/validate-token");
 
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("@Auth:token")
-        : null;
-
-    // Dispara session-expired apenas se havia um token de sessão salvo no navegador
-    if (token && !isAuthEndpoint) {
-      localStorage.clear();
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("session-expired"));
-      }
+    if (!isAuthEndpoint) {
+      encerrarSessaoExpirada();
     }
 
     return Promise.reject(error);

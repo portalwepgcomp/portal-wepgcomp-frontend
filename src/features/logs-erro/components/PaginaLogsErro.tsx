@@ -10,19 +10,28 @@ import PaginaListagem from "@/components/layout/PaginaListagem";
 import Paginacao from "@/components/layout/Paginacao";
 import { isAdminLevel } from "@/components/Perfil/perfilLabels";
 import { useAuth } from "@/hooks/useAuth";
+import type { PaginatedResponse } from "@/types/api";
 import { getErrorMessage } from "@/utils/error";
-import type { CampoOrdenacao, FiltrosLogsErro, OrigemLog } from "../tipos";
+import type {
+  CampoOrdenacao,
+  FiltrosLogsErro,
+  LogErroResumo,
+  OrigemLog,
+} from "../tipos";
 import { useFiltrosLogsErro } from "../hooks/useFiltrosLogsErro";
 import {
   CHAVE_LOGS,
+  chaveDoRecorte,
   useLogsErroQuery,
   usePrefetchLogErro,
   useResumoLogsErro,
 } from "../hooks/useLogsErroQuery";
 import { useIndicadoresLogsErro } from "../hooks/useIndicadoresLogsErro";
 import { useNovosRegistros } from "../hooks/useNovosRegistros";
+import { useTempoRealLogsErro } from "../hooks/useTempoRealLogsErro";
 import { useVisoesSalvas } from "../hooks/useVisoesSalvas";
 import { useAtalhosLogsErro } from "../hooks/useAtalhosLogsErro";
+import { idsNovos, motivoPausa } from "../lib/tempoReal";
 import {
   alternarFaceta,
   contarFiltrosAtivos,
@@ -43,6 +52,7 @@ import GraficoOcorrenciasDia from "./GraficoOcorrenciasDia";
 import PainelAgrupamentos from "./PainelAgrupamentos";
 import TabelaLogs from "./TabelaLogs";
 import AvisoNovosRegistros from "./AvisoNovosRegistros";
+import IndicadorTempoReal from "./IndicadorTempoReal";
 import {
   EsqueletoLinhas,
   EstadoErroLogs,
@@ -92,14 +102,98 @@ function ConteudoLogsErro() {
   const serie = useResumoLogsErro(filtros, "day");
   const agrupamento = useResumoLogsErro(filtros, filtros.agrupar);
   const itens = useMemo(() => lista.data?.items ?? [], [lista.data]);
-  const novos = useNovosRegistros(filtros, itens[0]?.createdAt);
 
   const [agora, setAgora] = useState(() => new Date());
   const [focado, setFocado] = useState<number>();
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [ajudaAberta, setAjudaAberta] = useState(false);
+  const [ponteiroNaTabela, setPonteiroNaTabela] = useState(false);
+  const [topoForaDaTela, setTopoForaDaTela] = useState(false);
+  const [novosIds, setNovosIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const [anuncio, setAnuncio] = useState("");
   const buscaRef = useRef<HTMLInputElement>(null);
   const agrupamentosRef = useRef<HTMLDivElement>(null);
+  const registrosRef = useRef<HTMLElement>(null);
+
+  const motivo = motivoPausa({
+    periodo: filtros.periodo,
+    ordenar: filtros.ordenar,
+    ordem: filtros.ordem,
+    pagina: filtros.pagina,
+    detalheAberto: !!filtros.log,
+    linhaSelecionada: focado !== undefined,
+    ponteiroNaTabela,
+    topoForaDaTela,
+  });
+
+  // Os avisos do stream chegam fora do render: leem sempre o estado atual.
+  const filtrosRef = useRef(filtros);
+  filtrosRef.current = filtros;
+  const itensRef = useRef(itens);
+  itensRef.current = itens;
+  const motivoRef = useRef(motivo);
+  motivoRef.current = motivo;
+
+  const inserirNovos = useCallback(async () => {
+    const chave = [CHAVE_LOGS, "lista", chaveDoRecorte(filtrosRef.current)];
+    const antes = itensRef.current.map((item) => item.id);
+    await queryClient.refetchQueries({ queryKey: chave, exact: true });
+    const dados =
+      queryClient.getQueryData<PaginatedResponse<LogErroResumo>>(chave);
+    const chegaram = idsNovos(antes, dados?.items.map((item) => item.id) ?? []);
+    if (chegaram.length === 0) return;
+    setNovosIds(new Set(chegaram));
+    setAnuncio(
+      chegaram.length === 1
+        ? "1 novo erro no topo da lista"
+        : `${chegaram.length} novos erros no topo da lista`,
+    );
+  }, [queryClient]);
+
+  const atualizarResumos = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: [CHAVE_LOGS, "resumo"] }),
+    [queryClient],
+  );
+
+  const estadoTempoReal = useTempoRealLogsErro({
+    habilitado: true,
+    aoAtualizarLista: () => {
+      if (motivoRef.current) {
+        queryClient.invalidateQueries({ queryKey: [CHAVE_LOGS, "novos"] });
+      } else {
+        void inserirNovos();
+      }
+    },
+    aoAtualizarResumos: () => {
+      if (motivoRef.current !== "periodo") void atualizarResumos();
+    },
+  });
+  const aoVivo = estadoTempoReal === "ao-vivo";
+  const novos = useNovosRegistros(filtros, itens[0]?.createdAt, aoVivo);
+
+  // Pausa terminou com registros esperando: entram sem precisar de clique.
+  useEffect(() => {
+    if (aoVivo && !motivo && novos > 0) void inserirNovos();
+  }, [aoVivo, motivo, novos, inserirNovos]);
+
+  useEffect(() => {
+    if (novosIds.size === 0) return;
+    const id = setTimeout(() => setNovosIds(new Set()), 3_000);
+    return () => clearTimeout(id);
+  }, [novosIds]);
+
+  const mostrarNovos = () => {
+    if (topoForaDaTela) {
+      registrosRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+    void inserirNovos();
+    void atualizarResumos();
+  };
 
   useEffect(() => setAgora(new Date()), [lista.dataUpdatedAt]);
   useEffect(() => {
@@ -217,6 +311,9 @@ function ConteudoLogsErro() {
           aoMudar={atualizar}
           aoAbrirFiltros={() => setFiltrosAbertos(true)}
           aoAtualizar={recarregar}
+          indicador={
+            <IndicadorTempoReal estado={estadoTempoReal} motivo={motivo} />
+          }
           visoes={visoes}
           aoAbrirVisao={(consultaSalva) =>
             substituir(lerFiltrosDaUrl(new URLSearchParams(consultaSalva)))
@@ -272,9 +369,13 @@ function ConteudoLogsErro() {
       </div>
 
       <section
+        ref={registrosRef}
         aria-labelledby="titulo-registros"
-        className="relative overflow-hidden rounded-lg border border-line bg-card shadow-sm"
+        className="relative scroll-mt-4 overflow-hidden rounded-lg border border-line bg-card shadow-sm"
       >
+        <p className="sr-only" aria-live="polite">
+          {anuncio}
+        </p>
         <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-3 sm:px-5">
           <div className="flex items-baseline gap-2">
             <h2
@@ -326,7 +427,11 @@ function ConteudoLogsErro() {
           </div>
         )}
 
-        <AvisoNovosRegistros quantidade={novos} aoMostrar={recarregar} />
+        <AvisoNovosRegistros
+          quantidade={novos}
+          fixo={topoForaDaTela}
+          aoMostrar={mostrarNovos}
+        />
 
         <div
           className={
@@ -359,9 +464,12 @@ function ConteudoLogsErro() {
               ordenar={filtros.ordenar}
               ordem={filtros.ordem}
               agora={agora}
+              novosIds={novosIds}
               aoOrdenar={ordenarPor}
               aoAbrir={abrir}
               aoPreCarregar={preCarregar}
+              aoMudarPonteiro={setPonteiroNaTabela}
+              aoMudarTopoForaDaTela={setTopoForaDaTela}
             />
           )}
         </div>
