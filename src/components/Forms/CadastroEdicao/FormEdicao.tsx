@@ -37,6 +37,11 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
     form,
     Edicao,
     comissaoOptions,
+    coordenadorOptions,
+    comissaoDisponivel,
+    carregandoComissao,
+    erroComissao,
+    recarregarComissao,
     salaInputValue,
     setSalaInputValue,
     handleSubmit,
@@ -69,6 +74,50 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
           className="text-sm"
           {...register("titulo")}
         />
+      </Campo>
+
+      <Campo
+        label={
+          <span className="text-sm font-semibold text-slate-700">
+            {labelObrigatorio("Coordenador geral")}
+          </span>
+        }
+        htmlFor="coordenador-input"
+        erro={errors.coordenador?.message}
+        className="mb-1"
+      >
+        <Controller
+          name="coordenador"
+          control={control}
+          render={({ field }) => (
+            <Select
+              {...field}
+              id="coordenador-select"
+              inputId="coordenador-input"
+              value={field.value ?? null}
+              isDisabled={!comissaoDisponivel}
+              options={coordenadorOptions}
+              placeholder="Escolha o coordenador geral"
+            />
+          )}
+        />
+        {carregandoComissao && (
+          <p role="status" className="mt-1 text-sm text-muted">
+            Carregando comissão do evento...
+          </p>
+        )}
+        {erroComissao && (
+          <div role="alert" className="mt-1 text-sm text-error">
+            <p>Não foi possível carregar a comissão do evento.</p>
+            <Button
+              type="button"
+              variante="outline"
+              onClick={() => void recarregarComissao()}
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        )}
       </Campo>
 
       <Campo
@@ -224,6 +273,7 @@ export function FormEdicao({ edicaoData }: Readonly<FormEdicaoProps>) {
               {...field}
               id="comissao-select"
               isMulti
+              isDisabled={!comissaoDisponivel}
               options={comissaoOptions}
               placeholder="Escolha o(s) usuário(s)"
               isClearable

@@ -1,6 +1,7 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,11 +9,10 @@ import { AuthContext } from "@/context/AuthProvider/authProvider";
 import { useEdicao } from "@/hooks/useEdicao";
 import { UserContext } from "@/hooks/useUsers";
 import { useSweetAlert } from "@/hooks/useAlert";
-import { useCommittee } from "@/hooks/useCommittee";
+import { committerMembersApi } from "@/services/CommitteeMember";
 import { registrarErro } from "@/utils/logError";
 import { formEdicaoSchema, type FormEdicaoSchema } from "./formEdicaoSchema";
 import { Edicao, EdicaoParams } from "@/models/edicao";
-import { OptionType } from "@/models/forms";
 
 interface UseFormEdicaoOptions {
   edicaoData?: Edicao | null;
@@ -24,13 +24,55 @@ type EdicaoFormulario = Edicao & { roomName?: string[] };
 export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
   const { showAlert } = useSweetAlert();
   const { createEdicao, updateEdicao, Edicao } = useEdicao();
-  const { getCommitterAll, committerList } = useCommittee();
   const { user } = useContext(AuthContext);
   const { getAdvisors, advisors, getAdmins, admins } = useContext(UserContext);
   const router = useRouter();
 
   const [salaInputValue, setSalaInputValue] = useState("");
-  const [comissaoOptions, setComissaoOptions] = useState<OptionType[]>([]);
+  const [comissaoInicializadaPara, setComissaoInicializadaPara] =
+    useState<string>();
+  const edicaoId = edicaoData?.id;
+  const comissaoQuery = useQuery({
+    queryKey: ["committee-members", edicaoId],
+    enabled: !!edicaoId,
+    queryFn: () => committerMembersApi.getAllMembers(edicaoId as string),
+  });
+  const membrosDaEdicao = useMemo(
+    () =>
+      comissaoQuery.data?.filter(
+        (member) => member.eventEditionId === edicaoId,
+      ),
+    [comissaoQuery.data, edicaoId],
+  );
+  const comissaoOptions = useMemo(
+    () =>
+      admins.map((admin) => ({
+        value: admin.id ?? "",
+        label: admin.name ?? "",
+      })),
+    [admins],
+  );
+  const coordenadorOptions = useMemo(() => {
+    const coordenadorAtual = membrosDaEdicao?.find(
+      (member) =>
+        member.role === "OrganizingCommittee" && member.level === "Coordinator",
+    );
+    if (
+      !coordenadorAtual ||
+      comissaoOptions.some((option) => option.value === coordenadorAtual.userId)
+    ) {
+      return comissaoOptions;
+    }
+    return [
+      ...comissaoOptions,
+      { value: coordenadorAtual.userId, label: coordenadorAtual.userName },
+    ];
+  }, [comissaoOptions, membrosDaEdicao]);
+  const comissaoDisponivel =
+    !edicaoId ||
+    (comissaoQuery.isSuccess &&
+      !comissaoQuery.isFetching &&
+      comissaoInicializadaPara === edicaoId);
 
   const form = useForm<FormEdicaoSchema>({
     resolver: zodResolver(formEdicaoSchema),
@@ -38,53 +80,66 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     defaultValues: { inicio: "", final: "", limite: "", salas: [] },
   });
 
-  const { setValue, handleSubmit, formState, trigger } = form;
+  const { reset, getValues, handleSubmit, formState, trigger } = form;
 
   useEffect(() => {
     const dados = edicaoData as EdicaoFormulario | null | undefined;
-    if (!dados || !Object.keys(dados).length) return;
-
-    setValue("titulo", dados.name ?? "");
-    setValue("descricao", dados.description ?? "");
-    setValue("inicio", dados.startDate ?? "");
-    setValue("final", dados.endDate ?? "");
-    setValue("local", dados.location ?? "");
-    setValue(
-      "salas",
-      dados.roomName?.map((nome) => ({ label: nome, value: nome })) ?? [],
-    );
-    setValue(
-      "comissao",
-      committerList
-        ?.filter((c) => c.role === "OrganizingCommittee")
-        .map((c) => ({ value: c.userId, label: c.userName })),
-    );
-    setValue("duracao", dados.presentationDuration ?? 0);
-    setValue("sessoes", dados.presentationsPerPresentationBlock ?? 0);
-    setValue("submissao", dados.callForPapersText ?? "");
-    setValue("limite", dados.submissionDeadline ?? "");
-
+    reset({
+      titulo: dados?.name ?? "",
+      descricao: dados?.description ?? "",
+      inicio: dados?.startDate ?? "",
+      final: dados?.endDate ?? "",
+      local: dados?.location ?? "",
+      salas:
+        dados?.roomName?.map((nome) => ({ label: nome, value: nome })) ?? [],
+      comissao: [],
+      coordenador: undefined,
+      duracao: dados?.presentationDuration ?? 0,
+      sessoes: dados?.presentationsPerPresentationBlock ?? 0,
+      submissao: dados?.callForPapersText ?? "",
+      limite: dados?.submissionDeadline ?? "",
+    });
+    setComissaoInicializadaPara(undefined);
     void trigger();
-  }, [edicaoData, committerList, setValue, trigger]);
+  }, [edicaoData, reset, trigger]);
+
+  useEffect(() => {
+    if (!edicaoData?.id || !comissaoQuery.isSuccess || !membrosDaEdicao) return;
+    const coordenadorAtual = membrosDaEdicao.find(
+      (member) =>
+        member.role === "OrganizingCommittee" && member.level === "Coordinator",
+    );
+    reset({
+      ...getValues(),
+      comissao: membrosDaEdicao
+        .filter(
+          (member) =>
+            member.role === "OrganizingCommittee" &&
+            member.level !== "Coordinator",
+        )
+        .map((member) => ({ value: member.userId, label: member.userName })),
+      coordenador: coordenadorAtual
+        ? { value: coordenadorAtual.userId, label: coordenadorAtual.userName }
+        : undefined,
+    });
+    setComissaoInicializadaPara(edicaoData.id);
+    void trigger();
+  }, [
+    edicaoData,
+    comissaoQuery.isSuccess,
+    membrosDaEdicao,
+    getValues,
+    reset,
+    trigger,
+  ]);
 
   useEffect(() => {
     getAdvisors();
     getAdmins();
   }, [getAdvisors, getAdmins]);
 
-  useEffect(() => {
-    if (admins.length > 0) {
-      setComissaoOptions(
-        admins.map((v) => ({ value: v.id ?? "", label: v.name ?? "" })),
-      );
-    }
-  }, [admins]);
-
-  useEffect(() => {
-    if (edicaoData?.id) getCommitterAll(edicaoData.id);
-  }, [edicaoData?.id, getCommitterAll]);
-
   const onSubmit = async (data: FormEdicaoSchema) => {
+    if (!comissaoDisponivel) return;
     if (!user) {
       showAlert({
         icon: "error",
@@ -99,7 +154,7 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
       description: data.descricao,
       location: data.local,
       roomName: data.salas.map((s) => s.value),
-      coordinatorId: user.id,
+      coordinatorId: data.coordenador.value,
       organizingCommitteeIds: data.comissao?.map((v) => v.value) || [],
       itSupportIds: [],
       administrativeSupportIds: [],
@@ -129,10 +184,16 @@ export function useFormEdicao({ edicaoData }: UseFormEdicaoOptions) {
     form,
     Edicao,
     comissaoOptions,
+    coordenadorOptions,
+    comissaoDisponivel,
+    carregandoComissao:
+      !!edicaoId && (comissaoQuery.isPending || comissaoQuery.isFetching),
+    erroComissao: !!edicaoId && comissaoQuery.isError,
+    recarregarComissao: comissaoQuery.refetch,
     salaInputValue,
     setSalaInputValue,
     handleSubmit: handleSubmit(onSubmit, onInvalid),
-    isValid: formState.isValid,
+    isValid: formState.isValid && comissaoDisponivel,
     errors: formState.errors,
     advisors,
   };

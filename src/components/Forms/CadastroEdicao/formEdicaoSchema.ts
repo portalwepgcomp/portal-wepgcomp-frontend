@@ -29,6 +29,17 @@ export const formEdicaoSchema = z.object({
     { invalid_type_error: "Campo inválido" },
   ),
 
+  coordenador: z.object(
+    {
+      label: z.string(),
+      value: z.string().min(1, "Selecione o coordenador geral."),
+    },
+    {
+      required_error: "Selecione o coordenador geral.",
+      invalid_type_error: "Selecione o coordenador geral.",
+    },
+  ),
+
   comissao: z
     .array(
       z.object({
